@@ -13,6 +13,7 @@ assembly_info:
 # restore NuGet packages before running MSBuild
 before_build:
   - nuget restore
+  - '"%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
   
 build:
  verbosity: minimal
