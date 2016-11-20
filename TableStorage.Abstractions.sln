@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorage.Abstractions", "src\TableStorage.Abstractions\TableStorage.Abstractions.csproj", "{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B552E72B-3048-4A53-BD20-D4E2A41EFE0D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0FF034AB-6A89-4F9C-9A8E-0CDD47EC97C6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorage.Abstractions.Tests", "tests\TableStorage.Abstractions.Tests\TableStorage.Abstractions.Tests.csproj", "{6F85E953-A833-4402-ADBE-B8BD240AAC64}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0} = {B552E72B-3048-4A53-BD20-D4E2A41EFE0D}
+		{6F85E953-A833-4402-ADBE-B8BD240AAC64} = {0FF034AB-6A89-4F9C-9A8E-0CDD47EC97C6}
+	EndGlobalSection
+EndGlobal
