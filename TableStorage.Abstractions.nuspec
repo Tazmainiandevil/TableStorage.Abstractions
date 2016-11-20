@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <authors>$author$</authors>
+    <owners>$owners$</owners>
+    <licenseUrl>https://github.com/Tazmainiandevil/TableStorage.Abstractions/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/Tazmainiandevil/TableStorage.Abstractions</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
+    <dependencies>
+      <dependency id="WindowsAzure.Storage" version="7.2.1" />
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="src\TableStorage.Abstractions\bin\Release\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
+  </files>
+</package>
