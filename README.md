@@ -33,7 +33,8 @@ await tableStorage.InsertAsync(entity);
 var result = tableStorage.GetByRowKey("John").ToList();
 ```
 
-Inserting multiple entries into table storage requires each entry to have the same partition key for a batch. The implementation in the wrapper does this job for you so that you can just pass a list of entities.
+Inserting multiple entries into table storage requires each entry to have the same partition key for a batch. This implementation in the wrapper does this job for you so that you can just pass a list of entities.
+
 Example Insert of multiple records
 ```C#
 var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
@@ -57,6 +58,6 @@ https://docs.microsoft.com/en-gb/azure/storage/storage-dotnet-how-to-use-tables
 
 __Notes__
 
-Each method as a synchronous and asynchronous version.
+Each method has a synchronous and asynchronous version.
 
 The unit tests rely on using Azure Storage Emulator (which can be found here https://azure.microsoft.com/en-gb/downloads/).
