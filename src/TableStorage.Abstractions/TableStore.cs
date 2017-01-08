@@ -4,6 +4,7 @@ using Microsoft.WindowsAzure.Storage.Table;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace TableStorage.Abstractions
@@ -58,10 +59,24 @@ namespace TableStorage.Abstractions
                 throw new ArgumentNullException(nameof(storageConnectionString));
             }
 
+            OptimisePerformance(storageConnectionString);
+
+
             var cloudTableClient = CreateTableClient(storageConnectionString, retries, retryWaitTimeInSeconds);
 
             _cloudTable = cloudTableClient.GetTableReference(tableName);
             CreateTable();
+        }
+
+        /// <summary>
+        /// Settings to improve performance
+        /// </summary>
+        private static void OptimisePerformance(string storageConnectionString)
+        {
+            var account = CloudStorageAccount.Parse(storageConnectionString);
+            var tableServicePoint = ServicePointManager.FindServicePoint(account.TableEndpoint);
+            tableServicePoint.UseNagleAlgorithm = false;
+            tableServicePoint.Expect100Continue = false;
         }
 
         /// <summary>
@@ -159,9 +174,25 @@ namespace TableStorage.Abstractions
             {
                 throw new ArgumentNullException(nameof(record));
             }
+
             var operation = TableOperation.Merge(record);
 
             _cloudTable.Execute(operation);
+        }
+
+        /// <summary>
+        /// Update an record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to update</param>
+        public void UpdateUsingWildcardEtag(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            record.ETag = "*";
+            Update(record);
         }
 
         /// <summary>
@@ -178,7 +209,23 @@ namespace TableStorage.Abstractions
             var operation = TableOperation.Delete(record);
             _cloudTable.Execute(operation);
         }
-       
+
+
+        /// <summary>
+        /// Delete a record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to delete</param>
+        public void DeleteUsingWildcardEtag(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            record.ETag = "*";
+            Delete(record);
+        }
+
         /// <summary>
         /// Delete the table
         /// </summary>
@@ -282,7 +329,7 @@ namespace TableStorage.Abstractions
         /// </summary>
         public async Task CreateTableAsync()
         {
-            await _cloudTable.CreateIfNotExistsAsync();
+            await _cloudTable.CreateIfNotExistsAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -291,7 +338,7 @@ namespace TableStorage.Abstractions
         /// <returns></returns>
         public async Task<bool> TableExistsAsync()
         {
-            return await _cloudTable.ExistsAsync();
+            return await _cloudTable.ExistsAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -332,7 +379,7 @@ namespace TableStorage.Abstractions
 
                 if (operation.Any())
                 {
-                    await _cloudTable.ExecuteBatchAsync(operation);
+                    await _cloudTable.ExecuteBatchAsync(operation).ConfigureAwait(false);
                 }
             }
         }
@@ -354,6 +401,22 @@ namespace TableStorage.Abstractions
         }
 
         /// <summary>
+        /// Update an record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to update</param>
+        public async Task UpdateUsingWildcardEtagAsync(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            record.ETag = "*";
+            await UpdateAsync(record).ConfigureAwait(false);
+        }
+
+
+        /// <summary>
         /// Update an entry
         /// </summary>
         /// <param name="record">The record to update</param>
@@ -368,6 +431,23 @@ namespace TableStorage.Abstractions
 
             await _cloudTable.ExecuteAsync(operation).ConfigureAwait(false);
         }
+
+        /// <summary>
+        /// Delete a record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to delete</param>
+        public async Task DeleteUsingWildcardEtagAsync(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            record.ETag = "*";
+
+            await DeleteAsync(record).ConfigureAwait(false);
+        }
+
 
         /// <summary>
         /// Delete the table
@@ -399,7 +479,7 @@ namespace TableStorage.Abstractions
             var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
             // Execute the operation.
-            var retrievedResult = await _cloudTable.ExecuteAsync(retrieveOperation);
+            var retrievedResult = await _cloudTable.ExecuteAsync(retrieveOperation).ConfigureAwait(false);
 
             return retrievedResult.Result as T;
         }
@@ -471,7 +551,7 @@ namespace TableStorage.Abstractions
             var alllItems = new List<T>();
             do
             {
-                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken);
+                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
                 alllItems.AddRange(items);
             } while (continuationToken != null);

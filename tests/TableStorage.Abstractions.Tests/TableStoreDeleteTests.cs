@@ -13,7 +13,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Action act = () => tableStorage.Delete(null as TestTableEntity);
+            Action act = () => _tableStorage.Delete(null as TestTableEntity);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
@@ -23,14 +23,14 @@ namespace TableStorage.Abstractions.Tests
         public void delete_an_entry_and_the_record_count_should_decrease()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
-            var item = tableStorage.GetRecord("Smith", "John");
+            TestDataHelper.SetupRecords(_tableStorage);
+            var item = _tableStorage.GetRecord("Smith", "John");
 
             // Act
 
-            tableStorage.Delete(item);
+            _tableStorage.Delete(item);
 
-            var result = tableStorage.GetByPartitionKey("Smith");
+            var result = _tableStorage.GetByPartitionKey("Smith");
 
             // Assert
             result.Count().Should().Be(1);

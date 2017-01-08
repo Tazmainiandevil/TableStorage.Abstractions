@@ -17,7 +17,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Action act = () => tableStorage.GetRecord(partitionKey, "someRowKey");
+            Action act = () => _tableStorage.GetRecord(partitionKey, "someRowKey");
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
@@ -31,7 +31,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Action act = () => tableStorage.GetRecord("somePartitionKey", rowKey);
+            Action act = () => _tableStorage.GetRecord("somePartitionKey", rowKey);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
@@ -42,10 +42,10 @@ namespace TableStorage.Abstractions.Tests
         public void get_record_with_no_entry_returns_null()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var result = tableStorage.GetRecord("surname", "first");
+            var result = _tableStorage.GetRecord("surname", "first");
 
             // Assert
             result.Should().BeNull();
@@ -55,11 +55,11 @@ namespace TableStorage.Abstractions.Tests
         public void get_record_with_an_entry_returns_the_expected_entry()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
             var expected = new TestTableEntity("Bill", "Jones") { Age = 45, Email = "bill.jones@somewhere.com" };
 
             // Act
-            var result = tableStorage.GetRecord("Jones", "Bill");
+            var result = _tableStorage.GetRecord("Jones", "Bill");
 
             // Assert
             result.ShouldBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath == "CompiledRead"));
@@ -73,7 +73,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Action act = () => tableStorage.GetByPartitionKey(partitionKey);
+            Action act = () => _tableStorage.GetByPartitionKey(partitionKey);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
@@ -83,11 +83,11 @@ namespace TableStorage.Abstractions.Tests
         public void get_records_by_partition_key_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
             var partitionKey = "something";
 
             // Act
-            var result = tableStorage.GetByPartitionKey(partitionKey);
+            var result = _tableStorage.GetByPartitionKey(partitionKey);
 
             // Assert
             result.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
@@ -121,10 +121,10 @@ namespace TableStorage.Abstractions.Tests
         public void get_records_by_partition_key_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var results = tableStorage.GetByPartitionKey(partitionKey);
+            var results = _tableStorage.GetByPartitionKey(partitionKey);
 
             // Assert
             results.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
@@ -138,7 +138,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Action act = () => tableStorage.GetByRowKey(rowKey);
+            Action act = () => _tableStorage.GetByRowKey(rowKey);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
@@ -148,11 +148,11 @@ namespace TableStorage.Abstractions.Tests
         public void get_records_by_row_key_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
             var rowKey = "something";
 
             // Act
-            var result = tableStorage.GetByRowKey(rowKey);
+            var result = _tableStorage.GetByRowKey(rowKey);
 
             // Assert
             result.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
@@ -187,10 +187,10 @@ namespace TableStorage.Abstractions.Tests
         public void get_records_by_row_key_with_known_key_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)
         {
             // Arrange            
-            TestDataHelper.SetupRowKeyRecords(tableStorage);
+            TestDataHelper.SetupRowKeyRecords(_tableStorage);
 
             // Act
-            var results = tableStorage.GetByRowKey(rowKey);
+            var results = _tableStorage.GetByRowKey(rowKey);
 
             // Assert
             results.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
@@ -200,7 +200,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            var results = tableStorage.GetAllRecords();
+            var results = _tableStorage.GetAllRecords();
 
             // Assert
             results.Should().BeEmpty();
@@ -211,10 +211,10 @@ namespace TableStorage.Abstractions.Tests
         public void get_all_records_with_entries_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var results = tableStorage.GetAllRecords();
+            var results = _tableStorage.GetAllRecords();
 
             // Assert
             results.Count().Should().Be(4);

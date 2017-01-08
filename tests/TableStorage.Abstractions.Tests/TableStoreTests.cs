@@ -8,16 +8,16 @@ namespace TableStorage.Abstractions.Tests
     {
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
-        private readonly ITableStore<TestTableEntity> tableStorage;
+        private readonly ITableStore<TestTableEntity> _tableStorage;
 
         public TableStoreTests()
         {
-            tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString);
+            _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString);
         }
 
         public void Dispose()
         {
-            tableStorage.DeleteTable();
+            _tableStorage.DeleteTable();
         }
 
         [Theory]
@@ -53,23 +53,23 @@ namespace TableStorage.Abstractions.Tests
         public void table_does_exist_then_exist_check_returns_true()
         {
             // Arrange
-            tableStorage.DeleteTable();
+            _tableStorage.DeleteTable();
 
             // Act
-            tableStorage.CreateTable();
+            _tableStorage.CreateTable();
 
             // Assert
-            tableStorage.TableExists().Should().BeTrue();
+            _tableStorage.TableExists().Should().BeTrue();
         }
 
         [Fact]
         public void table_does_not_exist_then_exist_check_returns_false()
         {
             // Arrange
-            tableStorage.DeleteTable();
+            _tableStorage.DeleteTable();
 
             // Act
-            var result = tableStorage.TableExists();
+            var result = _tableStorage.TableExists();
 
             // Assert
             result.Should().BeFalse();

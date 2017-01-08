@@ -41,10 +41,22 @@ namespace TableStorage.Abstractions
         void Update(T record);
 
         /// <summary>
+        /// Update a record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to update</param>
+        void UpdateUsingWildcardEtag(T record);
+
+        /// <summary>
         /// Delete a record
         /// </summary>
         /// <param name="record">The record to delete</param>
         void Delete(T record);
+
+        /// <summary>
+        /// Delete a record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to delete</param>
+        void DeleteUsingWildcardEtag(T record);
 
         /// <summary>
         /// Delete the table
@@ -113,10 +125,22 @@ namespace TableStorage.Abstractions
         Task UpdateAsync(T record);
 
         /// <summary>
-        /// Update an entry
+        /// Update an record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to update</param>
+        Task UpdateUsingWildcardEtagAsync(T record);
+
+        /// <summary>
+        /// Delete a record
+        /// </summary>
+        /// <param name="record">The record to delete</param>
         Task DeleteAsync(T record);
+
+        /// <summary>
+        /// Delete a record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to delete</param>
+        Task DeleteUsingWildcardEtagAsync(T record);
 
         /// <summary>
         /// Delete the table
