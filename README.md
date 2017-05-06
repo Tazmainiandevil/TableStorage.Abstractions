@@ -2,7 +2,7 @@
 Repository wrapper for Azure Table Storage in C# .NET 4.6
 
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
-[![NuGet version](https://badge.fury.io/nu/TableStorage.Abstractions.svg)](https://badge.fury.io/nu/TableStorage.Abstractions)
+<a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
 
 Starting work with Azure Table Storage has been interesting and very different from working with SQL Server which I have done for many years. After reading a number of articles about it and using it I realised a generic wrapper would be useful to create and so this is that creation.
 
