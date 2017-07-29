@@ -73,6 +73,18 @@ var entries = new List<TestTableEntity>
 
 await tableStorage.InsertAsync(entries);
 ```
+The library also includes a factory class to make it easier when using dependency injection
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient(ITableStoreFactory factory)
+    {
+        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true");
+    }
+}
+```
 
 __Useful Reading__
 
