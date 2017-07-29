@@ -69,8 +69,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ITableStore.cs" />
+    <Compile Include="ITableStoreFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TableStore.cs" />
+    <Compile Include="TableStoreFactory.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
