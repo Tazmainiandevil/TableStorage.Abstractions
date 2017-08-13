@@ -212,7 +212,25 @@ namespace TableStorage.Abstractions.Tests
             results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
-        [Theory]
+
+	    [Fact]
+	    public void get_records_by_partition_key_paged_after_deleted_row()
+	    {
+		    var partitionKey = "Jones";
+
+		    // Arrange
+		    TestDataHelper.SetupRecords(_tableStorage);
+			_tableStorage.Insert(new TestTableEntity("Zack", "Jones"));
+
+		    // Act
+		    var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1);
+			_tableStorage.DeleteUsingWildcardEtag(new TestTableEntity("Fred", "Jones"));
+			results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
+
+			
+	    }
+
+		[Theory]
         [MemberData("PartitionExpectedDataPageOfOne")]
         public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
