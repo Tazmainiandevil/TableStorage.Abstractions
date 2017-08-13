@@ -5,3 +5,4 @@
 /packages
 **/obj
 **/bin
+/.vs
