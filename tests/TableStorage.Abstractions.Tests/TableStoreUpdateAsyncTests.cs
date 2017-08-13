@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using FluentAssertions;
+using System;
 using System.Threading.Tasks;
-using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
@@ -16,7 +13,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await tableStorage.UpdateAsync(null as TestTableEntity);
+            Func<Task> act = async () => await _tableStorage.UpdateAsync(null as TestTableEntity);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
@@ -26,16 +23,16 @@ namespace TableStorage.Abstractions.Tests
         public async Task update_async_a_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var item = await tableStorage.GetRecordAsync("Smith", "John");
+            var item = await _tableStorage.GetRecordAsync("Smith", "John");
 
             item.Age = 22;
 
-            await tableStorage.UpdateAsync(item);
+            await _tableStorage.UpdateAsync(item);
 
-            var item2 = await tableStorage.GetRecordAsync("Smith", "John");
+            var item2 = await _tableStorage.GetRecordAsync("Smith", "John");
 
             // Assert
             item2.Age.Should().Be(22);
@@ -46,7 +43,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await tableStorage.UpdateUsingWildcardEtagAsync(null as TestTableEntity);
+            Func<Task> act = async () => await _tableStorage.UpdateUsingWildcardEtagAsync(null as TestTableEntity);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
@@ -56,16 +53,16 @@ namespace TableStorage.Abstractions.Tests
         public async Task update_using_wildcard_etag_the_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var item = await tableStorage.GetRecordAsync("Smith", "John");
+            var item = await _tableStorage.GetRecordAsync("Smith", "John");
 
             item.Age = 22;
 
-            await tableStorage.UpdateUsingWildcardEtagAsync(item);
+            await _tableStorage.UpdateUsingWildcardEtagAsync(item);
 
-            var item2 = await tableStorage.GetRecordAsync("Smith", "John");
+            var item2 = await _tableStorage.GetRecordAsync("Smith", "John");
 
             // Assert
             item2.Age.Should().Be(22);

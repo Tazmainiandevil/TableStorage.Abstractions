@@ -61,7 +61,6 @@ namespace TableStorage.Abstractions
 
             OptimisePerformance(storageConnectionString);
 
-
             var cloudTableClient = CreateTableClient(storageConnectionString, retries, retryWaitTimeInSeconds);
 
             _cloudTable = cloudTableClient.GetTableReference(tableName);
@@ -120,7 +119,6 @@ namespace TableStorage.Abstractions
         {
             return _cloudTable.Exists();
         }
-
 
         /// <summary>
         /// Insert an record
@@ -209,7 +207,6 @@ namespace TableStorage.Abstractions
             var operation = TableOperation.Delete(record);
             _cloudTable.Execute(operation);
         }
-
 
         /// <summary>
         /// Delete a record using the wildcard etag
@@ -320,6 +317,28 @@ namespace TableStorage.Abstractions
             return alllItems;
         }
 
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        public int GetRecordCount()
+        {
+            TableContinuationToken continuationToken = null;
+
+            var query = new TableQuery<T>().Select(new List<string> { "PartitionKey" });
+
+            var recordCount = 0;
+            do
+            {
+                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
+                continuationToken = items.ContinuationToken;
+
+                recordCount += items.Count();
+            } while (continuationToken != null);
+
+            return recordCount;
+        }
+
         #endregion Synchronous Methods
 
         #region Asynchronous Methods
@@ -367,7 +386,7 @@ namespace TableStorage.Abstractions
             {
                 throw new ArgumentNullException(nameof(records));
             }
-          
+
             var partitionSeparation = records.GroupBy(x => x.PartitionKey)
            .OrderBy(g => g.Key)
            .Select(g => g.ToList());
@@ -415,7 +434,6 @@ namespace TableStorage.Abstractions
             await UpdateAsync(record).ConfigureAwait(false);
         }
 
-
         /// <summary>
         /// Update an entry
         /// </summary>
@@ -448,13 +466,12 @@ namespace TableStorage.Abstractions
             await DeleteAsync(record).ConfigureAwait(false);
         }
 
-
         /// <summary>
         /// Delete the table
         /// </summary>
         public async Task DeleteTableAsync()
         {
-            await _cloudTable.DeleteIfExistsAsync();
+            await _cloudTable.DeleteIfExistsAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -553,10 +570,33 @@ namespace TableStorage.Abstractions
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
+
                 alllItems.AddRange(items);
             } while (continuationToken != null);
 
             return alllItems;
+        }
+
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        public async Task<int> GetRecordCountAsync()
+        {
+            TableContinuationToken continuationToken = null;
+
+            var query = new TableQuery<T>().Select(new List<string> { "PartitionKey" });
+
+            var recordCount = 0;
+            do
+            {
+                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+                continuationToken = items.ContinuationToken;
+
+                recordCount += items.Count();
+            } while (continuationToken != null);
+
+            return recordCount;
         }
 
         #endregion Asynchronous Methods

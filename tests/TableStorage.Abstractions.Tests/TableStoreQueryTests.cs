@@ -219,5 +219,18 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             results.Count().Should().Be(4);
         }
+
+        [Fact]
+        public void get_record_count_with_entries_returns_the_expected_count()
+        {
+            // Arrange
+            TestDataHelper.SetupRecords(_tableStorage);
+
+            // Act
+            var result = _tableStorage.GetRecordCount();
+
+            // Assert
+            result.Should().Be(4);
+        }
     }
 }

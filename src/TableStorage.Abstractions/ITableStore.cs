@@ -91,6 +91,12 @@ namespace TableStorage.Abstractions
         /// <returns>All records</returns>
         IEnumerable<T> GetAllRecords();
 
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        int GetRecordCount();
+
         #endregion Synchronous Methods
 
         #region Asynchronous Methods
@@ -174,6 +180,13 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <returns>All records</returns>
         Task<IEnumerable<T>> GetAllRecordsAsync();
+
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        Task<int> GetRecordCountAsync();
+
 
         #endregion Asynchronous Methods
     }
