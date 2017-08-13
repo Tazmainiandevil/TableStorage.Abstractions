@@ -14,7 +14,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await tableStorage.DeleteAsync(null as TestTableEntity);
+            Func<Task> act = async () => await _tableStorage.DeleteAsync(null as TestTableEntity);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
@@ -24,13 +24,13 @@ namespace TableStorage.Abstractions.Tests
         public async Task delete_async_an_entry_and_the_record_count_should_decrease()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
-            var item = await tableStorage.GetRecordAsync("Smith", "John");
+            TestDataHelper.SetupRecords(_tableStorage);
+            var item = await _tableStorage.GetRecordAsync("Smith", "John");
 
             // Act
-            await tableStorage.DeleteAsync(item);
+            await _tableStorage.DeleteAsync(item);
 
-            var result = await tableStorage.GetByPartitionKeyAsync("Smith");
+            var result = await _tableStorage.GetByPartitionKeyAsync("Smith");
 
             // Assert
             result.Count().Should().Be(1);

@@ -15,7 +15,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await tableStorage.InsertAsync(null as TestTableEntity);
+            Func<Task> act = async () => await _tableStorage.InsertAsync(null as TestTableEntity);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
@@ -28,8 +28,8 @@ namespace TableStorage.Abstractions.Tests
             var testEntity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
 
             // Act
-            await tableStorage.InsertAsync(testEntity);
-            var result = tableStorage.GetByRowKey("John").ToList();
+            await _tableStorage.InsertAsync(testEntity);
+            var result = _tableStorage.GetByRowKey("John").ToList();
 
             // Assert
             result.Count.Should().BeGreaterThan(0);
@@ -40,7 +40,7 @@ namespace TableStorage.Abstractions.Tests
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await tableStorage.InsertAsync(null as IEnumerable<TestTableEntity>);
+            Func<Task> act = async () => await _tableStorage.InsertAsync(null as IEnumerable<TestTableEntity>);
 
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: records");
@@ -57,8 +57,8 @@ namespace TableStorage.Abstractions.Tests
             };
 
             // Act
-            await tableStorage.InsertAsync(entityList);
-            var result = tableStorage.GetByPartitionKey("Smith").ToList();
+            await _tableStorage.InsertAsync(entityList);
+            var result = _tableStorage.GetByPartitionKey("Smith").ToList();
 
             // Assert
             result.Count.Should().BeGreaterThan(0);
@@ -68,13 +68,13 @@ namespace TableStorage.Abstractions.Tests
         public async Task insert_async_with_empty_list_of_records_does_not_insert_records_to_the_table()
         {
             // Arrange
-            TestDataHelper.SetupRecords(tableStorage);
+            TestDataHelper.SetupRecords(_tableStorage);
 
             var extraList = new List<TestTableEntity>();
 
             // Act
-            await tableStorage.InsertAsync(extraList);
-            var result = tableStorage.GetAllRecords().ToList();
+            await _tableStorage.InsertAsync(extraList);
+            var result = _tableStorage.GetAllRecords().ToList();
 
             // Assert
             result.Count.Should().Be(4);
@@ -88,8 +88,8 @@ namespace TableStorage.Abstractions.Tests
 
 
             // Act
-            await tableStorage.InsertAsync(entryList);
-            var result = await tableStorage.GetAllRecordsAsync();
+            await _tableStorage.InsertAsync(entryList);
+            var result = await _tableStorage.GetAllRecordsAsync();
 
             // Assert
             result.Count().Should().Be(entryList.Count);

@@ -117,6 +117,12 @@ namespace TableStorage.Abstractions
         /// <param name="pageToken">The page token.</param>
         /// <returns>PagedResult&lt;T&gt;.</returns>
         PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        int GetRecordCount();
+
         #endregion Synchronous Methods
 
         #region Asynchronous Methods
@@ -226,6 +232,13 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
         Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
+
+
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        Task<int> GetRecordCountAsync();
 
 
         #endregion Asynchronous Methods
