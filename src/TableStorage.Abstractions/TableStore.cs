@@ -270,11 +270,19 @@ namespace TableStorage.Abstractions
                 throw new ArgumentNullException(nameof(partitionKey));
             }
 
+            TableContinuationToken continuationToken = null;
+
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
 
-            var items = _cloudTable.ExecuteQuery(query).AsEnumerable();
+            var allItems = new List<T>();
+            do
+            {
+                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
+                continuationToken = items.ContinuationToken;
+                allItems.AddRange(items);
+            } while (continuationToken != null);
 
-            return items;
+            return allItems;
         }
 
         /// <summary>
@@ -306,15 +314,15 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>();
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         /// <summary>
@@ -517,15 +525,15 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         /// <summary>
@@ -544,15 +552,15 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         /// <summary>
@@ -565,16 +573,16 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>();
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
 
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         /// <summary>
