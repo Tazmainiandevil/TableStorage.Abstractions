@@ -79,6 +79,16 @@ namespace TableStorage.Abstractions
         IEnumerable<T> GetByPartitionKey(string partitionKey);
 
         /// <summary>
+        ///  Get the records by partition key, paged
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100,
+            string continuationTokenJson = null);
+
+        /// <summary>
         /// Get the records by row key
         /// </summary>
         /// <param name="rowKey">The row key</param>
@@ -86,11 +96,27 @@ namespace TableStorage.Abstractions
         IEnumerable<T> GetByRowKey(string rowKey);
 
         /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100,
+            string continuationTokenJson = null);
+
+        /// <summary>
         /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
         IEnumerable<T> GetAllRecords();
 
+        /// <summary>
+        /// Gets all records paged.
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageToken">The page token.</param>
+        /// <returns>PagedResult&lt;T&gt;.</returns>
+        PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
         #endregion Synchronous Methods
 
         #region Asynchronous Methods
@@ -163,17 +189,44 @@ namespace TableStorage.Abstractions
         Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
 
         /// <summary>
+        ///  Get the records by partition key, paged
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100,
+            string continuationTokenJson = null);
+
+        /// <summary>
         /// Get the records by row key
         /// </summary>
         /// <param name="rowKey">The row key</param>
         /// <returns>The records found</returns>
         Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
 
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row keyint.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100,
+        string continuationTokenJson = null);
+
         /// <summary>
         /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
         Task<IEnumerable<T>> GetAllRecordsAsync();
+
+        /// <summary>
+        /// Gets all records in the table, paged
+        /// </summary>
+        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
+
 
         #endregion Asynchronous Methods
     }
