@@ -269,15 +269,15 @@ namespace TableStorage.Abstractions
 
             var query = BuildGetByPartitionQuery(partitionKey);
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
 
         }
 
@@ -300,13 +300,13 @@ namespace TableStorage.Abstractions
             var query = BuildGetByPartitionQuery(partitionKey);
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
            
             var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
+            allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, alllItems);
+            return CreatePagedResult(continuationToken, allItems);
         }
 
 
@@ -325,15 +325,15 @@ namespace TableStorage.Abstractions
 
             var query = BuildGetByRowKeyQuery(rowKey);
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
 
@@ -354,14 +354,14 @@ namespace TableStorage.Abstractions
             var query = BuildGetByRowKeyQuery(rowKey);
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             
             var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
+            allItems.AddRange(items);
            
 
-            return CreatePagedResult(continuationToken, alllItems);
+            return CreatePagedResult(continuationToken, allItems);
       
         }
 
@@ -375,15 +375,15 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>();
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null)
@@ -393,13 +393,35 @@ namespace TableStorage.Abstractions
             var query = new TableQuery<T>();
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
            
             var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
-            return CreatePagedResult(continuationToken, alllItems);
+            allItems.AddRange(items);
+            return CreatePagedResult(continuationToken, allItems);
 
+        }
+
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        public int GetRecordCount()
+        {
+            TableContinuationToken continuationToken = null;
+
+            var query = new TableQuery<T>().Select(new List<string> { "PartitionKey" });
+
+            var recordCount = 0;
+            do
+            {
+                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
+                continuationToken = items.ContinuationToken;
+
+                recordCount += items.Count();
+            } while (continuationToken != null);
+
+            return recordCount;
         }
 
         #endregion Synchronous Methods
@@ -573,15 +595,15 @@ namespace TableStorage.Abstractions
 
             var query = BuildGetByPartitionQuery(partitionKey);
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null)
@@ -593,13 +615,13 @@ namespace TableStorage.Abstractions
             var query = BuildGetByPartitionQuery(partitionKey);
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
 
             var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
+            allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, alllItems);
+            return CreatePagedResult(continuationToken, allItems);
         }
 
         /// <summary>
@@ -615,15 +637,15 @@ namespace TableStorage.Abstractions
 
             var query = BuildGetByRowKeyQuery(rowKey);
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationTokenJson = null)
@@ -635,14 +657,14 @@ namespace TableStorage.Abstractions
             var query = BuildGetByRowKeyQuery(rowKey);
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
 
             var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
+            allItems.AddRange(items);
 
 
-            return CreatePagedResult(continuationToken, alllItems);
+            return CreatePagedResult(continuationToken, allItems);
 
         }
 
@@ -657,15 +679,15 @@ namespace TableStorage.Abstractions
 
             var query = new TableQuery<T>();
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
             do
             {
                 var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
                 continuationToken = items.ContinuationToken;
-                alllItems.AddRange(items);
+                allItems.AddRange(items);
             } while (continuationToken != null);
 
-            return alllItems;
+            return allItems;
         }
 
         public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
@@ -675,12 +697,34 @@ namespace TableStorage.Abstractions
             var query = new TableQuery<T>();
             query.TakeCount = pageSize;
 
-            var alllItems = new List<T>();
+            var allItems = new List<T>();
 
             var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
             continuationToken = items.ContinuationToken;
-            alllItems.AddRange(items);
-            return CreatePagedResult(continuationToken, alllItems);
+            allItems.AddRange(items);
+            return CreatePagedResult(continuationToken, allItems);
+        }
+
+        /// <summary>
+        /// Get the number of the records in the table
+        /// </summary>
+        /// <returns>The record count</returns>
+        public async Task<int> GetRecordCountAsync()
+        {
+            TableContinuationToken continuationToken = null;
+
+            var query = new TableQuery<T>().Select(new List<string> { "PartitionKey" });
+
+            var recordCount = 0;
+            do
+            {
+                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+                continuationToken = items.ContinuationToken;
+
+                recordCount += items.Count();
+            } while (continuationToken != null);
+
+            return recordCount;
         }
 
         #endregion Asynchronous Methods
