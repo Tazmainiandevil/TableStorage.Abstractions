@@ -274,6 +274,34 @@ namespace TableStorage.Abstractions.Tests
             results.IsFinalPage.ShouldBeEquivalentTo(true);
         }
 
+        [Fact]
+        public void get_records_by_partition_key_paged_using_maximum_page_size()
+        {
+            var tableStore = new TableStore<TestTableEntity>("recordsbypartmaxpage", ConnectionString);
+         
+            for (int i = 0; i < 11; i++)
+            {
+                var records = new List<TestTableEntity>();
+                for (int j = 0; j < 100; j++)
+                {
+                    records.Add(new TestTableEntity($"{i}_{j}", "x"));
+                }
+                tableStore.Insert(records);
+
+            }
+
+            var results = tableStore.GetByPartitionKeyPaged("x", pageSize: 1000);
+            var nextPageResults =
+                tableStore.GetByPartitionKeyPaged("x", pageSize: 1000,
+                    continuationTokenJson: results.ContinuationToken);
+           
+            results.Items.Count.ShouldBeEquivalentTo(1000);
+            nextPageResults.Items.Count.ShouldBeEquivalentTo(100);
+            nextPageResults.IsFinalPage.ShouldBeEquivalentTo(true);
+
+            tableStore.DeleteTable();
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
