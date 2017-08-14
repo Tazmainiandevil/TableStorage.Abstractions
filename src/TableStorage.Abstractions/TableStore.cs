@@ -388,15 +388,12 @@ namespace TableStorage.Abstractions
 
         public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null)
         {
-            TableContinuationToken continuationToken = null;
-
-            var query = new TableQuery<T>();
-            query.TakeCount = pageSize;
+            var query = new TableQuery<T> {TakeCount = pageSize};
 
             var allItems = new List<T>();
            
-            var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
-            continuationToken = items.ContinuationToken;
+            var items = _cloudTable.ExecuteQuerySegmented(query, null);
+            var continuationToken = items.ContinuationToken;
             allItems.AddRange(items);
             return CreatePagedResult(continuationToken, allItems);
 
@@ -692,15 +689,12 @@ namespace TableStorage.Abstractions
 
         public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
         {
-            TableContinuationToken continuationToken = null;
-
-            var query = new TableQuery<T>();
-            query.TakeCount = pageSize;
+            var query = new TableQuery<T> { TakeCount = pageSize };
 
             var allItems = new List<T>();
 
-            var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-            continuationToken = items.ContinuationToken;
+            var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, null).ConfigureAwait(false);
+            var continuationToken = items.ContinuationToken;
             allItems.AddRange(items);
             return CreatePagedResult(continuationToken, allItems);
         }
@@ -729,13 +723,14 @@ namespace TableStorage.Abstractions
 
         #endregion Asynchronous Methods
 
+        #region Helper Methods
 
         /// <summary>
         /// Ensures the partition key is not null.
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
         /// <exception cref="ArgumentNullException">partitionKey</exception>
-        private void EnsurePartitionKey(string partitionKey)
+        private static void EnsurePartitionKey(string partitionKey)
         {
             if (string.IsNullOrWhiteSpace(partitionKey))
             {
@@ -748,7 +743,7 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <param name="rowKey">The row key.</param>
         /// <exception cref="ArgumentNullException">rowKey</exception>
-        private void EnsureRowKey(string rowKey)
+        private static void EnsureRowKey(string rowKey)
         {
             if (string.IsNullOrWhiteSpace(rowKey))
             {
@@ -761,25 +756,41 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
         /// <returns>TableQuery&lt;T&gt;.</returns>
-        private TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
+        private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
         {
             var query = new TableQuery<T>().Where(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
             return query;
         }
 
-        private TableQuery<T> BuildGetByRowKeyQuery(string rowKey)
+        /// <summary>
+        /// Builds the get by row key query.
+        /// </summary>
+        /// <param name="rowKey">The row key.</param>
+        /// <returns>TableQuery&lt;T&gt;.</returns>
+        private static TableQuery<T> BuildGetByRowKeyQuery(string rowKey)
         {
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
             return query;
         }
-        private PagedResult<T> CreatePagedResult(TableContinuationToken continuationToken, List<T> items)
+        /// <summary>
+        /// Creates the paged result.
+        /// </summary>
+        /// <param name="continuationToken">The continuation token.</param>
+        /// <param name="items">The items.</param>
+        /// <returns>PagedResult&lt;T&gt;.</returns>
+        private static PagedResult<T> CreatePagedResult(TableContinuationToken continuationToken, List<T> items)
         {
             var continuationTokenJson = continuationToken != null ? JsonConvert.SerializeObject(continuationToken) : null;
             return new PagedResult<T>(items, continuationTokenJson, continuationToken == null);
         }
 
-        private TableContinuationToken DeserializeContinuationToken(string continuationTokenJson)
+        /// <summary>
+        /// Deserializes the continuation token.
+        /// </summary>
+        /// <param name="continuationTokenJson">The continuation token json.</param>
+        /// <returns>TableContinuationToken.</returns>
+        private static TableContinuationToken DeserializeContinuationToken(string continuationTokenJson)
         {
             TableContinuationToken continuationToken = null;
             if (!String.IsNullOrEmpty(continuationTokenJson))
@@ -788,5 +799,6 @@ namespace TableStorage.Abstractions
             }
             return continuationToken;
         }
+        #endregion Helper Methods
     }
 }

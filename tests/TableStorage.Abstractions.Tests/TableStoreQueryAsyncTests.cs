@@ -70,7 +70,7 @@ namespace TableStorage.Abstractions.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("    ")]
-        public async Task get_records_by_partition_key_async_with_null_or_empty_value_throws_exception(string partitionKey)
+        public void get_records_by_partition_key_async_with_null_or_empty_value_throws_exception(string partitionKey)
         {
             // Arrange
             // Act
@@ -84,7 +84,7 @@ namespace TableStorage.Abstractions.Tests
         [InlineData(null)]
         [InlineData("")]
         [InlineData("    ")]
-        public async Task get_records_by_partition_key_paged_async_with_null_or_empty_value_throws_exception(string partitionKey)
+        public void get_records_by_partition_key_paged_async_with_null_or_empty_value_throws_exception(string partitionKey)
         {
             // Arrange
             // Act
