@@ -14,7 +14,7 @@ namespace TableStorage.Abstractions
     /// Table store repository
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TableStore<T> : ITableStore<T> where T : TableEntity, new()
+    public class TableStore<T> : ITableStore<T> where T : class,ITableEntity, new()
     {
         /// <summary>
         /// The cloud table
