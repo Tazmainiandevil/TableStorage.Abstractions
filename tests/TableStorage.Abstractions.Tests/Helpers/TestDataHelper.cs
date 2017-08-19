@@ -68,9 +68,32 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Bill", "Smith") { Age = 38, Email = "bill.smith@another.com"},
                 new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
                 new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"},
-                new TestTableEntity("Bill", "King") {Age = 45, Email = "bill.king@email.com"},
+                new TestTableEntity("Bill", "King") { Age = 45, Email = "bill.king@email.com"},
                 new TestTableEntity("Fred", "Bloggs") { Age = 32, Email = "fred.bloggs@email.com" }
             };            
+        }
+
+        public static List<TestTableEntity> GetMoreThanMaxSinglePartitionRecords()
+        {
+            var entryList = new List<TestTableEntity>();
+            for (var i = 0; i < 105; i++)
+            {
+                entryList.Add(new TestTableEntity(i.ToString(), "x"));
+            }
+
+            return entryList;
+        }
+
+        public static List<TestTableEntity> GetMoreThanMaxMultiplePartitionRecords()
+        {
+            var entryList = GetMoreThanMaxSinglePartitionRecords();
+
+            for (var i = 0; i < 105; i++)
+            {
+                entryList.Add(new TestTableEntity($"a{i}", "y"));
+            }
+
+            return entryList;
         }
 
         #endregion Helpers

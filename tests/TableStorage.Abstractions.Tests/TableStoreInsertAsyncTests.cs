@@ -74,10 +74,10 @@ namespace TableStorage.Abstractions.Tests
 
             // Act
             await _tableStorage.InsertAsync(extraList);
-            var result = _tableStorage.GetAllRecords().ToList();
+            var result = await _tableStorage.GetAllRecordsAsync();
 
             // Assert
-            result.Count.Should().Be(4);
+            result.Count().Should().Be(4);
         }
 
         [Fact]
@@ -86,6 +86,34 @@ namespace TableStorage.Abstractions.Tests
             // Arrange
             var entryList = TestDataHelper.GetMultiplePartitionKeyRecords();
 
+
+            // Act
+            await _tableStorage.InsertAsync(entryList);
+            var result = await _tableStorage.GetAllRecordsAsync();
+
+            // Assert
+            result.Count().Should().Be(entryList.Count);
+        }
+
+        [Fact]
+        public async Task insert_async_multiple_records_with_same_partition_key_and_more_than_the_100_max_batch_size_still_inserts_all_the_records()
+        {
+            // Arrange
+            var entryList = TestDataHelper.GetMoreThanMaxSinglePartitionRecords();
+
+            // Act
+            await _tableStorage.InsertAsync(entryList);
+            var result = await _tableStorage.GetAllRecordsAsync();
+
+            // Assert
+            result.Count().Should().Be(entryList.Count);
+        }
+
+        [Fact]
+        public async Task insert_async_multiple_records_with_multiple_partition_keys_and_more_than_the_100_max_batch_size_in_for_all_and_still_inserts_all_the_records()
+        {
+            // Arrange
+            var entryList = TestDataHelper.GetMoreThanMaxMultiplePartitionRecords();
 
             // Act
             await _tableStorage.InsertAsync(entryList);

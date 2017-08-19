@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace TableStorage.Abstractions
 {
     /// <summary>
-    ///
+    /// Table store interface
     /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <typeparam name="T">The type of storage entity</typeparam>
     public interface ITableStore<T>
     {
         #region Synchronous Methods
@@ -84,7 +84,7 @@ namespace TableStorage.Abstractions
         /// <param name="partitionKey">The partition key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        /// <returns>The Paged Result</returns>
         PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100,
             string continuationTokenJson = null);
 
@@ -115,7 +115,7 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="pageToken">The page token.</param>
-        /// <returns>PagedResult&lt;T&gt;.</returns>
+        /// <returns>The Paged Result</returns>
         PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
         /// <summary>
         /// Get the number of the records in the table
@@ -200,7 +200,7 @@ namespace TableStorage.Abstractions
         /// <param name="partitionKey">The partition key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        /// <returns>The Paged Result</returns>
         Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100,
             string continuationTokenJson = null);
 
@@ -230,7 +230,7 @@ namespace TableStorage.Abstractions
         /// <summary>
         /// Gets all records in the table, paged
         /// </summary>
-        /// <returns>Task&lt;PagedResult&lt;T&gt;&gt;.</returns>
+        /// <returns>The Paged Result</returns>
         Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
 
 
