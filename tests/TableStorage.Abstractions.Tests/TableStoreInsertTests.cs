@@ -86,6 +86,33 @@ namespace TableStorage.Abstractions.Tests
             // Arrange
             var entryList = TestDataHelper.GetMultiplePartitionKeyRecords();
 
+            // Act
+            _tableStorage.Insert(entryList);
+            var result = _tableStorage.GetAllRecords().ToList();
+
+            // Assert
+            result.Count.Should().Be(entryList.Count);
+        }
+
+        [Fact]
+        public void insert_multiple_records_with_same_partition_key_and_more_than_the_100_max_batch_size_still_inserts_all_the_records()
+        {
+            // Arrange
+            var entryList = TestDataHelper.GetMoreThanMaxSinglePartitionRecords();
+
+            // Act
+            _tableStorage.Insert(entryList);
+            var result = _tableStorage.GetAllRecords().ToList();
+
+            // Assert
+            result.Count.Should().Be(entryList.Count);
+        }
+
+        [Fact]
+        public void insert_multiple_records_with_multiple_partition_keys_and_more_than_the_100_max_batch_size_in_for_all_and_still_inserts_all_the_records()
+        {
+            // Arrange
+            var entryList = TestDataHelper.GetMoreThanMaxMultiplePartitionRecords();
 
             // Act
             _tableStorage.Insert(entryList);
