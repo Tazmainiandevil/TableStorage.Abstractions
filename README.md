@@ -86,12 +86,47 @@ public class TestTableStorageClient
 }
 ```
 
+Table Storage does not really have generic way of filtering data as yet. So there are some methods to help with that.
+NOTE: The filtering works by getting all records so on large datasets this will be slow. 
+Testing showed ~1.3 seconds for 10,000 records
+Testing when paged by 100 ~0.0300 seconds for 10,000 records returning 100 records
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25);
+```
+And with basic paging starting at 0 and returning 100
+NOTE: The start is number of records e.g. 20, 100 would start at record 20 and then return a maxiumum of 100 after that
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25, 0, 100);
+```
+
+There is also the consideration of using Reactive Extensions (RX - http://reactivex.io/) to observe the results from a get all records call or a get filtered records.
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var theObserver = tableStorage.GetAllRecordsObservable();
+theObserver.Where(x => x.Age > 21 && x.Age < 25).Take(100).Subscribe(x =>
+{
+   // Do something with the table entry
+});
+```
+or 
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var theObserver = tableStorage.GetRecordsByFilterObservable(x => x.Age > 21 && x.Age < 25, 0, 100);
+theObserver.Subscribe(x =>
+{
+   // Do something with the table entry
+});
+```
+
 __Useful Reading__
 
 https://docs.microsoft.com/en-gb/azure/storage/storage-dotnet-how-to-use-tables
+http://www.introtorx.com/content/v1.0.10621.0/01_WhyRx.html
 
 __Notes__
 
-Each method has a synchronous and asynchronous version.
+Most methods have a synchronous and asynchronous version.
 
 The unit tests rely on using Azure Storage Emulator (which can be found here https://azure.microsoft.com/en-gb/downloads/).
