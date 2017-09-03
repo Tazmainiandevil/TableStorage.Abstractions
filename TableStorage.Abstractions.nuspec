@@ -11,9 +11,11 @@
     <description>$description$</description>
     <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
     <dependencies>
-      <dependency id="WindowsAzure.Storage" version="8.3.0" />
+      <dependency id="WindowsAzure.Storage" version="8.4.0" />
       <dependency id="Newtonsoft.Json" version="10.0.3" />
       <dependency id="Useful.Extensions" version="1.0.8" />
+      <dependency id="System.Reactive" version="3.1.1" />
+      <dependency id="System.Reactive.Linq" version="3.1.1" />
     </dependencies>
   </metadata>
   <files>

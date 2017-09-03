@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace TableStorage.Abstractions
@@ -117,11 +118,44 @@ namespace TableStorage.Abstractions
         /// <param name="pageToken">The page token.</param>
         /// <returns>The Paged Result</returns>
         PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
+
         /// <summary>
         /// Get the number of the records in the table
         /// </summary>
         /// <returns>The record count</returns>
         int GetRecordCount();
+
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <returns>The records filtered</returns>
+        IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The records filtered</returns>
+        IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize);
+
+        /// <summary>
+        /// Get the records via observable
+        /// </summary>
+        /// <returns>The observable for the results</returns>
+        IObservable<T> GetAllRecordsObservable();
+
+        /// <summary>
+        /// Get the records and filter by a given predicate via observable
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The observable for the results</returns>
+        IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize);
 
         #endregion Synchronous Methods
 
@@ -211,7 +245,6 @@ namespace TableStorage.Abstractions
         /// <returns>The records found</returns>
         Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
 
-
         /// <summary>
         /// Get the records by row key
         /// </summary>
@@ -230,9 +263,10 @@ namespace TableStorage.Abstractions
         /// <summary>
         /// Gets all records in the table, paged
         /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageToken">The page token</param>
         /// <returns>The Paged Result</returns>
         Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
-
 
         /// <summary>
         /// Get the number of the records in the table
@@ -240,6 +274,14 @@ namespace TableStorage.Abstractions
         /// <returns>The record count</returns>
         Task<int> GetRecordCountAsync();
 
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The records filterted</returns>
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
 
         #endregion Asynchronous Methods
     }

@@ -38,7 +38,6 @@ namespace TableStorage.Abstractions.Tests
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
         }
 
-
         [Fact]
         public async Task get_record_async_with_no_entry_returns_null()
         {
@@ -93,6 +92,7 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
+
         [Fact]
         public async Task get_records_by_partition_key_async_with_unknown_key_returns_empty_list()
         {
@@ -106,7 +106,6 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             result.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
         }
-
 
         [Fact]
         public async Task get_records_by_partition_key_paged_async_with_unknown_key_returns_empty_list()
@@ -145,7 +144,6 @@ namespace TableStorage.Abstractions.Tests
             }
         }
 
-
         public static IEnumerable<object[]> PartitionExpectedDataPageOfOne
         {
             get
@@ -166,6 +164,7 @@ namespace TableStorage.Abstractions.Tests
                 };
             }
         }
+
         public static IEnumerable<object[]> PartitionExpectedDataPageOfOneNextPage
         {
             get
@@ -186,6 +185,7 @@ namespace TableStorage.Abstractions.Tests
                 };
             }
         }
+
         [Theory]
         [MemberData("PartitionExpectedData")]
         public async Task get_records_by_partition_key_async_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
@@ -236,8 +236,8 @@ namespace TableStorage.Abstractions.Tests
             TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1);
-            results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
+            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1);
+            results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
             // Assert
             results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
@@ -252,12 +252,13 @@ namespace TableStorage.Abstractions.Tests
 
             // Act
 
-            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1, continuationTokenJson: null);
-            results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
+            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, null);
+            results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
             // Assert
             results.IsFinalPage.ShouldBeEquivalentTo(true);
         }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -323,6 +324,7 @@ namespace TableStorage.Abstractions.Tests
                 };
             }
         }
+
         public static IEnumerable<object[]> RowKeyExpectedDataPageOfOne
         {
             get
@@ -331,16 +333,13 @@ namespace TableStorage.Abstractions.Tests
                 {
                     "Bill", new List<TestTableEntity>
                     {
-
                         new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"},
-
                     }
                 };
                 yield return new object[]
                 {
                     "Fred", new List<TestTableEntity>
                     {
-
                         new TestTableEntity("Fred", "Bloggs") {Age = 32, Email = "fred.bloggs@email.com"}
                     }
                 };
@@ -355,26 +354,24 @@ namespace TableStorage.Abstractions.Tests
                 {
                     "Bill", new List<TestTableEntity>
                     {
-
                         new TestTableEntity("Bill", "King") {Age = 45, Email = "bill.king@email.com"}
-
                     }
                 };
                 yield return new object[]
                 {
                     "Fred", new List<TestTableEntity>
                     {
-
                         new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
                     }
                 };
             }
         }
+
         [Theory]
         [MemberData("RowKeyExpectedData")]
         public async Task get_records_by_row_key_async_with_known_key_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)
         {
-            // Arrange            
+            // Arrange
             TestDataHelper.SetupRowKeyRecords(_tableStorage);
 
             // Act
@@ -388,7 +385,7 @@ namespace TableStorage.Abstractions.Tests
         [MemberData("RowKeyExpectedData")]
         public async Task get_records_by_row_key_with_known_key_paged_async_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)
         {
-            // Arrange            
+            // Arrange
             TestDataHelper.SetupRowKeyRecords(_tableStorage);
 
             // Act
@@ -402,7 +399,7 @@ namespace TableStorage.Abstractions.Tests
         [MemberData("RowKeyExpectedDataPageOfOne")]
         public async Task get_records_by_row_key_with_known_key_paged_async_returns_the_expected_results_and_expected_row_count(string rowKey, List<TestTableEntity> expected)
         {
-            // Arrange            
+            // Arrange
             TestDataHelper.SetupRowKeyRecords(_tableStorage);
 
             // Act
@@ -416,7 +413,7 @@ namespace TableStorage.Abstractions.Tests
         [MemberData("RowKeyExpectedDataPageOfOneNextPage")]
         public async Task get_records_by_row_key_with_known_key_paged_async_second_page_returns_the_expected_results_and_expected_row_count(string rowKey, List<TestTableEntity> expected)
         {
-            // Arrange            
+            // Arrange
             TestDataHelper.SetupRowKeyRecords(_tableStorage);
 
             // Act
@@ -437,7 +434,6 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             results.Should().BeEmpty();
         }
-
 
         [Fact]
         public async Task get_all_records_async_with_entries_returns_the_expected_count()
@@ -476,7 +472,6 @@ namespace TableStorage.Abstractions.Tests
             results.Items.Count().Should().Be(4);
         }
 
-
         [Fact]
         public async Task get_all_records_with_entries_paged_async_returns_the_expected_count_when_given_page_size()
         {
@@ -502,6 +497,5 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             result.Should().Be(4);
         }
-
     }
 }

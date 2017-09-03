@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Useful.Extensions;
 
@@ -15,7 +17,7 @@ namespace TableStorage.Abstractions
     /// Table store repository
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class TableStore<T> : ITableStore<T> where T : class,ITableEntity, new()
+    public class TableStore<T> : ITableStore<T> where T : class, ITableEntity, new()
     {
         /// <summary>
         /// The cloud table
@@ -152,7 +154,7 @@ namespace TableStorage.Abstractions
             {
                 throw new ArgumentNullException(nameof(records));
             }
-            
+
             var partitionKeySeparation = records.GroupBy(x => x.PartitionKey)
                 .OrderBy(g => g.Key)
                 .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
@@ -363,20 +365,27 @@ namespace TableStorage.Abstractions
         /// <returns>All records</returns>
         public IEnumerable<T> GetAllRecords()
         {
-            TableContinuationToken continuationToken = null;
-
             var query = new TableQuery<T>();
 
-            var allItems = new List<T>();
-            do
+            var token = new TableContinuationToken();
+            var segment = _cloudTable.ExecuteQuerySegmented(query, token);
+            while (token != null)
             {
-                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+                foreach (var result in segment)
+                {
+                    yield return result;
+                }
+                token = segment.ContinuationToken;
+                segment = _cloudTable.ExecuteQuerySegmented(query, token);
+            }
         }
+
+        /// <summary>
+        /// Gets all records in the table, paged
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageToken">The page token</param>
+        /// <returns>The Paged Result</returns>
 
         public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null)
         {
@@ -410,6 +419,65 @@ namespace TableStorage.Abstractions
             } while (continuationToken != null);
 
             return recordCount;
+        }
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <returns>The records filtered</returns>
+        public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter)
+        {
+            return GetAllRecords().Where(filter);
+        }
+
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The records filtered</returns>
+        public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize)
+        {
+            var items = GetRecordsByFilter(filter);
+            return items.Page(start, pageSize);
+        }
+
+        /// <summary>
+        /// Get the records via observable
+        /// </summary>
+        /// <returns>The observable for the results</returns>
+        public IObservable<T> GetAllRecordsObservable()
+        {
+            return Observable.Create<T>(o =>
+            {
+                foreach (var result in GetAllRecords())
+                {
+                    o.OnNext(result);
+                }
+                return Disposable.Empty;
+            });
+        }
+
+        /// <summary>
+        /// Get the records and filter by a given predicate via observable
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The observable for the results</returns>
+        public IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize)
+        {
+            return Observable.Create<T>(o =>
+            {
+                foreach (var result in GetAllRecords().Where(filter).Page(start, pageSize))
+                {
+                    o.OnNext(result);
+                }
+                return Disposable.Empty;
+            });
         }
 
         #endregion Synchronous Methods
@@ -724,7 +792,24 @@ namespace TableStorage.Abstractions
             return recordCount;
         }
 
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <returns>The records filterted</returns>
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize)
+        {
+            var a = GetAllRecords();
+            var data = a.Where(filter).Page(start, pageSize);
+
+            return await Task.FromResult(data);
+        }
+
         #endregion Asynchronous Methods
+
+        #region Helpers
 
         /// <summary>
         /// Ensures the partition key is not null.
@@ -801,5 +886,7 @@ namespace TableStorage.Abstractions
             }
             return continuationToken;
         }
+
+        #endregion Helpers
     }
 }
