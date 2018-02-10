@@ -74,5 +74,35 @@ namespace TableStorage.Abstractions.Tests
             // Assert
             result.Should().BeFalse();
         }
+
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData(null)]
+        public void set_max_connections_with_null_connection_string_throws_exception(string connectionString)
+        {
+            // Arrange
+            // Act
+            Action act = () => TableStoreFactory.SetMaxNumberConnections(connectionString, 20);
+
+            // Assert
+            act.ShouldThrow<ArgumentNullException>()
+                .WithMessage("Value cannot be null.\r\nParameter name: storageConnectionString");
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(-1)]
+        public void set_max_connections_with_less_than_1_throws_exception(int connections)
+        {
+            // Arrange
+            // Act
+            Action act = () => TableStoreFactory.SetMaxNumberConnections("test", connections);
+
+            // Assert
+            act.ShouldThrow<ArgumentException>()
+                .WithMessage("maxNumberOfConnections");
+        }
     }
 }

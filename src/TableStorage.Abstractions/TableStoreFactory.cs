@@ -19,8 +19,8 @@ namespace TableStorage.Abstractions
         /// <exception cref="ArgumentException">maxNumberOfConnections</exception>
         public static void SetMaxNumberConnections(string storageConnectionString, int maxNumberOfConnections)
         {
-            if(String.IsNullOrEmpty(storageConnectionString))
-                throw new ArgumentException(nameof(storageConnectionString));
+            if(String.IsNullOrWhiteSpace(storageConnectionString))
+                throw new ArgumentNullException(nameof(storageConnectionString));
 
             if(maxNumberOfConnections < 1)
                 throw new ArgumentException(nameof(maxNumberOfConnections));
