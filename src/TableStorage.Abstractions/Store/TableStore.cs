@@ -9,7 +9,9 @@ using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using FluentValidation;
 using TableStorage.Abstractions.Models;
+using TableStorage.Abstractions.Validators;
 using Useful.Extensions;
 
 namespace TableStorage.Abstractions.Store
@@ -30,16 +32,6 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         private const int MaxPartitionSize = 100;
 
-        /// <summary>
-        /// The default retries
-        /// </summary>
-        private const int DefaultRetries = 3;
-
-        /// <summary>
-        /// The default retry in seconds
-        /// </summary>
-        private const double DefaultRetryTimeInSeconds = 1;
-
         #region Construction
 
         /// <summary>
@@ -47,48 +39,49 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="tableName">The table name</param>
         /// <param name="storageConnectionString">The connection string</param>
-        /// <param name="ensureTableExists">When set to true the Azure table will be created if it does not exist.  Set to false to improve performance in cases where this class is instantiated frequently.</param>
-        public TableStore(string tableName, string storageConnectionString, bool ensureTableExists = true)
-        : this(tableName, storageConnectionString, DefaultRetries, DefaultRetryTimeInSeconds, ensureTableExists) { }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
-        /// <param name="retries">Number of retries</param>
-        /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
-        /// <param name="ensureTableExists">When set to true the Azure table will be created if it does not exist.  Set to false to improve performance in cases where this class is instantiated frequently.</param>
-        public TableStore(string tableName, string storageConnectionString, int retries, double retryWaitTimeInSeconds, bool ensureTableExists = true)
+        /// <param name="options">Table storage options</param>
+        public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
         {
             if (string.IsNullOrWhiteSpace(tableName))
             {
-                throw new ArgumentNullException(nameof(tableName));
+                throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
             }
 
             if (string.IsNullOrWhiteSpace(storageConnectionString))
             {
-                throw new ArgumentNullException(nameof(storageConnectionString));
+                throw new ArgumentException("Table connection string cannot be null or empty", nameof(storageConnectionString));
             }
 
-            OptimisePerformance(storageConnectionString);
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options), "Table storage options cannot be null");
+            }
 
-            var cloudTableClient = CreateTableClient(storageConnectionString, retries, retryWaitTimeInSeconds);
+            var validator = new TableStorageOptionsValidator();
+            validator.ValidateAndThrow(options);
+
+            OptimisePerformance(storageConnectionString, options);
+
+            var cloudTableClient = CreateTableClient(storageConnectionString, options.Retries, options.RetryWaitTimeInSeconds);
 
             _cloudTable = cloudTableClient.GetTableReference(tableName);
-            if(ensureTableExists)
+
+            if (options.EnsureTableExists)
+            {
                 CreateTable();
+            }
         }
 
         /// <summary>
         /// Settings to improve performance
         /// </summary>
-        private static void OptimisePerformance(string storageConnectionString)
+        private static void OptimisePerformance(string storageConnectionString, TableStorageOptions options)
         {
             var account = CloudStorageAccount.Parse(storageConnectionString);
             var tableServicePoint = ServicePointManager.FindServicePoint(account.TableEndpoint);
-            tableServicePoint.UseNagleAlgorithm = false;
-            tableServicePoint.Expect100Continue = false;
+            tableServicePoint.UseNagleAlgorithm = options.UseNagleAlgorithm;
+            tableServicePoint.Expect100Continue = options.Expect100Continue;
+            tableServicePoint.ConnectionLimit = options.ConnectionLimit;
         }
 
         /// <summary>
@@ -434,7 +427,6 @@ namespace TableStorage.Abstractions.Store
         {
             return GetAllRecords().Where(filter);
         }
-
 
         /// <summary>
         /// Get the records and filter by a given predicate

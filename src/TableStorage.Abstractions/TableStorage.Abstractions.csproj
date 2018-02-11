@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="7.4.0" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
     <PackageReference Include="Useful.Extensions" Version="2.0.0" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.0.0" />

@@ -280,7 +280,7 @@ namespace TableStorage.Abstractions.Tests.Store
         [Fact]
         public void get_records_by_partition_key_paged_using_maximum_page_size()
         {
-            var tableStore = new TableStore<TestTableEntity>("recordsbypartmaxpage", TableStoreTests.ConnectionString);
+            var tableStore = new TableStore<TestTableEntity>("recordsbypartmaxpage", ConnectionString, _tableStorageOptions);
 
             for (int i = 0; i < 11; i++)
             {
