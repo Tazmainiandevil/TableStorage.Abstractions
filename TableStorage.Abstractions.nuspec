@@ -21,7 +21,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="src\TableStorage.Abstractions\bin\Release\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
-    <file src="src\TableStorage.Abstractions\bin\Release\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
+    <file src="src\TableStorage.Abstractions\bin\Release\net46\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
+    <file src="src\TableStorage.Abstractions\bin\Release\net452\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
   </files>
 </package>
