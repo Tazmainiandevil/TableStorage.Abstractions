@@ -46,8 +46,9 @@ namespace TableStorage.Abstractions
         /// </summary>
         /// <param name="tableName">The table name</param>
         /// <param name="storageConnectionString">The connection string</param>
-        public TableStore(string tableName, string storageConnectionString)
-        : this(tableName, storageConnectionString, DefaultRetries, DefaultRetryTimeInSeconds) { }
+        /// <param name="ensureTableExists">When set to true the Azure table will be created if it does not exist.  Set to false to improve performance in cases where this class is instantiated frequently.</param>
+        public TableStore(string tableName, string storageConnectionString, bool ensureTableExists = true)
+        : this(tableName, storageConnectionString, DefaultRetries, DefaultRetryTimeInSeconds, ensureTableExists) { }
 
         /// <summary>
         /// Constructor
@@ -56,7 +57,8 @@ namespace TableStorage.Abstractions
         /// <param name="storageConnectionString">The connection string</param>
         /// <param name="retries">Number of retries</param>
         /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
-        public TableStore(string tableName, string storageConnectionString, int retries, double retryWaitTimeInSeconds)
+        /// <param name="ensureTableExists">When set to true the Azure table will be created if it does not exist.  Set to false to improve performance in cases where this class is instantiated frequently.</param>
+        public TableStore(string tableName, string storageConnectionString, int retries, double retryWaitTimeInSeconds, bool ensureTableExists = true)
         {
             if (string.IsNullOrWhiteSpace(tableName))
             {
@@ -73,7 +75,8 @@ namespace TableStorage.Abstractions
             var cloudTableClient = CreateTableClient(storageConnectionString, retries, retryWaitTimeInSeconds);
 
             _cloudTable = cloudTableClient.GetTableReference(tableName);
-            CreateTable();
+            if(ensureTableExists)
+                CreateTable();
         }
 
         /// <summary>
