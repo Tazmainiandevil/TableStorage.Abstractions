@@ -262,8 +262,9 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData(nameof(PartitionExpectedData))]
-        public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey, List<TestTableEntity> expected)
+        [InlineData("Smith")]
+        [InlineData("Jones")]
+        public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey)
         {
             // Arrange
             TestDataHelper.SetupRecords(_tableStorage);

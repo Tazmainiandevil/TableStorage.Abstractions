@@ -244,14 +244,14 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData(nameof(PartitionExpectedData))]
-        public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey, List<TestTableEntity> expected)
+        [InlineData("Smith")]
+        [InlineData("Jones")]
+        public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey)
         {
             // Arrange
             TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
-
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1);
             results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
