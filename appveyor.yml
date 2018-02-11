@@ -14,8 +14,8 @@ dotnet_csproj:
 # temporary workaround for getting Azure Storage Emulator 5.2 installed
 install: 
   - ps: | 
-       $msiPath = "$env:TEMP\MicrosoftAzureStorageEmulator.msi" 
-       (New-Object Net.WebClient).DownloadFile('https://download.microsoft.com/download/F/3/8/F3857A38-D344-43B4-8E5B-2D03489909B9/MicrosoftAzureStorageEmulator.msi', $msiPath) 
+       $msiPath = "$env:TEMP\MicrosoftAzureStorageEmulator.msi"        
+       (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409, $msiPath)       
        cmd /c start /wait msiexec /i $msiPath /quiet 
        del $msiPath
 
