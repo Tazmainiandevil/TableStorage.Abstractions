@@ -1,10 +1,10 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
 using System.Linq;
+using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
@@ -16,7 +16,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => _tableStorage.Delete(null as TestTableEntity);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         [Fact]

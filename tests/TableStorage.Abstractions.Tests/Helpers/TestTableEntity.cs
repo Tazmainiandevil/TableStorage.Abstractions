@@ -1,6 +1,6 @@
 using Microsoft.WindowsAzure.Storage.Table;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Helpers
 {
     public class TestTableEntity : TableEntity
     {

@@ -1,10 +1,9 @@
-﻿using FluentAssertions;
-using System;
-using NSubstitute;
+﻿using System;
+using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
@@ -16,7 +15,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => _tableStorage.Update(null as TestTableEntity);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         [Fact]
@@ -46,7 +45,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => _tableStorage.UpdateUsingWildcardEtag(null as TestTableEntity);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         [Fact]

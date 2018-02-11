@@ -1,8 +1,11 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
+using FluentAssertions;
+using TableStorage.Abstractions.Factory;
+using TableStorage.Abstractions.Store;
+using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests : IDisposable
     {
@@ -31,7 +34,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => new TableStore<TestTableEntity>(tablename, "somestring");
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: tableName");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: tableName");
         }
 
         [Theory]
@@ -45,7 +48,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => new TableStore<TestTableEntity>("sometable", connectionString);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("Value cannot be null.\r\nParameter name: storageConnectionString");
         }
 
@@ -87,7 +90,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => TableStoreFactory.SetMaxNumberConnections(connectionString, 20);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>()
+            act.Should().Throw<ArgumentNullException>()
                 .WithMessage("Value cannot be null.\r\nParameter name: storageConnectionString");
         }
 
@@ -101,7 +104,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => TableStoreFactory.SetMaxNumberConnections("test", connections);
 
             // Assert
-            act.ShouldThrow<ArgumentException>()
+            act.Should().Throw<ArgumentException>()
                 .WithMessage("maxNumberOfConnections");
         }
     }

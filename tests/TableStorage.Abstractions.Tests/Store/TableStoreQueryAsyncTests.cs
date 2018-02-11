@@ -1,12 +1,12 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreAsyncTests
     {
@@ -21,7 +21,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.GetRecordAsync(partitionKey, "someRowKey");
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
 
         [Theory]
@@ -35,7 +35,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.GetRecordAsync("somePartitionKey", rowKey);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace TableStorage.Abstractions.Tests
             var result = await _tableStorage.GetRecordAsync("Jones", "Bill");
 
             // Assert
-            result.ShouldBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath == "CompiledRead"));
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath == "CompiledRead"));
         }
 
         [Theory]
@@ -76,7 +76,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.GetByPartitionKeyAsync(partitionKey);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
 
         [Theory]
@@ -90,7 +90,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace TableStorage.Abstractions.Tests
             var result = await _tableStorage.GetByPartitionKeyAsync(partitionKey);
 
             // Assert
-            result.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
+            result.Should().BeEquivalentTo(new List<TestTableEntity>());
         }
 
         [Fact]
@@ -118,7 +118,7 @@ namespace TableStorage.Abstractions.Tests
             var result = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey);
 
             // Assert
-            result.Items.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
+            result.Items.Should().BeEquivalentTo(new List<TestTableEntity>());
         }
 
         public static IEnumerable<object[]> PartitionExpectedData
@@ -197,7 +197,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByPartitionKeyAsync(partitionKey);
 
             // Assert
-            results.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -211,7 +211,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -225,7 +225,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -240,7 +240,7 @@ namespace TableStorage.Abstractions.Tests
             results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -256,7 +256,7 @@ namespace TableStorage.Abstractions.Tests
             results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
             // Assert
-            results.IsFinalPage.ShouldBeEquivalentTo(true);
+            results.IsFinalPage.Should().BeTrue();
         }
 
         [Theory]
@@ -270,7 +270,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.GetByRowKeyAsync(rowKey);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
         }
 
         [Fact]
@@ -284,7 +284,7 @@ namespace TableStorage.Abstractions.Tests
             var result = await _tableStorage.GetByRowKeyAsync(rowKey);
 
             // Assert
-            result.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
+            result.Should().BeEquivalentTo(new List<TestTableEntity>());
         }
 
         [Fact]
@@ -298,7 +298,7 @@ namespace TableStorage.Abstractions.Tests
             var result = await _tableStorage.GetByRowKeyPagedAsync(rowKey);
 
             // Assert
-            result.Items.ShouldAllBeEquivalentTo(new List<TestTableEntity>());
+            result.Items.Should().BeEquivalentTo(new List<TestTableEntity>());
         }
 
         public static IEnumerable<object[]> RowKeyExpectedData
@@ -378,7 +378,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByRowKeyAsync(rowKey);
 
             // Assert
-            results.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -392,7 +392,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByRowKeyPagedAsync(rowKey);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -406,7 +406,7 @@ namespace TableStorage.Abstractions.Tests
             var results = await _tableStorage.GetByRowKeyPagedAsync(rowKey, pageSize: 1);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Theory]
@@ -421,7 +421,7 @@ namespace TableStorage.Abstractions.Tests
             results = await _tableStorage.GetByRowKeyPagedAsync(rowKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
 
             // Assert
-            results.Items.ShouldAllBeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Items.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
 
         [Fact]

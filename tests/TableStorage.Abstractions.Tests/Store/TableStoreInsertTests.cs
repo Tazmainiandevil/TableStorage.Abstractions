@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
@@ -17,7 +17,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => _tableStorage.Insert(null as TestTableEntity);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace TableStorage.Abstractions.Tests
             Action act = () => _tableStorage.Insert(null as IEnumerable<TestTableEntity>);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: records");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: records");
         }
 
         [Fact]

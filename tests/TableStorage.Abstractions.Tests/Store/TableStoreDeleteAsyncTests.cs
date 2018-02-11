@@ -1,11 +1,11 @@
-﻿using FluentAssertions;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreAsyncTests
     {
@@ -17,7 +17,7 @@ namespace TableStorage.Abstractions.Tests
             Func<Task> act = async () => await _tableStorage.DeleteAsync(null as TestTableEntity);
 
             // Assert
-            act.ShouldThrow<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         [Fact]

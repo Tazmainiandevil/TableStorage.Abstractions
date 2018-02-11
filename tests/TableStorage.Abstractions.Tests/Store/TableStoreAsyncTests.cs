@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
+using TableStorage.Abstractions.Store;
+using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
-namespace TableStorage.Abstractions.Tests
+namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreAsyncTests : IDisposable
     {

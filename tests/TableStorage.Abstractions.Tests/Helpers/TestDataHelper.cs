@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using TableStorage.Abstractions.Store;
 
 namespace TableStorage.Abstractions.Tests.Helpers
 {
