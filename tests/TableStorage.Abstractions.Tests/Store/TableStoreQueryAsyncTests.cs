@@ -187,7 +187,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedData")]
+        [MemberData(nameof(PartitionExpectedData))]
         public async Task get_records_by_partition_key_async_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -201,7 +201,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedData")]
+        [MemberData(nameof(PartitionExpectedData))]
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -215,7 +215,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedDataPageOfOne")]
+        [MemberData(nameof(PartitionExpectedDataPageOfOne))]
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -229,7 +229,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedDataPageOfOneNextPage")]
+        [MemberData(nameof(PartitionExpectedDataPageOfOneNextPage))]
         public async Task get_records_by_partition_key_paged_async_with_known_key_second_page_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -244,7 +244,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedData")]
+        [MemberData(nameof(PartitionExpectedData))]
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -252,7 +252,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Act
 
-            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, null);
+            var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1);
             results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1, results.ContinuationToken);
 
             // Assert
@@ -368,7 +368,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("RowKeyExpectedData")]
+        [MemberData(nameof(RowKeyExpectedData))]
         public async Task get_records_by_row_key_async_with_known_key_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -382,7 +382,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("RowKeyExpectedData")]
+        [MemberData(nameof(RowKeyExpectedData))]
         public async Task get_records_by_row_key_with_known_key_paged_async_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -396,7 +396,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("RowKeyExpectedDataPageOfOne")]
+        [MemberData(nameof(RowKeyExpectedDataPageOfOne))]
         public async Task get_records_by_row_key_with_known_key_paged_async_returns_the_expected_results_and_expected_row_count(string rowKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -410,7 +410,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("RowKeyExpectedDataPageOfOneNextPage")]
+        [MemberData(nameof(RowKeyExpectedDataPageOfOneNextPage))]
         public async Task get_records_by_row_key_with_known_key_paged_async_second_page_returns_the_expected_results_and_expected_row_count(string rowKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -469,7 +469,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = await _tableStorage.GetAllRecordsPagedAsync();
 
             // Assert
-            results.Items.Count().Should().Be(4);
+            results.Items.Count.Should().Be(4);
         }
 
         [Fact]
@@ -482,7 +482,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = await _tableStorage.GetAllRecordsPagedAsync(pageSize: 2);
 
             // Assert
-            results.Items.Count().Should().Be(2);
+            results.Items.Count.Should().Be(2);
         }
 
         [Fact]

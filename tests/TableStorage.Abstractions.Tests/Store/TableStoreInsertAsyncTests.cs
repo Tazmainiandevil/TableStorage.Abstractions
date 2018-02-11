@@ -70,10 +70,8 @@ namespace TableStorage.Abstractions.Tests.Store
             // Arrange
             TestDataHelper.SetupRecords(_tableStorage);
 
-            var extraList = new List<TestTableEntity>();
-
             // Act
-            await _tableStorage.InsertAsync(extraList);
+            await _tableStorage.InsertAsync(new List<TestTableEntity>());
             var result = await _tableStorage.GetAllRecordsAsync();
 
             // Assert

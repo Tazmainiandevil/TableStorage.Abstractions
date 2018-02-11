@@ -215,7 +215,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_partition_key_paged_after_deleted_row()
+        public void get_records_by_partition_key_paged_after_deleted_row_has_expected_rows()
         {
             var partitionKey = "Jones";
 
@@ -224,16 +224,16 @@ namespace TableStorage.Abstractions.Tests.Store
             _tableStorage.Insert(new TestTableEntity("Zack", "Jones"));
 
             // Act
-            var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1);
+            var result = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1);
             _tableStorage.DeleteUsingWildcardEtag(new TestTableEntity("Fred", "Jones"));
-            results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
+            result = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1, continuationTokenJson: result.ContinuationToken);
 
             // Assert
-
+            result.Items.Count.Should().Be(1);
         }
 
         [Theory]
-        [MemberData("PartitionExpectedDataPageOfOne")]
+        [MemberData(nameof(PartitionExpectedDataPageOfOne))]
         public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -247,7 +247,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedDataPageOfOneNextPage")]
+        [MemberData(nameof(PartitionExpectedDataPageOfOneNextPage))]
         public void get_records_by_partition_key_paged_with_known_key_second_page_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -262,7 +262,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Theory]
-        [MemberData("PartitionExpectedData")]
+        [MemberData(nameof(PartitionExpectedData))]
         public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
@@ -270,8 +270,8 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Act
 
-            var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1, continuationTokenJson: null);
-            results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1, continuationTokenJson: results.ContinuationToken);
+            var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, 1);
+            results = _tableStorage.GetByPartitionKeyPaged(partitionKey, 1, results.ContinuationToken);
 
             // Assert
             results.IsFinalPage.Should().BeTrue();
@@ -514,7 +514,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = _tableStorage.GetAllRecordsPaged();
 
             // Assert
-            results.Items.Count().Should().Be(4);
+            results.Items.Count.Should().Be(4);
         }
 
         [Fact]
@@ -527,7 +527,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = _tableStorage.GetAllRecordsPaged(pageSize: 2);
 
             // Assert
-            results.Items.Count().Should().Be(2);
+            results.Items.Count.Should().Be(2);
         }
 
         [Fact]

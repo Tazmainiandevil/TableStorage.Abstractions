@@ -1,7 +1,7 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
@@ -70,10 +70,8 @@ namespace TableStorage.Abstractions.Tests.Store
             // Arrange
             TestDataHelper.SetupRecords(_tableStorage);
 
-            var extraList = new List<TestTableEntity>();
-
             // Act
-            _tableStorage.Insert(extraList);
+            _tableStorage.Insert(new List<TestTableEntity>());
             var result = _tableStorage.GetAllRecords().ToList();
 
             // Assert
