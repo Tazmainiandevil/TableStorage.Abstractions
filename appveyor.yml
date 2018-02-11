@@ -15,7 +15,7 @@ dotnet_csproj:
 install: 
   - ps: | 
        $msiPath = "$env:TEMP\MicrosoftAzureStorageEmulator.msi"        
-       (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409, $msiPath)       
+       (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409', $msiPath)       
        cmd /c start /wait msiexec /i $msiPath /quiet 
        del $msiPath
 
