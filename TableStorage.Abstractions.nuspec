@@ -10,6 +10,7 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
+    <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
       <dependency id="WindowsAzure.Storage" version="8.4.0" />
       <dependency id="Newtonsoft.Json" version="10.0.3" />
