@@ -12,14 +12,16 @@
     <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
-      <dependency id="WindowsAzure.Storage" version="8.4.0" />
+      <dependency id="WindowsAzure.Storage" version="9.0.0" />
       <dependency id="Newtonsoft.Json" version="10.0.3" />
-      <dependency id="Useful.Extensions" version="1.0.8" />
+      <dependency id="Useful.Extensions" version="2.0.0" />
       <dependency id="System.Reactive" version="3.1.1" />
       <dependency id="System.Reactive.Linq" version="3.1.1" />
+      <dependency id="FluentValidation" version="7.4.0" />
     </dependencies>
   </metadata>
   <files>
     <file src="src\TableStorage.Abstractions\bin\Release\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
+    <file src="src\TableStorage.Abstractions\bin\Release\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
   </files>
 </package>
