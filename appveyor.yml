@@ -28,10 +28,9 @@ before_build:
   # Start the azure storage emulator
   - '"%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
 
-
 build:
  verbosity: minimal
 
- test_script:  
+test_script:  
   - cd tests\TableStorage.Abstractions.Tests
   - dotnet xunit -fxversion 2.0.5
