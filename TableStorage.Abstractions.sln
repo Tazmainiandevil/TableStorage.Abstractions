@@ -1,15 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2027
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorage.Abstractions", "src\TableStorage.Abstractions\TableStorage.Abstractions.csproj", "{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TableStorage.Abstractions", "src\TableStorage.Abstractions\TableStorage.Abstractions.csproj", "{60C332EC-56B9-4E1E-9F06-26D2A5DE6639}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B552E72B-3048-4A53-BD20-D4E2A41EFE0D}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2C20023F-4412-40E2-8024-7D473F180E5A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0FF034AB-6A89-4F9C-9A8E-0CDD47EC97C6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{B467184C-8DDB-4ED9-ADEB-37ECAE77C3FB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorage.Abstractions.Tests", "tests\TableStorage.Abstractions.Tests\TableStorage.Abstractions.Tests.csproj", "{6F85E953-A833-4402-ADBE-B8BD240AAC64}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TableStorage.Abstractions.Tests", "tests\TableStorage.Abstractions.Tests\TableStorage.Abstractions.Tests.csproj", "{9A7D6662-6B05-4224-A353-C6E75BED6BAE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,20 +17,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F85E953-A833-4402-ADBE-B8BD240AAC64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{60C332EC-56B9-4E1E-9F06-26D2A5DE6639}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{60C332EC-56B9-4E1E-9F06-26D2A5DE6639}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{60C332EC-56B9-4E1E-9F06-26D2A5DE6639}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{60C332EC-56B9-4E1E-9F06-26D2A5DE6639}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A7D6662-6B05-4224-A353-C6E75BED6BAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A7D6662-6B05-4224-A353-C6E75BED6BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A7D6662-6B05-4224-A353-C6E75BED6BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A7D6662-6B05-4224-A353-C6E75BED6BAE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{1D3F8BE9-CED4-4CB2-B853-D28EA001C4E0} = {B552E72B-3048-4A53-BD20-D4E2A41EFE0D}
-		{6F85E953-A833-4402-ADBE-B8BD240AAC64} = {0FF034AB-6A89-4F9C-9A8E-0CDD47EC97C6}
+		{60C332EC-56B9-4E1E-9F06-26D2A5DE6639} = {2C20023F-4412-40E2-8024-7D473F180E5A}
+		{9A7D6662-6B05-4224-A353-C6E75BED6BAE} = {B467184C-8DDB-4ED9-ADEB-37ECAE77C3FB}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {18628F95-6298-4083-B59D-7B031E9E4486}
 	EndGlobalSection
 EndGlobal

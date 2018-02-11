@@ -9,9 +9,10 @@ using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using TableStorage.Abstractions.Models;
 using Useful.Extensions;
 
-namespace TableStorage.Abstractions
+namespace TableStorage.Abstractions.Store
 {
     /// <summary>
     /// Table store repository

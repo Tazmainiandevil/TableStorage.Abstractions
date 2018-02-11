@@ -1,14 +1,15 @@
-version: 1.0.{build}
-os: Visual Studio 2015
+version: 2.0.{build}
+os: Visual Studio 2017
 configuration: Release
 
-# enable AssemblyInfo.cs patching with build version number 
-assembly_info: 
- patch: true 
- file: AssemblyInfo.* 
- assembly_version: "{version}" 
- assembly_file_version: "{version}" 
- assembly_informational_version: "{version}" 
+# enable version patching with build version number 
+dotnet_csproj:
+  patch: true
+  file: '**\*.csproj'
+  version: '{version}'
+  package_version: '{version}'
+  assembly_version: '{version}'
+  file_version: '{version}'
 
 # temporary workaround for getting Azure Storage Emulator 5.2 installed
 install: 
@@ -18,10 +19,19 @@ install:
        cmd /c start /wait msiexec /i $msiPath /quiet 
        del $msiPath
 
-# restore NuGet packages before running MSBuild
+# restore NuGet packages before running
 before_build:
-  - nuget restore
+  # Display .NET Core version
+  - cmd: dotnet --version
+  # Display minimal restore text
+  - cmd: dotnet restore --verbosity m
+  # Start the azure storage emulator
   - '"%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
-  
+
+
 build:
  verbosity: minimal
+
+ test_script:  
+  - cd tests\TableStorage.Abstractions.Tests
+  - dotnet xunit -fxversion 2.0.5

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TableStorage.Abstractions.Models;
 
-namespace TableStorage.Abstractions
+namespace TableStorage.Abstractions.Store
 {
     /// <summary>
     /// Table store interface

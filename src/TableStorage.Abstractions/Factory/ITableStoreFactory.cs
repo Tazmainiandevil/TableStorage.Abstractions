@@ -1,6 +1,7 @@
 ﻿using Microsoft.WindowsAzure.Storage.Table;
+using TableStorage.Abstractions.Store;
 
-namespace TableStorage.Abstractions
+namespace TableStorage.Abstractions.Factory
 {
     public interface ITableStoreFactory
     {
