@@ -1,12 +1,13 @@
 # TableStorage.Abstractions
-Repository wrapper for Azure Table Storage in C# .NET 4.6
+Repository wrapper for Azure Table Storage in C# .NET 4.5.2, .NET 4.6
 
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
 <a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
 
 Starting work with Azure Table Storage has been interesting and very different from working with SQL Server which I have done for many years. After reading a number of articles about it and using it I realised a generic wrapper would be useful to create and so this is that creation.
 
-Based on multiple articles from Microsoft and others
+Based on multiple articles from Microsoft and others to try and get a performant wrapper and aid unit testing of code using Azure Table Storage.
+
 https://blogs.msdn.microsoft.com/windowsazurestorage/2010/06/25/nagles-algorithm-is-not-friendly-towards-small-requests/
 
 https://azure.microsoft.com/en-gb/blog/managing-concurrency-in-microsoft-azure-storage-2/
@@ -17,15 +18,24 @@ https://docs.particular.net/nservicebus/azure-storage-persistence/performance-tu
 
 http://robertgreiner.com/2012/06/why-is-azure-table-storage-so-slow/
 
-
-Optimisations added are:
+Optimisations are controlled by the Table Storage Options Class.
+The defaults are applied as below if not overridden:
 
 ```C#
- var account = CloudStorageAccount.Parse(storageConnectionString);
- var tableServicePoint = ServicePointManager.FindServicePoint(account.TableEndpoint);
- 
- tableServicePoint.UseNagleAlgorithm = false;
- tableServicePoint.Expect100Continue = false;
+public class TableStorageOptions
+{
+    public bool UseNagleAlgorithm { get; set; } = false;
+
+    public bool Expect100Continue { get; set; } = false;
+
+    public int ConnectionLimit { get; set; } = 10;
+
+    public int Retries { get; set; } = 3;
+
+    public double RetryWaitTimeInSeconds { get; set; } = 1;
+
+    public bool EnsureTableExists { get; set; } = true;
+}
 ```
 
 Example entity:
@@ -120,12 +130,12 @@ theObserver.Subscribe(x =>
 });
 ```
 
-__Useful Reading__
+## Useful Reading
 
 https://docs.microsoft.com/en-gb/azure/storage/storage-dotnet-how-to-use-tables
 http://www.introtorx.com/content/v1.0.10621.0/01_WhyRx.html
 
-__Notes__
+## Notes
 
 Most methods have a synchronous and asynchronous version.
 
