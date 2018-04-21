@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;net46</TargetFrameworks>
+    <TargetFrameworks>net452;net46;net461</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <Version>1.0.0</Version>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="7.5.2" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
-    <PackageReference Include="Useful.Extensions" Version="2.0.0" />
+    <PackageReference Include="Useful.Extensions" Version="2.1.0" />
     <PackageReference Include="WindowsAzure.Storage" Version="9.1.1" />
   </ItemGroup>
 
