@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.Storage;
+﻿using FluentValidation;
+using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.RetryPolicies;
 using Microsoft.WindowsAzure.Storage.Table;
 using Newtonsoft.Json;
@@ -9,8 +10,8 @@ using System.Net;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using FluentValidation;
 using TableStorage.Abstractions.Models;
+using TableStorage.Abstractions.Parsers;
 using TableStorage.Abstractions.Validators;
 using Useful.Extensions;
 
@@ -283,6 +284,31 @@ namespace TableStorage.Abstractions.Store
         }
 
         /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        public IEnumerable<T> GetByPartitionKey(string partitionKey, string ago)
+        {
+            EnsurePartitionKey(partitionKey);
+
+            TableContinuationToken continuationToken = null;
+
+            var query = BuildGetByPartitionAndTimeQuery(partitionKey, ago);
+
+            var allItems = new List<T>();
+            do
+            {
+                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
+                continuationToken = items.ContinuationToken;
+                allItems.AddRange(items);
+            } while (continuationToken != null);
+
+            return allItems;
+        }
+
+        /// <summary>
         /// Get the records by partition key, paged
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
@@ -319,6 +345,31 @@ namespace TableStorage.Abstractions.Store
             TableContinuationToken continuationToken = null;
 
             var query = BuildGetByRowKeyQuery(rowKey);
+
+            var allItems = new List<T>();
+            do
+            {
+                var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
+                continuationToken = items.ContinuationToken;
+                allItems.AddRange(items);
+            } while (continuationToken != null);
+
+            return allItems;
+        }
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        public IEnumerable<T> GetByRowKey(string rowKey, string ago)
+        {
+            EnsureRowKey(rowKey);
+
+            TableContinuationToken continuationToken = null;
+
+            var query = BuildGetByRowKeyAndTimeQuery(rowKey, ago);
 
             var allItems = new List<T>();
             do
@@ -429,6 +480,18 @@ namespace TableStorage.Abstractions.Store
         }
 
         /// <summary>
+        /// Get the records and filter by a given predicate and time in the past
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filtered</returns>
+        public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago)
+        {
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            return GetAllRecords().Where(CombineFilter);
+        }
+
+        /// <summary>
         /// Get the records and filter by a given predicate
         /// </summary>
         /// <param name="filter">The filter to apply</param>
@@ -438,6 +501,21 @@ namespace TableStorage.Abstractions.Store
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize)
         {
             var items = GetRecordsByFilter(filter);
+            return items.Page(start, pageSize);
+        }
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filtered</returns>
+        public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize, string ago)
+        {
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var items = GetRecordsByFilter(CombineFilter);
             return items.Page(start, pageSize);
         }
 
@@ -469,6 +547,28 @@ namespace TableStorage.Abstractions.Store
             return Observable.Create<T>(o =>
             {
                 foreach (var result in GetAllRecords().Where(filter).Page(start, pageSize))
+                {
+                    o.OnNext(result);
+                }
+                return Disposable.Empty;
+            });
+        }
+
+        /// <summary>
+        /// Get the records and filter by a given predicate via observable
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The observable for the results</returns>
+        public IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago)
+        {
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+
+            return Observable.Create<T>(o =>
+            {
+                foreach (var result in GetAllRecords().Where(CombineFilter).Page(start, pageSize))
                 {
                     o.OnNext(result);
                 }
@@ -656,6 +756,25 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago)
+        {
+            EnsurePartitionKey(partitionKey);
+
+            TableContinuationToken continuationToken = null;
+
+            var query = BuildGetByPartitionAndTimeQuery(partitionKey, ago);
+
+            var allItems = new List<T>();
+            do
+            {
+                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+                continuationToken = items.ContinuationToken;
+                allItems.AddRange(items);
+            } while (continuationToken != null);
+
+            return allItems;
+        }
+
         /// <summary>
         ///  Get the records by partition key, paged
         /// </summary>
@@ -693,6 +812,25 @@ namespace TableStorage.Abstractions.Store
             TableContinuationToken continuationToken = null;
 
             var query = BuildGetByRowKeyQuery(rowKey);
+
+            var allItems = new List<T>();
+            do
+            {
+                var items = await _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+                continuationToken = items.ContinuationToken;
+                allItems.AddRange(items);
+            } while (continuationToken != null);
+
+            return allItems;
+        }
+
+        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago)
+        {
+            EnsureRowKey(rowKey);
+
+            TableContinuationToken continuationToken = null;
+
+            var query = BuildGetByRowKeyAndTimeQuery(rowKey, ago);
 
             var allItems = new List<T>();
             do
@@ -797,8 +935,25 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filterted</returns>
         public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize)
         {
-            var a = GetAllRecords();
-            var data = a.Where(filter).Page(start, pageSize);
+            var allRecords = GetAllRecords();
+            var data = allRecords.Where(filter).Page(start, pageSize);
+
+            return await Task.FromResult(data);
+        }
+
+        /// <summary>
+        /// Get the records and filter by a given predicate and time in the past
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filterted</returns>
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago)
+        {
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var allRecords = GetAllRecords();
+            var data = allRecords.Where(CombineFilter).Page(start, pageSize);
 
             return await Task.FromResult(data);
         }
@@ -846,6 +1001,23 @@ namespace TableStorage.Abstractions.Store
         }
 
         /// <summary>
+        /// Builds the get by partition query.
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The table query</returns>
+        private static TableQuery<T> BuildGetByPartitionAndTimeQuery(string partitionKey, string ago)
+        {
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey),
+                                                                            TableOperators.And,
+                                                                            TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
+            return query;
+        }
+
+
+        /// <summary>
         /// Build the row key table query
         /// </summary>
         /// <param name="rowKey">The row key</param>
@@ -853,6 +1025,22 @@ namespace TableStorage.Abstractions.Store
         private static TableQuery<T> BuildGetByRowKeyQuery(string rowKey)
         {
             var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
+            return query;
+        }
+
+        /// <summary>
+        /// Build the row key table query
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The table query</returns>
+        private static TableQuery<T> BuildGetByRowKeyAndTimeQuery(string rowKey, string ago)
+        {
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey),
+                                                                            TableOperators.And,
+                                                                            TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
             return query;
         }
 

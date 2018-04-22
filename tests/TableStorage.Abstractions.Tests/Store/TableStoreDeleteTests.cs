@@ -35,5 +35,16 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Count().Should().Be(1);
         }
+
+        [Fact]
+        public void delete_using_wild_card_etag_when_entity_is_null_then_throws_an_exception()
+        {
+            // Arrange
+            // Act
+            Action act = () => _tableStorage.DeleteUsingWildcardEtag(null as TestTableEntity);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+        }
     }
 }

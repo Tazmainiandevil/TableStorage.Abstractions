@@ -380,7 +380,7 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
-
+        
         [Theory]
         [MemberData(nameof(RowKeyExpectedData))]
         public async Task get_records_by_row_key_with_known_key_paged_async_returns_the_expected_results(string rowKey, List<TestTableEntity> expected)

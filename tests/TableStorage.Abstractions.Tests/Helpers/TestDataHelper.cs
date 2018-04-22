@@ -6,7 +6,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
     internal static class TestDataHelper
     {
         #region Helpers
-       
+
         public static void SetupRecords(ITableStore<TestTableEntity> tableStorage)
         {
             var entityList = new List<TestTableEntity>
@@ -71,7 +71,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"},
                 new TestTableEntity("Bill", "King") { Age = 45, Email = "bill.king@email.com"},
                 new TestTableEntity("Fred", "Bloggs") { Age = 32, Email = "fred.bloggs@email.com" }
-            };            
+            };
         }
 
         public static List<TestTableEntity> GetMoreThanMaxSinglePartitionRecords()

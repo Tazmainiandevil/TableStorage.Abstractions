@@ -81,6 +81,14 @@ namespace TableStorage.Abstractions.Store
         IEnumerable<T> GetByPartitionKey(string partitionKey);
 
         /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        IEnumerable<T> GetByPartitionKey(string partitionKey, string ago);
+
+        /// <summary>
         ///  Get the records by partition key, paged
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
@@ -96,6 +104,14 @@ namespace TableStorage.Abstractions.Store
         /// <param name="rowKey">The row key</param>
         /// <returns>The records found</returns>
         IEnumerable<T> GetByRowKey(string rowKey);
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        IEnumerable<T> GetByRowKey(string rowKey, string ago);
 
         /// <summary>
         /// Get the records by row key
@@ -126,13 +142,21 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The record count</returns>
         int GetRecordCount();
 
-
         /// <summary>
         /// Get the records and filter by a given predicate
         /// </summary>
         /// <param name="filter">The filter to apply</param>
         /// <returns>The records filtered</returns>
         IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate and time in the past
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filtered</returns>
+        IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago);
+
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -142,6 +166,16 @@ namespace TableStorage.Abstractions.Store
         /// <param name="pageSize">The page size</param>
         /// <returns>The records filtered</returns>
         IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filtered</returns>
+        IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize, string ago);
 
         /// <summary>
         /// Get the records via observable
@@ -157,6 +191,16 @@ namespace TableStorage.Abstractions.Store
         /// <param name="pageSize">The page size</param>
         /// <returns>The observable for the results</returns>
         IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate via observable
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The observable for the results</returns>
+        IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago);
 
         #endregion Synchronous Methods
 
@@ -230,6 +274,14 @@ namespace TableStorage.Abstractions.Store
         Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
 
         /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago);
+
+        /// <summary>
         ///  Get the records by partition key, paged
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
@@ -245,6 +297,14 @@ namespace TableStorage.Abstractions.Store
         /// <param name="rowKey">The row key</param>
         /// <returns>The records found</returns>
         Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago);
 
         /// <summary>
         /// Get the records by row key
@@ -283,6 +343,16 @@ namespace TableStorage.Abstractions.Store
         /// <param name="pageSize">The page size</param>
         /// <returns>The records filterted</returns>
         Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate and time in the past
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filterted</returns>
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago);
 
         #endregion Asynchronous Methods
     }
