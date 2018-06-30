@@ -19,7 +19,9 @@
       <dependency id="FluentValidation" version="7.5.2" />
     </dependencies>
   </metadata>
-  <files>
+  <files>  
+    <file src="src\TableStorage.Abstractions\bin\Release\netcoreapp2.1\TableStorage.Abstractions.dll" target="lib\netcoreapp2.1\TableStorage.Abstractions.dll" />
+    <file src="src\TableStorage.Abstractions\bin\Release\netcoreapp2.0\TableStorage.Abstractions.dll" target="lib\netcoreapp2.0\TableStorage.Abstractions.dll" />
     <file src="src\TableStorage.Abstractions\bin\Release\net461\TableStorage.Abstractions.dll" target="lib\net461\TableStorage.Abstractions.dll" />
     <file src="src\TableStorage.Abstractions\bin\Release\net46\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
     <file src="src\TableStorage.Abstractions\bin\Release\net452\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
