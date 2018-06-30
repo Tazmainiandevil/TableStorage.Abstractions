@@ -33,4 +33,4 @@ build:
 
 test_script:  
   - cd tests\TableStorage.Abstractions.Tests
-  - dotnet xunit -fxversion 2.0.5
+  - dotnet test
