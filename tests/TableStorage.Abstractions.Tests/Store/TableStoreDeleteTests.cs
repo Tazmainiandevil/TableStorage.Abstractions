@@ -8,6 +8,7 @@ namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
         [Fact]
         public void delete_with_null_record_throws_exception()
         {
@@ -46,5 +47,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
+        #endif
     }
 }

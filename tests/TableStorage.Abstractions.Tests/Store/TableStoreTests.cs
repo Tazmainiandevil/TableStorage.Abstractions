@@ -22,8 +22,13 @@ namespace TableStorage.Abstractions.Tests.Store
 
         public void Dispose()
         {
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
             _tableStorage.DeleteTable();
+#endif
         }
+
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
+
 
         [Theory]
         [InlineData("")]
@@ -157,5 +162,7 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().BeFalse();
         }
+
+        #endif
     }
 }

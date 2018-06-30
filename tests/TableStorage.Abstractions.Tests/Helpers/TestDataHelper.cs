@@ -15,7 +15,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
             };
 
-            tableStorage.Insert(entityList);
+            tableStorage.InsertAsync(entityList).Wait();
 
             var anotherEntityList = new List<TestTableEntity>
             {
@@ -23,7 +23,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
             };
 
-            tableStorage.Insert(anotherEntityList);
+            tableStorage.InsertAsync(anotherEntityList).Wait();
         }
 
         public static void SetupRowKeyRecords(ITableStore<TestTableEntity> tableStorage)
@@ -35,7 +35,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Bill", "Smith") { Age = 38, Email = "bill.smith@another.com"}
             };
 
-            tableStorage.Insert(entityList);
+            tableStorage.InsertAsync(entityList).Wait();
 
             var anotherEntityList = new List<TestTableEntity>
             {
@@ -43,21 +43,21 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
             };
 
-            tableStorage.Insert(anotherEntityList);
+            tableStorage.InsertAsync(anotherEntityList).Wait();
 
             var moreEntityList = new List<TestTableEntity>
             {
                 new TestTableEntity("Bill", "King") {Age = 45, Email = "bill.king@email.com"}
             };
 
-            tableStorage.Insert(moreEntityList);
+            tableStorage.InsertAsync(moreEntityList).Wait();
 
             var evenMoreEntityList = new List<TestTableEntity>
             {
                 new TestTableEntity("Fred", "Bloggs") { Age = 32, Email = "fred.bloggs@email.com" }
             };
 
-            tableStorage.Insert(evenMoreEntityList);
+            tableStorage.InsertAsync(evenMoreEntityList).Wait();
         }
 
         public static List<TestTableEntity> GetMultiplePartitionKeyRecords()

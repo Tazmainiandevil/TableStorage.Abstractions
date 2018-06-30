@@ -7,6 +7,7 @@ namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
         [Fact]
         public void update_with_null_record_throws_exception()
         {
@@ -66,5 +67,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             item2.Age.Should().Be(22);
         }
+#endif
     }
 }

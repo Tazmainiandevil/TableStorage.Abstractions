@@ -29,10 +29,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Act
             await _tableStorage.InsertAsync(testEntity);
-            var result = _tableStorage.GetByRowKey("John").ToList();
+            var result = await _tableStorage.GetByRowKeyAsync("John");
 
             // Assert
-            result.Count.Should().BeGreaterThan(0);
+            result.Count().Should().BeGreaterThan(0);
         }
 
         [Fact]
@@ -58,10 +58,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Act
             await _tableStorage.InsertAsync(entityList);
-            var result = _tableStorage.GetByPartitionKey("Smith").ToList();
+            var result = await _tableStorage.GetByPartitionKeyAsync("Smith");
 
             // Assert
-            result.Count.Should().BeGreaterThan(0);
+            result.Count().Should().BeGreaterThan(0);
         }
 
         [Fact]

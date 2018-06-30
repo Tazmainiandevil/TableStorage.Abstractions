@@ -435,8 +435,8 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(continuationToken, allItems);
         }
 
-        ///// <summary>
-        ///// Get all the records in the table
+        /// <summary>
+        /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
         public IEnumerable<T> GetAllRecords()

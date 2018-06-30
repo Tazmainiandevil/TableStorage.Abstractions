@@ -10,6 +10,7 @@ namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests
     {
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
         [Theory]
         [InlineData(null)]
         [InlineData("")]
@@ -610,5 +611,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
         }
+        #endif
     }
 }
