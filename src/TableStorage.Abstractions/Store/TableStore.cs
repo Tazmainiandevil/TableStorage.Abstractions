@@ -62,14 +62,17 @@ namespace TableStorage.Abstractions.Store
             validator.ValidateAndThrow(options);
 
             OptimisePerformance(storageConnectionString, options);
-
             var cloudTableClient = CreateTableClient(storageConnectionString, options.Retries, options.RetryWaitTimeInSeconds);
 
             _cloudTable = cloudTableClient.GetTableReference(tableName);
 
             if (options.EnsureTableExists)
             {
+#if NETCOREAPP2_0 || NETCOREAPP2_1
+                CreateTableAsync().Wait();
+#else
                 CreateTable();
+#endif
             }
         }
 
@@ -109,6 +112,31 @@ namespace TableStorage.Abstractions.Store
         #endregion Construction
 
         #region Synchronous Methods
+            
+#if NETCOREAPP2_0 || NETCOREAPP2_1
+        /// <summary>
+        /// Get all the records in the table
+        /// </summary>
+        /// <returns>All records</returns>
+        public IEnumerable<T> GetAllRecords()
+        {
+            var query = new TableQuery<T>();
+
+            var token = new TableContinuationToken();
+            var segment = _cloudTable.ExecuteQuerySegmentedAsync(query, token).Result;
+            while (token != null)
+            {
+                foreach (var result in segment)
+                {
+                    yield return result;
+                }
+                token = segment.ContinuationToken;
+                segment = _cloudTable.ExecuteQuerySegmentedAsync(query, token).Result;
+            }
+        }
+#endif
+
+#if !NETCOREAPP2_0 && !NETCOREAPP2_1
 
         /// <summary>
         /// Create the table
@@ -407,8 +435,8 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(continuationToken, allItems);
         }
 
-        /// <summary>
-        /// Get all the records in the table
+        ///// <summary>
+        ///// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
         public IEnumerable<T> GetAllRecords()
@@ -574,8 +602,8 @@ namespace TableStorage.Abstractions.Store
                 }
                 return Disposable.Empty;
             });
-        }
-
+        }        
+#endif
         #endregion Synchronous Methods
 
         #region Asynchronous Methods
@@ -887,7 +915,7 @@ namespace TableStorage.Abstractions.Store
 
             return allItems;
         }
-
+     
         /// <summary>
         /// Gets all records in the table, paged
         /// </summary>
@@ -924,7 +952,7 @@ namespace TableStorage.Abstractions.Store
             } while (continuationToken != null);
 
             return recordCount;
-        }
+        }     
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -1015,7 +1043,6 @@ namespace TableStorage.Abstractions.Store
                                                                             TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
             return query;
         }
-
 
         /// <summary>
         /// Build the row key table query
