@@ -24,6 +24,8 @@ namespace TableStorage.Abstractions.Tests.Helpers
             };
 
             entityList.Combine(anotherEntityList);
+
+            await tableStorage.CreateTableAsync().ConfigureAwait(false);
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
