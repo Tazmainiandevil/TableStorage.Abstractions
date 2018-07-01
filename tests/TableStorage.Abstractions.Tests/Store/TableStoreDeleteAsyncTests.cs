@@ -24,7 +24,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task delete_async_an_entry_and_the_record_count_should_decrease()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var item = await _tableStorage.GetRecordAsync("Smith", "John");
 
             // Act

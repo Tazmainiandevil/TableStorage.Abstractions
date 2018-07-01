@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
@@ -40,10 +41,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_record_with_no_entry_returns_null()
+        public async Task get_record_with_no_entry_returns_null()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = _tableStorage.GetRecord("surname", "first");
@@ -53,10 +54,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_record_with_an_entry_returns_the_expected_entry()
+        public async Task get_record_with_an_entry_returns_the_expected_entry()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var expected = new TestTableEntity("Bill", "Jones") { Age = 45, Email = "bill.jones@somewhere.com" };
 
             // Act
@@ -95,10 +96,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_partition_key_with_unknown_key_returns_empty_list()
+        public async Task get_records_by_partition_key_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var partitionKey = "something";
 
             // Act
@@ -109,10 +110,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_partition_key_paged_with_unknown_key_returns_empty_list()
+        public async Task get_records_by_partition_key_paged_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var partitionKey = "something";
 
             // Act
@@ -189,10 +190,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
         [Theory]
         [MemberData(nameof(PartitionExpectedData))]
-        public void get_records_by_partition_key_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
+        public async Task get_records_by_partition_key_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetByPartitionKey(partitionKey);
@@ -203,10 +204,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
         [Theory]
         [MemberData(nameof(PartitionExpectedData))]
-        public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
+        public async Task get_records_by_partition_key_paged_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetByPartitionKeyPaged(partitionKey);
@@ -216,12 +217,12 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_partition_key_paged_after_deleted_row_has_expected_rows()
+        public async Task get_records_by_partition_key_paged_after_deleted_row_has_expected_rows()
         {
             var partitionKey = "Jones";
 
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             _tableStorage.Insert(new TestTableEntity("Zack", "Jones"));
 
             // Act
@@ -235,10 +236,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
         [Theory]
         [MemberData(nameof(PartitionExpectedDataPageOfOne))]
-        public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
+        public async Task get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1);
@@ -249,10 +250,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
         [Theory]
         [MemberData(nameof(PartitionExpectedDataPageOfOneNextPage))]
-        public void get_records_by_partition_key_paged_with_known_key_second_page_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
+        public async Task get_records_by_partition_key_paged_with_known_key_second_page_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetByPartitionKeyPaged(partitionKey, pageSize: 1);
@@ -265,10 +266,10 @@ namespace TableStorage.Abstractions.Tests.Store
         [Theory]
         [InlineData("Smith")]
         [InlineData("Jones")]
-        public void get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey)
+        public async Task get_records_by_partition_key_paged_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
 
@@ -321,10 +322,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_row_key_with_unknown_key_returns_empty_list()
+        public async Task get_records_by_row_key_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var rowKey = "something";
 
             // Act
@@ -335,10 +336,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_row_key_paged_with_unknown_key_returns_empty_list()
+        public async Task get_records_by_row_key_paged_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var rowKey = "something";
 
             // Act
@@ -494,10 +495,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_all_records_with_entries_returns_the_expected_count()
+        public async Task get_all_records_with_entries_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetAllRecords();
@@ -507,10 +508,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_all_records_with_entries_paged_returns_the_expected_count()
+        public async Task get_all_records_with_entries_paged_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetAllRecordsPaged();
@@ -520,10 +521,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_all_records_with_entries_paged_returns_the_expected_count_when_given_page_size()
+        public async Task get_all_records_with_entries_paged_returns_the_expected_count_when_given_page_size()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = _tableStorage.GetAllRecordsPaged(pageSize: 2);
@@ -533,10 +534,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_record_count_with_entries_returns_the_expected_count()
+        public async Task get_record_count_with_entries_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = _tableStorage.GetRecordCount();
@@ -546,10 +547,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_filter_with_a_given_filter_returns_the_expected_count()
+        public async Task get_records_by_filter_with_a_given_filter_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 21 && x.Age < 29);
@@ -559,7 +560,7 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void get_records_by_filter_with_a_given_filter_returns_the_expected_results()
+        public async Task get_records_by_filter_with_a_given_filter_returns_the_expected_results()
         {
             // Arrange
             var expected = new List<TestTableEntity>
@@ -568,7 +569,7 @@ namespace TableStorage.Abstractions.Tests.Store
                 new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
             };
 
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 21 && x.Age < 29);
@@ -600,10 +601,10 @@ namespace TableStorage.Abstractions.Tests.Store
 
         [Theory]
         [MemberData(nameof(FilterExpectedData))]
-        public void get_records_by_filter_with_a_given_filter_and_page_returns_the_expected_results(List<TestTableEntity> expected, int start, int page)
+        public async Task get_records_by_filter_with_a_given_filter_and_page_returns_the_expected_results(List<TestTableEntity> expected, int start, int page)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 21 && x.Age < 29, start, page);

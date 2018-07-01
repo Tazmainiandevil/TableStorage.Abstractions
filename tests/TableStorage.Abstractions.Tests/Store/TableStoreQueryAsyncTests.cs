@@ -42,7 +42,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_record_async_with_no_entry_returns_null()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await  TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = await _tableStorage.GetRecordAsync("surname", "first");
@@ -55,7 +55,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_record_async_with_an_entry_returns_the_expected_entry()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var expected = new TestTableEntity("Bill", "Jones") { Age = 45, Email = "bill.jones@somewhere.com" };
 
             // Act
@@ -97,7 +97,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_async_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var partitionKey = "something";
 
             // Act
@@ -111,7 +111,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_paged_async_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var partitionKey = "something";
 
             // Act
@@ -191,7 +191,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_async_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await  TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetByPartitionKeyAsync(partitionKey);
@@ -205,7 +205,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey);
@@ -219,7 +219,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, pageSize: 1);
@@ -233,7 +233,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_paged_async_with_known_key_second_page_returns_the_expected_results_and_expected_row_count(string partitionKey, List<TestTableEntity> expected)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1);
@@ -249,7 +249,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_partition_key_paged_async_with_known_key_returns_the_expected_results_with_final_page_annotated(string partitionKey)
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetByPartitionKeyPagedAsync(partitionKey, 1);
@@ -277,7 +277,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_row_key_async_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var rowKey = "something";
 
             // Act
@@ -291,7 +291,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_records_by_row_key_paged_async_with_unknown_key_returns_empty_list()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var rowKey = "something";
 
             // Act
@@ -439,7 +439,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_all_records_async_with_entries_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetAllRecordsAsync();
@@ -463,7 +463,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_all_records_with_entries_paged_async_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetAllRecordsPagedAsync();
@@ -476,7 +476,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_all_records_with_entries_paged_async_returns_the_expected_count_when_given_page_size()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var results = await _tableStorage.GetAllRecordsPagedAsync(pageSize: 2);
@@ -489,7 +489,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task get_record_count_async_with_entries_returns_the_expected_count()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await  TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var result = await _tableStorage.GetRecordCountAsync();

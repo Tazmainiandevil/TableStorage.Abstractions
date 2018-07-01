@@ -68,7 +68,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task insert_async_with_empty_list_of_records_does_not_insert_records_to_the_table()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             await _tableStorage.InsertAsync(new List<TestTableEntity>());

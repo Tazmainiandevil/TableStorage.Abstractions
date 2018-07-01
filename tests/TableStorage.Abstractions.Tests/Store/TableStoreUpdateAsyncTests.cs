@@ -23,7 +23,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task update_async_a_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var item = await _tableStorage.GetRecordAsync("Smith", "John");
@@ -53,7 +53,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public async Task update_using_wildcard_etag_the_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var item = await _tableStorage.GetRecordAsync("Smith", "John");

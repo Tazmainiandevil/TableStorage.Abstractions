@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using TableStorage.Abstractions.Store;
+using Useful.Extensions;
 
 namespace TableStorage.Abstractions.Tests.Helpers
 {
@@ -7,7 +9,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
     {
         #region Helpers
 
-        public static void SetupRecords(ITableStore<TestTableEntity> tableStorage)
+        public static async Task SetupRecords(ITableStore<TestTableEntity> tableStorage)
         {
             var entityList = new List<TestTableEntity>
             {
@@ -15,15 +17,14 @@ namespace TableStorage.Abstractions.Tests.Helpers
                 new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
             };
 
-            tableStorage.InsertAsync(entityList).Wait();
-
             var anotherEntityList = new List<TestTableEntity>
             {
                 new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
                 new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
             };
 
-            tableStorage.InsertAsync(anotherEntityList).Wait();
+            entityList.Combine(anotherEntityList);
+            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
         public static void SetupRowKeyRecords(ITableStore<TestTableEntity> tableStorage)

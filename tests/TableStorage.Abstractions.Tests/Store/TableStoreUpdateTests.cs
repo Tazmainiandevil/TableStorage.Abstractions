@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
@@ -20,10 +21,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void update_a_record_in_the_table_and_the_change_should_be_recorded()
+        public async Task update_a_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var item = _tableStorage.GetRecord("Smith", "John");
@@ -50,10 +51,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void update_using_wildcard_etag_the_record_in_the_table_and_the_change_should_be_recorded()
+        public async Task update_using_wildcard_etag_the_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             var item = _tableStorage.GetRecord("Smith", "John");

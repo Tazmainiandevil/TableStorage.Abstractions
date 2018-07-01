@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
@@ -21,10 +22,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void delete_an_entry_and_the_record_count_should_decrease()
+        public async Task delete_an_entry_and_the_record_count_should_decrease()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
             var item = _tableStorage.GetRecord("Smith", "John");
 
             // Act

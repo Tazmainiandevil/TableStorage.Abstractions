@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
@@ -66,10 +67,10 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
-        public void insert_with_empty_list_of_records_does_not_insert_records_to_the_table()
+        public async Task insert_with_empty_list_of_records_does_not_insert_records_to_the_table()
         {
             // Arrange
-            TestDataHelper.SetupRecords(_tableStorage);
+            await TestDataHelper.SetupRecords(_tableStorage);
 
             // Act
             _tableStorage.Insert(new List<TestTableEntity>());
