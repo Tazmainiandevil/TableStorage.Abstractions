@@ -69,9 +69,15 @@ namespace TableStorage.Abstractions.Store
             if (options.EnsureTableExists)
             {
 #if NETCOREAPP2_0 || NETCOREAPP2_1
-                CreateTableAsync().Wait();
+                if(TableExistsAsync().Result)
+                {
+                    CreateTableAsync().Wait();
+                }
 #else
-                CreateTable();
+                if (TableExists())
+                {
+                    CreateTable();
+                }
 #endif
             }
         }
@@ -112,7 +118,7 @@ namespace TableStorage.Abstractions.Store
         #endregion Construction
 
         #region Synchronous Methods
-            
+
 #if NETCOREAPP2_0 || NETCOREAPP2_1
         /// <summary>
         /// Get all the records in the table
@@ -602,7 +608,7 @@ namespace TableStorage.Abstractions.Store
                 }
                 return Disposable.Empty;
             });
-        }        
+        }
 #endif
         #endregion Synchronous Methods
 
@@ -915,7 +921,7 @@ namespace TableStorage.Abstractions.Store
 
             return allItems;
         }
-     
+
         /// <summary>
         /// Gets all records in the table, paged
         /// </summary>
@@ -952,7 +958,7 @@ namespace TableStorage.Abstractions.Store
             } while (continuationToken != null);
 
             return recordCount;
-        }     
+        }
 
         /// <summary>
         /// Get the records and filter by a given predicate
