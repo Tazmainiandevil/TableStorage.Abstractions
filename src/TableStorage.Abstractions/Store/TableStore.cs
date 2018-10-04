@@ -69,12 +69,12 @@ namespace TableStorage.Abstractions.Store
             if (options.EnsureTableExists)
             {
 #if NETCOREAPP2_0 || NETCOREAPP2_1
-                if(TableExistsAsync().Result)
+                if(!TableExistsAsync().Result)
                 {
                     CreateTableAsync().Wait();
                 }
 #else
-                if (TableExists())
+                if (!TableExists())
                 {
                     CreateTable();
                 }
