@@ -25,6 +25,10 @@ before_build:
   - cmd: dotnet --version
   # Display minimal restore text
   - cmd: dotnet restore --verbosity m
+  # Prepare localdb
+  - cmd: SqlLocalDB.exe create MSSQLLocalDB
+  - cmd: SqlLocalDB.exe start MSSQLLocalDB
+  - cmd: SqlLocalDB.exe info MSSQLLocalDB
   # Start the azure storage emulator
   - '"%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
 
