@@ -85,7 +85,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- 'Connection Limit' must be greater than or equal to '2'.");
+                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.");
         }
 
         [Theory]
@@ -101,7 +101,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- 'Retries' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- Retries: 'Retries' must be greater than '0'.");
         }
 
         [Theory]
@@ -117,7 +117,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
         }
 
         [Theory]
@@ -134,7 +134,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- 'Connection Limit' must be greater than or equal to '2'.\r\n -- 'Retries' must be greater than '0'.\r\n -- 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.\r\n -- Retries: 'Retries' must be greater than '0'.\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
         }
 
         [Fact]
