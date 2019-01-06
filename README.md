@@ -1,4 +1,5 @@
 # TableStorage.Abstractions
+
 Repository wrapper for Azure Table Storage in C# .NET 4.5.2, .NET 4.6, and .NET Standard 2.0.
 
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
@@ -39,6 +40,7 @@ public class TableStorageOptions
 ```
 
 Example entity:
+
 ```C#
 public class TestTableEntity : TableEntity
 {
@@ -53,10 +55,13 @@ public class TestTableEntity : TableEntity
         RowKey = name;
     }
 }
+
 ```
+
 Example usage:
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
 
 await tableStorage.InsertAsync(entity);
@@ -68,8 +73,9 @@ var result = tableStorage.GetByRowKey("John").ToList();
 Inserting multiple entries into table storage requires each entry to have the same partition key for a batch. This implementation in the wrapper does this job for you so that you can just pass a list of entities.
 
 Example Insert of multiple records
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var entries = new List<TestTableEntity>
 {
     new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
@@ -79,11 +85,12 @@ var entries = new List<TestTableEntity>
     new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"},
     new TestTableEntity("Bill", "King") {Age = 45, Email = "bill.king@email.com"},
     new TestTableEntity("Fred", "Bloggs") { Age = 32, Email = "fred.bloggs@email.com" }
-};      
+};
 
 await tableStorage.InsertAsync(entries);
 ```
-The library also includes a factory class to make it easier when using dependency injection
+The library also includes a factory class to make it easier when using dependency injection with multiple tables. This can create a table store with the default TableStorageOptions which is used when not specified, or override the options depending on your needs.
+
 ```C#
 public class TestTableStorageClient
 {
@@ -96,33 +103,60 @@ public class TestTableStorageClient
 }
 ```
 
+Override TableStorageOptions
+
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient(ITableStoreFactory factory)
+    {
+        var options = new TableStorageOptions
+        {
+            UseNagleAlgorithm = true,
+            ConnectionLimit = 100,
+            EnsureTableExists = false
+        };
+
+        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
+    }
+}
+```
+
 Table Storage does not really have generic way of filtering data as yet. So there are some methods to help with that.
 NOTE: The filtering works by getting all records so on large datasets this will be slow. 
 Testing showed ~1.3 seconds for 10,000 records
 Testing when paged by 100 ~0.0300 seconds for 10,000 records returning 100 records
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25);
 ```
+
 And with basic paging starting at 0 and returning 100
 NOTE: The start is number of records e.g. 20, 100 would start at record 20 and then return a maxiumum of 100 after that
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25, 0, 100);
 ```
 
 There is also the consideration of using Reactive Extensions (RX - http://reactivex.io/) to observe the results from a get all records call or a get filtered records.
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var theObserver = tableStorage.GetAllRecordsObservable();
 theObserver.Where(x => x.Age > 21 && x.Age < 25).Take(100).Subscribe(x =>
 {
    // Do something with the table entry
 });
 ```
-or 
+
+or
+
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
 var theObserver = tableStorage.GetRecordsByFilterObservable(x => x.Age > 21 && x.Age < 25, 0, 100);
 theObserver.Subscribe(x =>
 {
