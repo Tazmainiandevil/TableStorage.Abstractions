@@ -1,13 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net452;net46;net461;netcoreApp2.0;netcoreApp2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net452;net46;</TargetFrameworks>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <Version>1.0.0</Version>
     <PackageVersion>1.0.0</PackageVersion>
   </PropertyGroup>
-
+	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+		<DefineConstants>NETSTANDARD2_0</DefineConstants>
+	</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="FluentValidation" Version="7.6.103" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
