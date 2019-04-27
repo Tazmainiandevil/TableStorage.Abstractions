@@ -2,19 +2,17 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452;net46;</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <AssemblyVersion>1.0.0</AssemblyVersion>
     <FileVersion>1.0.0</FileVersion>
     <Version>1.0.0</Version>
     <PackageVersion>1.0.0</PackageVersion>
   </PropertyGroup>
-	<PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-		<DefineConstants>NETSTANDARD2_0</DefineConstants>
-	</PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="7.6.103" />
+    <PackageReference Include="FluentValidation" Version="8.1.2" />
     <PackageReference Include="System.Reactive" Version="3.1.1" />
-    <PackageReference Include="Useful.Extensions" Version="2.1.1" />
-    <PackageReference Include="WindowsAzure.Storage" Version="9.3.2" />
+    <PackageReference Include="Useful.Extensions" Version="2.3.0" />
+    <PackageReference Include="WindowsAzure.Storage" Version="9.3.3" />
   </ItemGroup>
 
 </Project>

@@ -5,24 +5,23 @@
     <version>$version$</version>
     <authors>$author$</authors>
     <owners>$owners$</owners>
-    <licenseUrl>https://raw.githubusercontent.com/Tazmainiandevil/TableStorage.Abstractions/master/LICENSE</licenseUrl>
+    <license type="file">LICENSE.txt</license>    
     <projectUrl>https://github.com/Tazmainiandevil/TableStorage.Abstractions</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
     <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
-      <dependency id="WindowsAzure.Storage" version="9.3.2" />      
-      <dependency id="Useful.Extensions" version="2.1.1" />
+      <dependency id="WindowsAzure.Storage" version="9.3.3" />      
+      <dependency id="Useful.Extensions" version="2.3.0" />
       <dependency id="System.Reactive" version="3.1.1" />
       <dependency id="System.Reactive.Linq" version="3.1.1" />
-      <dependency id="FluentValidation" version="7.6.103" />
+      <dependency id="FluentValidation" version="8.1.2" />
     </dependencies>
   </metadata>
   <files>  
-    <file src="src\TableStorage.Abstractions\bin\Release\netcoreapp2.1\TableStorage.Abstractions.dll" target="lib\netcoreapp2.1\TableStorage.Abstractions.dll" />
-    <file src="src\TableStorage.Abstractions\bin\Release\netcoreapp2.0\TableStorage.Abstractions.dll" target="lib\netcoreapp2.0\TableStorage.Abstractions.dll" />
-    <file src="src\TableStorage.Abstractions\bin\Release\net461\TableStorage.Abstractions.dll" target="lib\net461\TableStorage.Abstractions.dll" />
+    <file src="LICENSE.txt" target="" />
+    <file src="src\TableStorage.Abstractions\bin\Release\netstandard2.0\TableStorage.Abstractions.dll" target="lib\netstandard2.0\TableStorage.Abstractions.dll" />
     <file src="src\TableStorage.Abstractions\bin\Release\net46\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
     <file src="src\TableStorage.Abstractions\bin\Release\net452\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
   </files>
