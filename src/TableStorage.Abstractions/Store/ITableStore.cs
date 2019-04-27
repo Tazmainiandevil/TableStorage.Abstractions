@@ -37,6 +37,12 @@ namespace TableStorage.Abstractions.Store
         void Insert(IEnumerable<T> records);
 
         /// <summary>
+        /// Inserts or replaces the record
+        /// </summary>
+        /// <param name="record"></param>
+        void InsertOrReplace(T record);
+
+        /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
@@ -230,6 +236,12 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="records">The records to insert</param>
         Task InsertAsync(IEnumerable<T> records);
+        
+        /// <summary>
+        /// Inserts or replaces the record
+        /// </summary>
+        /// <param name="record"></param>
+        Task InsertOrReplaceAsync(T record);
 
         /// <summary>
         /// Update an record

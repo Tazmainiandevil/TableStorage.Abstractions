@@ -47,6 +47,37 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
+        public async Task insert_or_replace_async_record_into_the_table_when_record_does_not_exist_and_record_count_should_be_greater_than_zero()
+        {
+            // Arrange
+            var testEntity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
+
+            // Act
+            await _tableStorage.InsertOrReplaceAsync(testEntity);
+
+            var result = (await _tableStorage.GetByRowKeyAsync("John")).ToList();
+
+            // Assert
+            result.Count.Should().BeGreaterThan(0);
+        }
+
+        [Fact]
+        public async Task insert_or_replace_async_record_into_the_table_when_record_does_exist_and_record_should_have_updated_fields()
+        {
+            // Arrange
+            var testEntity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
+            await _tableStorage.InsertAsync(testEntity);
+            // Act
+            testEntity = new TestTableEntity("John", "Smith") { Age = 45, Email = "john.smith@something.com" };
+            await _tableStorage.InsertOrReplaceAsync(testEntity);
+
+            var result = (await _tableStorage.GetByRowKeyAsync("John")).ToList();
+
+            // Assert
+            result[0].Age.Should().Be(45);
+        }
+
+        [Fact]
         public async Task insert_async_multiple_records_into_the_table_and_record_count_should_be_greater_than_zero()
         {
             // Arrange
