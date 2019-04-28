@@ -218,6 +218,24 @@ namespace TableStorage.Abstractions.Store
                 }
             }
         }
+        /// <summary>
+        /// Inserts or replaces the record
+        /// </summary>
+        /// <param name="record"></param>
+        public void InsertOrReplace(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            var operation = TableOperation.InsertOrReplace(record);
+#if NETSTANDARD2_0
+            _cloudTable.ExecuteAsync(operation).GetAwaiter().GetResult();
+#else
+            _cloudTable.Execute(operation);
+#endif
+        }
 
         /// <summary>
         /// Update an record
@@ -716,6 +734,23 @@ namespace TableStorage.Abstractions.Store
         }
 
         /// <summary>
+        /// Inserts or replaces the record
+        /// </summary>
+        /// <param name="record"></param>
+        /// <returns></returns>
+        public async Task InsertOrReplaceAsync(T record)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException(nameof(record));
+            }
+
+            var operation = TableOperation.InsertOrReplace(record);
+
+            await _cloudTable.ExecuteAsync(operation).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
@@ -1154,6 +1189,7 @@ namespace TableStorage.Abstractions.Store
 #endif
             return items;
         }
+
 
         #endregion Helpers
     }
