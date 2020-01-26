@@ -1,7 +1,5 @@
 ﻿using FluentValidation;
-using Microsoft.WindowsAzure.Storage;
-using Microsoft.WindowsAzure.Storage.RetryPolicies;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -29,7 +27,7 @@ namespace TableStorage.Abstractions.Store
         private readonly CloudTable _cloudTable;
 
         /// <summary>
-        /// The max size for a single partion to be added to Table Storage
+        /// The max size for a single partition to be added to Table Storage
         /// </summary>
         private const int MaxPartitionSize = 100;
 
@@ -68,17 +66,10 @@ namespace TableStorage.Abstractions.Store
 
             if (options.EnsureTableExists)
             {
-#if NETSTANDARD2_0
-                if(!TableExistsAsync().Result)
-                {
-                    CreateTableAsync().GetAwaiter().GetResult();
-                }
-#else
                 if (!TableExists())
                 {
                     CreateTable();
                 }
-#endif
             }
         }
 
@@ -115,45 +106,16 @@ namespace TableStorage.Abstractions.Store
             return cloudTableClient;
         }
 
-		#endregion Construction
+        #endregion Construction
 
-		#region Synchronous Methods
-
-#if NETSTANDARD2_0
-		/// <summary>
-		/// Get all the records in the table
-		/// </summary>
-		/// <returns>All records</returns>
-		public IEnumerable<T> GetAllRecords()
-        {
-            var query = new TableQuery<T>();
-
-            var token = new TableContinuationToken();
-            var segment = _cloudTable.ExecuteQuerySegmentedAsync(query, token).GetAwaiter().GetResult();
-            while (token != null)
-            {
-                foreach (var result in segment)
-                {
-                    yield return result;
-                }
-                token = segment.ContinuationToken;
-                segment = _cloudTable.ExecuteQuerySegmentedAsync(query, token).Result;
-            }
-        }
-#endif
-
-
+        #region Synchronous Methods
 
         /// <summary>
         /// Create the table
         /// </summary>
         public void CreateTable()
         {
-#if NETSTANDARD2_0
-            _cloudTable.CreateIfNotExistsAsync().GetAwaiter().GetResult();
-#else
             _cloudTable.CreateIfNotExists();
-#endif
         }
 
         /// <summary>
@@ -162,11 +124,7 @@ namespace TableStorage.Abstractions.Store
         /// <returns></returns>
         public bool TableExists()
         {
-#if NETSTANDARD2_0
-            return _cloudTable.ExistsAsync().GetAwaiter().GetResult();
-#else
             return _cloudTable.Exists();
-#endif
         }
 
         /// <summary>
@@ -181,11 +139,7 @@ namespace TableStorage.Abstractions.Store
             }
 
             var operation = TableOperation.Insert(record);
-#if NETSTANDARD2_0
-            _cloudTable.ExecuteAsync(operation).GetAwaiter().GetResult();
-#else
             _cloudTable.Execute(operation);
-#endif
         }
 
         /// <summary>
@@ -210,14 +164,11 @@ namespace TableStorage.Abstractions.Store
 
                 if (operation.Any())
                 {
-#if NETSTANDARD2_0
-                    _cloudTable.ExecuteBatchAsync(operation).GetAwaiter().GetResult();
-#else
                     _cloudTable.ExecuteBatch(operation);
-#endif
                 }
             }
         }
+
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
@@ -230,11 +181,7 @@ namespace TableStorage.Abstractions.Store
             }
 
             var operation = TableOperation.InsertOrReplace(record);
-#if NETSTANDARD2_0
-            _cloudTable.ExecuteAsync(operation).GetAwaiter().GetResult();
-#else
             _cloudTable.Execute(operation);
-#endif
         }
 
         /// <summary>
@@ -249,11 +196,7 @@ namespace TableStorage.Abstractions.Store
             }
 
             var operation = TableOperation.Merge(record);
-#if NETSTANDARD2_0
-            _cloudTable.ExecuteAsync(operation).GetAwaiter().GetResult();
-#else
             _cloudTable.Execute(operation);
-#endif
         }
 
         /// <summary>
@@ -283,11 +226,7 @@ namespace TableStorage.Abstractions.Store
             }
 
             var operation = TableOperation.Delete(record);
-#if NETSTANDARD2_0
-            _cloudTable.ExecuteAsync(operation).GetAwaiter().GetResult();
-#else
             _cloudTable.Execute(operation);
-#endif
         }
 
         /// <summary>
@@ -310,11 +249,7 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         public void DeleteTable()
         {
-#if NETSTANDARD2_0
-            _cloudTable.DeleteIfExistsAsync().GetAwaiter().GetResult();
-#else
             _cloudTable.DeleteIfExists();
-#endif
         }
 
         /// <summary>
@@ -333,11 +268,7 @@ namespace TableStorage.Abstractions.Store
             var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
             // Execute the operation.
-#if NETSTANDARD2_0
-            var retrievedResult = _cloudTable.ExecuteAsync(retrieveOperation).GetAwaiter().GetResult();
-#else
             var retrievedResult = _cloudTable.Execute(retrieveOperation);
-#endif
             return retrievedResult.Result as T;
         }
 
@@ -489,12 +420,11 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(continuationToken, allItems);
         }
 
-#if !NETSTANDARD2_0
-		/// <summary>
-		/// Get all the records in the table
-		/// </summary>
-		/// <returns>All records</returns>
-		public IEnumerable<T> GetAllRecords()
+        /// <summary>
+        /// Get all the records in the table
+        /// </summary>
+        /// <returns>All records</returns>
+        public IEnumerable<T> GetAllRecords()
         {
             var query = new TableQuery<T>();
 
@@ -511,8 +441,6 @@ namespace TableStorage.Abstractions.Store
             }
         }
 
-#endif
-
         /// <summary>
         /// Gets all records in the table, paged
         /// </summary>
@@ -526,11 +454,7 @@ namespace TableStorage.Abstractions.Store
 
             var allItems = new List<T>();
             var continuationToken = DeserializeContinuationToken(pageToken);
-#if NETSTANDARD2_0
-                var items = _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).GetAwaiter().GetResult();
-#else
             var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
-#endif
             continuationToken = items.ContinuationToken;
             allItems.AddRange(items);
             return CreatePagedResult(continuationToken, allItems);
@@ -549,11 +473,7 @@ namespace TableStorage.Abstractions.Store
             var recordCount = 0;
             do
             {
-#if NETSTANDARD2_0
-                var items = _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).GetAwaiter().GetResult();
-#else
                 var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
-#endif
                 continuationToken = items.ContinuationToken;
 
                 recordCount += items.Count();
@@ -1182,14 +1102,9 @@ namespace TableStorage.Abstractions.Store
 
         private TableQuerySegment<T> ExecuteQuerySegment(TableQuery<T> query, TableContinuationToken continuationToken)
         {
-#if NETSTANDARD2_0
-            var items = _cloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).GetAwaiter().GetResult();
-#else
             var items = _cloudTable.ExecuteQuerySegmented(query, continuationToken);
-#endif
             return items;
         }
-
 
         #endregion Helpers
     }

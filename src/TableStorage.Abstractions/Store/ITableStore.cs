@@ -12,7 +12,7 @@ namespace TableStorage.Abstractions.Store
     public interface ITableStore<T>
     {
         #region Synchronous Methods
-#if !NETCOREAPP2_0 && !NETCOREAPP2_1
+
         /// <summary>
         /// Create the table
         /// </summary>
@@ -163,7 +163,6 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filtered</returns>
         IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago);
 
-
         /// <summary>
         /// Get the records and filter by a given predicate
         /// </summary>
@@ -207,8 +206,6 @@ namespace TableStorage.Abstractions.Store
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The observable for the results</returns>
         IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago);
-        
-#endif
 
         #endregion Synchronous Methods
 
@@ -236,7 +233,7 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="records">The records to insert</param>
         Task InsertAsync(IEnumerable<T> records);
-        
+
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
