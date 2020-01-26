@@ -61,7 +61,7 @@ public class TestTableEntity : TableEntity
 Example usage:
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
 
 await tableStorage.InsertAsync(entity);
@@ -75,7 +75,7 @@ Inserting multiple entries into table storage requires each entry to have the sa
 Example Insert of multiple records
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var entries = new List<TestTableEntity>
 {
     new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
@@ -125,13 +125,32 @@ public class TestTableStorageClient
 }
 ```
 
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient()
+    {
+        var options = new TableStorageOptions
+        {
+            UseNagleAlgorithm = true,
+            ConnectionLimit = 100,
+            EnsureTableExists = false
+        };
+
+        _store = new TableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
+    }
+}
+```
+
 Table Storage does not really have generic way of filtering data as yet. So there are some methods to help with that.
 NOTE: The filtering works by getting all records so on large datasets this will be slow.
 Testing showed ~1.3 seconds for 10,000 records
 Testing when paged by 100 ~0.0300 seconds for 10,000 records returning 100 records
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25);
 ```
 
@@ -139,14 +158,14 @@ And with basic paging starting at 0 and returning 100
 NOTE: The start is number of records e.g. 20, 100 would start at record 20 and then return a maxiumum of 100 after that
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var results = tableStorage.GetRecordsByFilter(x => x.Age > 21 && x.Age < 25, 0, 100);
 ```
 
 There is also the consideration of using Reactive Extensions (RX - <http://reactivex.io/>) to observe the results from a get all records call or a get filtered records.
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var theObserver = tableStorage.GetAllRecordsObservable();
 theObserver.Where(x => x.Age > 21 && x.Age < 25).Take(100).Subscribe(x =>
 {
@@ -157,7 +176,7 @@ theObserver.Where(x => x.Age > 21 && x.Age < 25).Take(100).Subscribe(x =>
 or
 
 ```C#
-var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true", new TableStorageOptions());
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 var theObserver = tableStorage.GetRecordsByFilterObservable(x => x.Age > 21 && x.Age < 25, 0, 100);
 theObserver.Subscribe(x =>
 {
