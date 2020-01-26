@@ -1,7 +1,6 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Threading.Tasks;
-using FluentAssertions;
-using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;

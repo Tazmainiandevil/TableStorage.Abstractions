@@ -320,7 +320,7 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Get the records by row key
         /// </summary>
-        /// <param name="rowKey">The row keyint.</param>
+        /// <param name="rowKey">The row key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationTokenJson">The next page token.</param>
         Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100,
@@ -352,7 +352,7 @@ namespace TableStorage.Abstractions.Store
         /// <param name="filter">The filter to apply</param>
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
-        /// <returns>The records filterted</returns>
+        /// <returns>The records filtered</returns>
         Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace TableStorage.Abstractions.Store
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records filterted</returns>
+        /// <returns>The records filtered</returns>
         Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago);
 
         #endregion Asynchronous Methods

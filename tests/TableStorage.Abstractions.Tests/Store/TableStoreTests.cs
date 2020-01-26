@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using System;
-using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
