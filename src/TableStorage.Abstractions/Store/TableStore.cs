@@ -38,6 +38,15 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="tableName">The table name</param>
         /// <param name="storageConnectionString">The connection string</param>
+        public TableStore(string tableName, string storageConnectionString) : this(tableName, storageConnectionString, new TableStorageOptions())
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="tableName">The table name</param>
+        /// <param name="storageConnectionString">The connection string</param>
         /// <param name="options">Table storage options</param>
         public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
         {
