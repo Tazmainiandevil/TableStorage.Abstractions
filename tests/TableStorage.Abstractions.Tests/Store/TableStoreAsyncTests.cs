@@ -12,16 +12,18 @@ namespace TableStorage.Abstractions.Tests.Store
         private const string TableName = "TestTableAsync";
         private const string ConnectionString = "UseDevelopmentStorage=true";
         private readonly ITableStore<TestTableEntity> _tableStorage;
+        private readonly ITableStoreDynamic _tableStorageDynamic;
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
         public TableStoreAsyncTests()
         {
             _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString, _tableStorageOptions);
+            _tableStorageDynamic = new TableStoreDynamic(TableName, ConnectionString);
         }
 
         public void Dispose()
         {
-            _tableStorage.DeleteTableAsync().Wait();
+            _tableStorage.DeleteTable();
         }
 
         [Fact]

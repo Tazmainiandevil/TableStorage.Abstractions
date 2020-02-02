@@ -14,5 +14,15 @@ namespace TableStorage.Abstractions.Factory
         {
             return new TableStore<T>(tableName, storageConnectionString, options);
         }
+
+        public ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString)
+        {
+            return new TableStoreDynamic(tableName, storageConnectionString);
+        }
+
+        public ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString, TableStorageOptions options)
+        {
+            return new TableStoreDynamic(tableName, storageConnectionString, options);
+        }
     }
 }

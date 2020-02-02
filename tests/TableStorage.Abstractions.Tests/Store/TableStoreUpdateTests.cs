@@ -20,6 +20,17 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
+        public void update_dynamic_with_null_record_throws_exception()
+        {
+            // Arrange
+            // Act
+            Action act = () => _tableStorageDynamic.Update(null as TestTableEntity);
+
+            // Assert
+            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+        }
+
+        [Fact]
         public async Task update_a_record_in_the_table_and_the_change_should_be_recorded()
         {
             // Arrange
@@ -33,6 +44,25 @@ namespace TableStorage.Abstractions.Tests.Store
             _tableStorage.Update(item);
 
             var item2 = _tableStorage.GetRecord("Smith", "John");
+
+            // Assert
+            item2.Age.Should().Be(22);
+        }
+
+        [Fact]
+        public async Task update_a_dynamic_record_in_the_table_and_the_change_should_be_recorded()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+
+            // Act
+            var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
+
+            item.Age = 22;
+
+            _tableStorageDynamic.Update(item);
+
+            var item2 = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
 
             // Assert
             item2.Age.Should().Be(22);
