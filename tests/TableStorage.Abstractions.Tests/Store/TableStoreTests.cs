@@ -1,7 +1,6 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using System;
-using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
@@ -13,22 +12,19 @@ namespace TableStorage.Abstractions.Tests.Store
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
         private readonly ITableStore<TestTableEntity> _tableStorage;
+        private readonly ITableStoreDynamic _tableStorageDynamic;
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
         public TableStoreTests()
         {
             _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString, _tableStorageOptions);
+            _tableStorageDynamic = new TableStoreDynamic(TableName, ConnectionString);
         }
 
         public void Dispose()
         {
-#if !NETCOREAPP2_0 && !NETCOREAPP2_1
             _tableStorage.DeleteTable();
-#endif
         }
-
-#if !NETCOREAPP2_0 && !NETCOREAPP2_1
-
 
         [Theory]
         [InlineData("")]
@@ -162,7 +158,5 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().BeFalse();
         }
-
-        #endif
     }
 }

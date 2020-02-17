@@ -12,17 +12,16 @@
     <tags>tazmainiandevil tableStorage.abstractions tablestorage abstractions azure table storage</tags>
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
-      <dependency id="WindowsAzure.Storage" version="9.3.3" />      
-      <dependency id="Useful.Extensions" version="2.3.0" />
-      <dependency id="System.Reactive" version="3.1.1" />
-      <dependency id="System.Reactive.Linq" version="3.1.1" />
-      <dependency id="FluentValidation" version="8.1.2" />
+     <group targetFramework="netstandard2.0">
+      <dependency id="Microsoft.Azure.Cosmos.Table" version="1.0.6" />      
+      <dependency id="Useful.Extensions" version="3.0.1" />
+      <dependency id="System.Reactive" version="4.3.2" />      
+      <dependency id="FluentValidation" version="8.6.1" />
+     </group> 
     </dependencies>
   </metadata>
   <files>  
     <file src="LICENSE.txt" target="" />
     <file src="src\TableStorage.Abstractions\bin\Release\netstandard2.0\TableStorage.Abstractions.dll" target="lib\netstandard2.0\TableStorage.Abstractions.dll" />
-    <file src="src\TableStorage.Abstractions\bin\Release\net46\TableStorage.Abstractions.dll" target="lib\net46\TableStorage.Abstractions.dll" />
-    <file src="src\TableStorage.Abstractions\bin\Release\net452\TableStorage.Abstractions.dll" target="lib\net452\TableStorage.Abstractions.dll" />
   </files>
 </package>

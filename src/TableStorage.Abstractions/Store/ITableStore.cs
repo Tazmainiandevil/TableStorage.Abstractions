@@ -9,26 +9,19 @@ namespace TableStorage.Abstractions.Store
     /// Table store interface
     /// </summary>
     /// <typeparam name="T">The type of storage entity</typeparam>
-    public interface ITableStore<T>
+    public interface ITableStore<T> : ITableStoreCommon
     {
-        #region Synchronous Methods
-#if !NETCOREAPP2_0 && !NETCOREAPP2_1
-        /// <summary>
-        /// Create the table
-        /// </summary>
-        void CreateTable();
-
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        bool TableExists();
-
         /// <summary>
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
         void Insert(T record);
+
+        /// <summary>
+        /// Insert an record
+        /// </summary>
+        /// <param name="record">The record to insert</param>
+        Task InsertAsync(T record);
 
         /// <summary>
         /// Insert multiple records
@@ -37,10 +30,22 @@ namespace TableStorage.Abstractions.Store
         void Insert(IEnumerable<T> records);
 
         /// <summary>
+        /// Insert multiple records
+        /// </summary>
+        /// <param name="records">The records to insert</param>
+        Task InsertAsync(IEnumerable<T> records);
+
+        /// <summary>
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
         void InsertOrReplace(T record);
+
+        /// <summary>
+        /// Inserts or replaces the record
+        /// </summary>
+        /// <param name="record"></param>
+        Task InsertOrReplaceAsync(T record);
 
         /// <summary>
         /// Update an record
@@ -49,10 +54,22 @@ namespace TableStorage.Abstractions.Store
         void Update(T record);
 
         /// <summary>
+        /// Update an record
+        /// </summary>
+        /// <param name="record">The record to update</param>
+        Task UpdateAsync(T record);
+
+        /// <summary>
         /// Update a record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to update</param>
         void UpdateUsingWildcardEtag(T record);
+
+        /// <summary>
+        /// Update an record using the wildcard etag
+        /// </summary>
+        /// <param name="record">The record to update</param>
+        Task UpdateUsingWildcardEtagAsync(T record);
 
         /// <summary>
         /// Delete a record
@@ -61,15 +78,22 @@ namespace TableStorage.Abstractions.Store
         void Delete(T record);
 
         /// <summary>
+        /// Delete a record
+        /// </summary>
+        /// <param name="record">The record to delete</param>
+        Task DeleteAsync(T record);
+
+        /// <summary>
         /// Delete a record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to delete</param>
         void DeleteUsingWildcardEtag(T record);
 
         /// <summary>
-        /// Delete the table
+        /// Delete a record using the wildcard etag
         /// </summary>
-        void DeleteTable();
+        /// <param name="record">The record to delete</param>
+        Task DeleteUsingWildcardEtagAsync(T record);
 
         /// <summary>
         /// Get an record by partition and row key
@@ -78,6 +102,14 @@ namespace TableStorage.Abstractions.Store
         /// <param name="rowKey"></param>
         /// <returns>The record found or null if not found</returns>
         T GetRecord(string partitionKey, string rowKey);
+
+        /// <summary>
+        /// Get an record by partition and row key
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        /// <param name="rowKey"></param>
+        /// <returns>The record found or null if not found</returns>
+        Task<T> GetRecordAsync(string partitionKey, string rowKey);
 
         /// <summary>
         /// Get the records by partition key
@@ -95,6 +127,21 @@ namespace TableStorage.Abstractions.Store
         IEnumerable<T> GetByPartitionKey(string partitionKey, string ago);
 
         /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago);
+
+        /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
+
+        /// <summary>
         ///  Get the records by partition key, paged
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
@@ -102,6 +149,16 @@ namespace TableStorage.Abstractions.Store
         /// <param name="continuationTokenJson">The next page token.</param>
         /// <returns>The Paged Result</returns>
         PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100,
+            string continuationTokenJson = null);
+
+        /// <summary>
+        ///  Get the records by partition key, paged
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        /// <returns>The Paged Result</returns>
+        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100,
             string continuationTokenJson = null);
 
         /// <summary>
@@ -115,9 +172,24 @@ namespace TableStorage.Abstractions.Store
         /// Get the records by row key
         /// </summary>
         /// <param name="rowKey">The row key</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The records found</returns>
         IEnumerable<T> GetByRowKey(string rowKey, string ago);
+
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records found</returns>
+        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago);
 
         /// <summary>
         /// Get the records by row key
@@ -129,10 +201,25 @@ namespace TableStorage.Abstractions.Store
             string continuationTokenJson = null);
 
         /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100,
+            string continuationTokenJson = null);
+
+        /// <summary>
         /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
         IEnumerable<T> GetAllRecords();
+
+        /// <summary>
+        /// Get all the records in the table
+        /// </summary>
+        /// <returns>All records</returns>
+        Task<IEnumerable<T>> GetAllRecordsAsync();
 
         /// <summary>
         /// Gets all records paged.
@@ -143,10 +230,12 @@ namespace TableStorage.Abstractions.Store
         PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
 
         /// <summary>
-        /// Get the number of the records in the table
+        /// Gets all records in the table, paged
         /// </summary>
-        /// <returns>The record count</returns>
-        int GetRecordCount();
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageToken">The page token</param>
+        /// <returns>The Paged Result</returns>
+        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -163,7 +252,6 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filtered</returns>
         IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago);
 
-
         /// <summary>
         /// Get the records and filter by a given predicate
         /// </summary>
@@ -179,9 +267,28 @@ namespace TableStorage.Abstractions.Store
         /// <param name="filter">The filter to apply</param>
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
+        /// <returns>The records filtered</returns>
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The records filtered</returns>
         IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize, string ago);
+
+        /// <summary>
+        /// Get the records and filter by a given predicate and time in the past
+        /// </summary>
+        /// <param name="filter">The filter to apply</param>
+        /// <param name="start">The start record</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <returns>The records filtered</returns>
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago);
 
         /// <summary>
         /// Get the records via observable
@@ -207,167 +314,5 @@ namespace TableStorage.Abstractions.Store
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The observable for the results</returns>
         IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago);
-        
-#endif
-
-        #endregion Synchronous Methods
-
-        #region Asynchronous Methods
-
-        /// <summary>
-        /// Create the table
-        /// </summary>
-        Task CreateTableAsync();
-
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> TableExistsAsync();
-
-        /// <summary>
-        /// Insert an record
-        /// </summary>
-        /// <param name="record">The record to insert</param>
-        Task InsertAsync(T record);
-
-        /// <summary>
-        /// Insert multiple records
-        /// </summary>
-        /// <param name="records">The records to insert</param>
-        Task InsertAsync(IEnumerable<T> records);
-        
-        /// <summary>
-        /// Inserts or replaces the record
-        /// </summary>
-        /// <param name="record"></param>
-        Task InsertOrReplaceAsync(T record);
-
-        /// <summary>
-        /// Update an record
-        /// </summary>
-        /// <param name="record">The record to update</param>
-        Task UpdateAsync(T record);
-
-        /// <summary>
-        /// Update an record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to update</param>
-        Task UpdateUsingWildcardEtagAsync(T record);
-
-        /// <summary>
-        /// Delete a record
-        /// </summary>
-        /// <param name="record">The record to delete</param>
-        Task DeleteAsync(T record);
-
-        /// <summary>
-        /// Delete a record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to delete</param>
-        Task DeleteUsingWildcardEtagAsync(T record);
-
-        /// <summary>
-        /// Delete the table
-        /// </summary>
-        Task DeleteTableAsync();
-
-        /// <summary>
-        /// Get an record by partition and row key
-        /// </summary>
-        /// <param name="partitionKey"></param>
-        /// <param name="rowKey"></param>
-        /// <returns>The record found or null if not found</returns>
-        Task<T> GetRecordAsync(string partitionKey, string rowKey);
-
-        /// <summary>
-        /// Get the records by partition key
-        /// </summary>
-        /// <param name="partitionKey">The partition key</param>
-        /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
-
-        /// <summary>
-        /// Get the records by partition key
-        /// </summary>
-        /// <param name="partitionKey">The partition key</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago);
-
-        /// <summary>
-        ///  Get the records by partition key, paged
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>The Paged Result</returns>
-        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100,
-            string continuationTokenJson = null);
-
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
-
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago);
-
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row keyint.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100,
-        string continuationTokenJson = null);
-
-        /// <summary>
-        /// Get all the records in the table
-        /// </summary>
-        /// <returns>All records</returns>
-        Task<IEnumerable<T>> GetAllRecordsAsync();
-
-        /// <summary>
-        /// Gets all records in the table, paged
-        /// </summary>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="pageToken">The page token</param>
-        /// <returns>The Paged Result</returns>
-        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
-
-        /// <summary>
-        /// Get the number of the records in the table
-        /// </summary>
-        /// <returns>The record count</returns>
-        Task<int> GetRecordCountAsync();
-
-        /// <summary>
-        /// Get the records and filter by a given predicate
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <returns>The records filterted</returns>
-        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
-
-        /// <summary>
-        /// Get the records and filter by a given predicate and time in the past
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records filterted</returns>
-        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago);
-
-        #endregion Asynchronous Methods
     }
 }

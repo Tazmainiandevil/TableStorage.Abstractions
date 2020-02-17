@@ -1,4 +1,4 @@
-﻿namespace TableStorage.Abstractions.Models
+﻿namespace TableStorage.Abstractions.Store
 {
     public class TableStorageOptions
     {

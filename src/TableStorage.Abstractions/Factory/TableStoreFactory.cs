@@ -1,5 +1,4 @@
-﻿using Microsoft.WindowsAzure.Storage.Table;
-using TableStorage.Abstractions.Models;
+﻿using Microsoft.Azure.Cosmos.Table;
 using TableStorage.Abstractions.Store;
 
 namespace TableStorage.Abstractions.Factory
@@ -14,6 +13,16 @@ namespace TableStorage.Abstractions.Factory
         public ITableStore<T> CreateTableStore<T>(string tableName, string storageConnectionString, TableStorageOptions options) where T : class, ITableEntity, new()
         {
             return new TableStore<T>(tableName, storageConnectionString, options);
+        }
+
+        public ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString)
+        {
+            return new TableStoreDynamic(tableName, storageConnectionString);
+        }
+
+        public ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString, TableStorageOptions options)
+        {
+            return new TableStoreDynamic(tableName, storageConnectionString, options);
         }
     }
 }

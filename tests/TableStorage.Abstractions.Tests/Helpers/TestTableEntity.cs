@@ -1,4 +1,4 @@
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace TableStorage.Abstractions.Tests.Helpers
 {
@@ -7,7 +7,9 @@ namespace TableStorage.Abstractions.Tests.Helpers
         public int Age { get; set; }
         public string Email { get; set; }
 
-        public TestTableEntity() {}
+        public TestTableEntity()
+        {
+        }
 
         public TestTableEntity(string name, string surname)
         {

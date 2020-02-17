@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using TableStorage.Abstractions.Models;
+using TableStorage.Abstractions.Store;
 
 namespace TableStorage.Abstractions.Validators
 {
