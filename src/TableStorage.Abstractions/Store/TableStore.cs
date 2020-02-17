@@ -754,11 +754,12 @@ namespace TableStorage.Abstractions.Store
             var query = new TableQuery<T> { TakeCount = pageSize };
 
             var allItems = new List<T>();
-
-            var items = await CloudTable.ExecuteQuerySegmentedAsync(query, null).ConfigureAwait(false);
-            var continuationToken = items.ContinuationToken;
+            var continuationToken = DeserializeContinuationToken(pageToken);
+            var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            continuationToken = items.ContinuationToken;
             allItems.AddRange(items);
             return CreatePagedResult(continuationToken, allItems);
+
         }
 
         /// <summary>
