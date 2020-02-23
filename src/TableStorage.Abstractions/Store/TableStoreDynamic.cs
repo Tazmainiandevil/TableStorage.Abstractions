@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.Azure.Cosmos.Table;
+﻿using Microsoft.Azure.Cosmos.Table;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -267,6 +267,11 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <returns>The records found</returns>
         public IEnumerable<T> GetByPartitionKey<T>(string partitionKey) where T : class, ITableEntity, new()
         {
             EnsurePartitionKey(partitionKey);
@@ -286,6 +291,11 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <returns>The records found</returns>
         public async Task<IEnumerable<T>> GetByPartitionKeyAsync<T>(string partitionKey) where T : class, ITableEntity, new()
         {
             EnsurePartitionKey(partitionKey);
@@ -305,6 +315,11 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <returns>The records found</returns>
         public IEnumerable<T> GetByRowKey<T>(string rowKey) where T : class, ITableEntity, new()
         {
             EnsureRowKey(rowKey);
@@ -324,6 +339,11 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <returns>The records found</returns>
         public async Task<IEnumerable<T>> GetByRowKeyAsync<T>(string rowKey) where T : class, ITableEntity, new()
         {
             EnsureRowKey(rowKey);
@@ -343,6 +363,12 @@ namespace TableStorage.Abstractions.Store
             return allItems;
         }
 
+        #region Helpers
+
+        /// <summary>
+        /// Create the entity resolver for type T
+        /// </summary>
+        /// <returns>The entity resolver</returns>
         private static EntityResolver<T> CreateEntityResolver<T>() where T : class, ITableEntity, new()
         {
             return (pk, rk, ts, props, etag) =>
@@ -384,5 +410,7 @@ namespace TableStorage.Abstractions.Store
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
             return query;
         }
+
+        #endregion Helpers
     }
 }
