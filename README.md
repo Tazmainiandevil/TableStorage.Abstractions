@@ -5,6 +5,8 @@ Repository wrapper for Azure Table Storage in C# using the Microsoft.Azure.Cosmo
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
 <a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
 
+## Introduction
+
 Working with Azure Table Storage has been interesting and very different from working with SQL Server which I have done for many years. After reading a number of articles about it and using it I realised a generic wrapper would be useful to aid unit testing and so this is the result of that realisation.
 
 I referenced a number of articles on Table Storage most of which are quite old now but still valid. Suggestions from these articles have been included in this library.
@@ -18,6 +20,8 @@ I referenced a number of articles on Table Storage most of which are quite old n
 <https://docs.particular.net/nservicebus/azure-storage-persistence/performance-tuning>
 
 <http://robertgreiner.com/2012/06/why-is-azure-table-storage-so-slow/>
+
+## Usage
 
 Optimisations are controlled by the Table Storage Options Class.
 The defaults are applied as below if not overridden:
@@ -183,6 +187,24 @@ theObserver.Subscribe(x =>
    // Do something with the table entry
 });
 ```
+
+### Heterogeneous Tables
+
+As Table storage is a schema-less store there are times when you are dealing with multiple entity types in a single table.
+<https://docs.microsoft.com/en-us/azure/cosmos-db/table-storage-design-guide#work-with-heterogeneous-entity-types>
+
+This library has some additional support for those times.
+
+When creating a TableStore if no generic type is supplied then it creates a dynamic store. This allows the basic methods, Insert, Update, GetRecord, etc. to specify the generic type on the method call. Getting all records now returns a list of DynamicTableEntity but you can still get by partition key using a generic type.
+
+```C#
+var tableStorage = new TableStore("MyTable", "UseDevelopmentStorage=true");
+var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
+
+await tableStorage.InsertAsync(entity);
+```
+
+__NOTE__: Currently only the basic methods are supported for this type of table, there are no filter/search methods.
 
 ## Useful Reading
 
