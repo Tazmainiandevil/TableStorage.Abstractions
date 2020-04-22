@@ -543,9 +543,9 @@ namespace TableStorage.Abstractions.Store
         }
 
         /// <summary>
-        /// Update an entry
+        /// Delete an entry
         /// </summary>
-        /// <param name="record">The record to update</param>
+        /// <param name="record">The record to delete</param>
         public async Task DeleteAsync(T record)
         {
             EnsureRecord(record);
@@ -566,6 +566,53 @@ namespace TableStorage.Abstractions.Store
             record.ETag = "*";
 
             await DeleteAsync(record).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Delete records by partition key
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        public async Task DeleteByPartitionAsync(string partitionKey)
+        {
+            var deleteQuery = BuildGetByPartitionQuery(partitionKey);
+
+            TableContinuationToken continuationToken = null;
+            do
+            {
+                var tableQueryResult = CloudTable.ExecuteQuerySegmentedAsync(deleteQuery, continuationToken);
+
+                continuationToken = tableQueryResult.Result.ContinuationToken;
+
+                // Split result into chunks of 100s
+                List<List<T>> rowsChunked = tableQueryResult.Result.Select((x, index) => new { Index = index, Value = x })
+                    .Where(x => x.Value != null)
+                    .GroupBy(x => x.Index / 100)
+                    .Select(x => x.Select(v => v.Value).ToList())
+                    .ToList();
+
+                // Delete each chunk in a batch
+                foreach (List<T> rows in rowsChunked)
+                {
+                    TableBatchOperation tableBatchOperation = new TableBatchOperation();
+                    rows.ForEach(x => tableBatchOperation.Add(TableOperation.Delete(x)));
+
+                    await CloudTable.ExecuteBatchAsync(tableBatchOperation);
+                }
+            }
+            while (continuationToken != null);
+        }
+
+        /// <summary>
+        /// Delete all records in the table
+        /// </summary>
+        public async Task DeleteAllAsync()
+        {
+            var records = await GetAllRecordsAsync().ConfigureAwait(false);
+            var partitionKeys = records.Select(x => x.PartitionKey).Distinct().ToList();
+            foreach (var key in partitionKeys)
+            {
+                await DeleteByPartitionAsync(key);
+            }
         }
 
         /// <summary>

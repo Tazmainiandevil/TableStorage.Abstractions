@@ -48,7 +48,7 @@ namespace TableStorage.Abstractions.Tests.Store
             result.Count().Should().Be(1);
         }
 
-        
+
         [Fact]
         public async Task delete_a_dynamic_entry_and_the_record_count_should_decrease()
         {
@@ -75,6 +75,36 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+        }
+
+        [Fact]
+        public async Task delete_all_records_and_the_record_count_should_be_zero()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+
+            // Act
+            await _tableStorage.DeleteAllAsync();
+            var result = await _tableStorage.GetAllRecordsAsync();
+
+            // Assert
+            result.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task delete_records_by_partitionkey_and_record_count_by_partition_should_be_zero()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+
+            // Act
+            await _tableStorage.DeleteByPartitionAsync("Smith");
+            var resultEmpty = await _tableStorage.GetByPartitionKeyAsync("Smith");
+            var resultNotEmpty = await _tableStorage.GetByPartitionKeyAsync("Jones");
+
+            // Assert
+            resultEmpty.Count().Should().Be(0);
+            resultNotEmpty.Count().Should().NotBe(0);
         }
     }
 }

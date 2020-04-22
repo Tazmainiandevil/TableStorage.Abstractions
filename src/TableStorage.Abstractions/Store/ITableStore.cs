@@ -96,6 +96,19 @@ namespace TableStorage.Abstractions.Store
         Task DeleteUsingWildcardEtagAsync(T record);
 
         /// <summary>
+        /// Delete records by partition key
+        /// </summary>
+        /// <param name="partitionKey"></param>
+        /// <returns></returns>
+        Task DeleteByPartitionAsync(string partitionKey);
+
+        /// <summary>
+        /// Delete all records in the table
+        /// </summary>
+        /// <returns></returns>
+        Task DeleteAllAsync();
+
+        /// <summary>
         /// Get an record by partition and row key
         /// </summary>
         /// <param name="partitionKey"></param>
