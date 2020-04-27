@@ -580,22 +580,19 @@ namespace TableStorage.Abstractions.Store
             do
             {
                 var tableQueryResult = CloudTable.ExecuteQuerySegmentedAsync(deleteQuery, continuationToken);
-
                 continuationToken = tableQueryResult.Result.ContinuationToken;
 
                 // Split result into chunks of 100s
-                List<List<T>> rowsChunked = tableQueryResult.Result.Select((x, index) => new { Index = index, Value = x })
-                    .Where(x => x.Value != null)
-                    .GroupBy(x => x.Index / 100)
-                    .Select(x => x.Select(v => v.Value).ToList())
-                    .ToList();
+                var rowsChunked = tableQueryResult.Result.ToList().Partition(100);
 
                 // Delete each chunk in a batch
-                foreach (List<T> rows in rowsChunked)
+                foreach (var rows in rowsChunked)
                 {
                     TableBatchOperation tableBatchOperation = new TableBatchOperation();
-                    rows.ForEach(x => tableBatchOperation.Add(TableOperation.Delete(x)));
-
+                    foreach (var row in rows)
+                    {
+                        tableBatchOperation.Add(TableOperation.Delete(row));
+                    }
                     await CloudTable.ExecuteBatchAsync(tableBatchOperation);
                 }
             }
