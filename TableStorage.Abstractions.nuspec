@@ -13,7 +13,7 @@
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
      <group targetFramework="netstandard2.0">
-      <dependency id="Microsoft.Azure.Cosmos.Table" version="1.0.6" />      
+      <dependency id="Microsoft.Azure.Cosmos.Table" version="1.0.7" />      
       <dependency id="Useful.Extensions" version="3.0.1" />
       <dependency id="System.Reactive" version="4.3.2" />      
       <dependency id="FluentValidation" version="8.6.1" />
