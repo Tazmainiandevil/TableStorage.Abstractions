@@ -21,7 +21,7 @@ I referenced a number of articles on Table Storage most of which are quite old n
 
 <http://robertgreiner.com/2012/06/why-is-azure-table-storage-so-slow/>
 
-## Usage
+## Configuration
 
 Optimisations are controlled by the Table Storage Options Class.
 The defaults are applied as below if not overridden:
@@ -62,7 +62,65 @@ public class TestTableEntity : TableEntity
 
 ```
 
-Example usage:
+The library also includes a factory class to make it easier when using dependency injection with multiple tables. This can create a table store with the default TableStorageOptions which is used when not specified, or override the options depending on your needs.
+
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient(ITableStoreFactory factory)
+    {
+        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true");
+    }
+}
+```
+
+Override TableStorageOptions when using the factory creation
+
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient(ITableStoreFactory factory)
+    {
+        var options = new TableStorageOptions
+        {
+            UseNagleAlgorithm = true,
+            ConnectionLimit = 100,
+            EnsureTableExists = false
+        };
+
+        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
+    }
+}
+```
+
+Override TableStorageOptions when using the store creation
+
+```C#
+public class TestTableStorageClient
+{
+    private ITableStore<MyStuff> _store;
+
+    public TestTableStorageClient()
+    {
+        var options = new TableStorageOptions
+        {
+            UseNagleAlgorithm = true,
+            ConnectionLimit = 100,
+            EnsureTableExists = false
+        };
+
+        _store = new TableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
+    }
+}
+```
+
+### Insert Records
+
+Example Insert of a record
 
 ```C#
 var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
@@ -94,59 +152,62 @@ var entries = new List<TestTableEntity>
 await tableStorage.InsertAsync(entries);
 ```
 
-The library also includes a factory class to make it easier when using dependency injection with multiple tables. This can create a table store with the default TableStorageOptions which is used when not specified, or override the options depending on your needs.
+### InsertOrReplace
+
+Example of Insert or Replace of a record
 
 ```C#
-public class TestTableStorageClient
-{
-    private ITableStore<MyStuff> _store;
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
 
-    public TestTableStorageClient(ITableStoreFactory factory)
-    {
-        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true");
-    }
-}
+await tableStorage.InsertOrReplaceAsync(entity);
 ```
 
-Override TableStorageOptions
+### Update Records
+
+Example of Updating a record
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+
+// Get the current record
+var entity = await tableStorage.GetRecordAsync("Smith", "John");
+
+// Update properties
+entity.Age = 22;
+
+await tableStorage.UpdateAsync(entity);
+```
+
+### Delete Records
+
+Example of deleting a record
 
 ```C#
-public class TestTableStorageClient
-{
-    private ITableStore<MyStuff> _store;
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 
-    public TestTableStorageClient(ITableStoreFactory factory)
-    {
-        var options = new TableStorageOptions
-        {
-            UseNagleAlgorithm = true,
-            ConnectionLimit = 100,
-            EnsureTableExists = false
-        };
+// Get the current record
+var entity = await tableStorage.GetRecordAsync("Smith", "John");
 
-        _store = factory.CreateTableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
-    }
-}
+await tableStorage.DeleteAsync(entity);
 ```
+
+Example of deleting all records for a partition
 
 ```C#
-public class TestTableStorageClient
-{
-    private ITableStore<MyStuff> _store;
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
 
-    public TestTableStorageClient()
-    {
-        var options = new TableStorageOptions
-        {
-            UseNagleAlgorithm = true,
-            ConnectionLimit = 100,
-            EnsureTableExists = false
-        };
-
-        _store = new TableStore<MyStuff>("MyTable", "UseDevelopmentStorage=true", options);
-    }
-}
+await tableStorage.DeleteByPartitionAsync("Smith");
 ```
+
+Example of deleting all records in all partitions
+
+```C#
+var tableStorage = new TableStore<TestTableEntity>("MyTable", "UseDevelopmentStorage=true");
+
+await tableStorage.DeleteAllAsync();
+```
+
+### Filter Records
 
 Table Storage does not really have generic way of filtering data as yet. So there are some methods to help with that.
 NOTE: The filtering works by getting all records so on large datasets this will be slow.
@@ -188,7 +249,7 @@ theObserver.Subscribe(x =>
 });
 ```
 
-### Heterogeneous Tables
+## Heterogeneous Tables
 
 As Table storage is a schema-less store there are times when you are dealing with multiple entity types in a single table.
 <https://docs.microsoft.com/en-us/azure/cosmos-db/table-storage-design-guide#work-with-heterogeneous-entity-types>
@@ -198,10 +259,12 @@ This library has some additional support for those times.
 When creating a TableStore if no generic type is supplied then it creates a dynamic store. This allows the basic methods, Insert, Update, GetRecord, etc. to specify the generic type on the method call. Getting all records now returns a list of DynamicTableEntity but you can still get by partition key using a generic type.
 
 ```C#
-var tableStorage = new TableStore("MyTable", "UseDevelopmentStorage=true");
+var tableStorage = new TableStoreDynamic("MyTable", "UseDevelopmentStorage=true");
 var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
+var otherEntity = new AnotherTableEntity(1, "52a54878-b4b3-45bd-bc5b-3822989b460f") { Name = "Product", Url = "https://someendpoint" };
 
-await tableStorage.InsertAsync(entity);
+await tableStorage.InsertAsync<TestTableEntity>(entity);
+await tableStorage.InsertAsync<AnotherTableEntity>(otherEntity);
 ```
 
 __NOTE__: Currently only the basic methods are supported for this type of table, there are no filter/search methods.
