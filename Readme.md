@@ -261,10 +261,13 @@ When creating a TableStore if no generic type is supplied then it creates a dyna
 ```C#
 var tableStorage = new TableStoreDynamic("MyTable", "UseDevelopmentStorage=true");
 var entity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
-var otherEntity = new AnotherTableEntity(1, "52a54878-b4b3-45bd-bc5b-3822989b460f") { Name = "Product", Url = "https://someendpoint" };
+var otherEntity = new AnotherTableEntity("52a54878-b4b3-45bd-bc5b-3822989b460f", "MyProduct") { Name = "Product", Url = "https://someendpoint" };
 
 await tableStorage.InsertAsync<TestTableEntity>(entity);
 await tableStorage.InsertAsync<AnotherTableEntity>(otherEntity);
+
+var employee = await GetRecordAsync<TestTableEntity>("Smith", "John");
+var productEntity = await GetRecordAsync<otherEntity>("MyProduct", "52a54878-b4b3-45bd-bc5b-3822989b460f");
 ```
 
 __NOTE__: Currently only the basic methods are supported for this type of table, there are no filter/search methods.
