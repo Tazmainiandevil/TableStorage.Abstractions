@@ -1,9 +1,6 @@
-﻿using FluentAssertions;
-using System;
-using System.Threading.Tasks;
+﻿using System;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
-using Xunit;
 
 namespace TableStorage.Abstractions.Tests.Store
 {
@@ -26,31 +23,31 @@ namespace TableStorage.Abstractions.Tests.Store
             _tableStorage.DeleteTable();
         }
 
-        [Fact]
-        public async Task table_does_exist_then_exist_check_returns_true()
-        {
-            // Arrange
-            await _tableStorage.DeleteTableAsync();
-            await _tableStorage.CreateTableAsync();
+        //[Fact]
+        //public async Task table_does_exist_then_exist_check_returns_true()
+        //{
+        //    // Arrange
+        //    await _tableStorage.DeleteTableAsync();
+        //    await _tableStorage.CreateTableAsync();
 
-            // Act
-            var result = await _tableStorage.TableExistsAsync();
+        //    // Act
+        //    var result = await _tableStorage.TableExistsAsync();
 
-            // Assert
-            result.Should().BeTrue();
-        }
+        //    // Assert
+        //    result.Should().BeTrue();
+        //}
 
-        [Fact]
-        public async Task table_does_not_exist_then_exist_check_returns_false()
-        {
-            // Arrange
-            await _tableStorage.DeleteTableAsync();
+        //[Fact]
+        //public async Task table_does_not_exist_then_exist_check_returns_false()
+        //{
+        //    // Arrange
+        //    await _tableStorage.DeleteTableAsync();
 
-            // Act
-            var result = await _tableStorage.TableExistsAsync();
+        //    // Act
+        //    var result = await _tableStorage.TableExistsAsync();
 
-            // Assert
-            result.Should().BeFalse();
-        }
+        //    // Assert
+        //    result.Should().BeFalse();
+        //}
     }
 }

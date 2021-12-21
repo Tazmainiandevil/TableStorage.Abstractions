@@ -29,25 +29,25 @@ namespace TableStorage.Abstractions.Tests.Helpers
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
-        public static async Task SetupRecords(ITableStoreDynamic tableStorage)
-        {
-            var entityList = new List<TestTableEntity>
-            {
-                new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
-                new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
-            };
+        //public static async Task SetupRecords(ITableStoreDynamic tableStorage)
+        //{
+        //    var entityList = new List<TestTableEntity>
+        //    {
+        //        new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
+        //        new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
+        //    };
 
-            var anotherEntityList = new List<TestTableEntity>
-            {
-                new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
-                new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
-            };
+        //    var anotherEntityList = new List<TestTableEntity>
+        //    {
+        //        new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
+        //        new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
+        //    };
 
-            entityList.Combine(anotherEntityList);
+        //    entityList.Combine(anotherEntityList);
 
-            await tableStorage.CreateTableAsync().ConfigureAwait(false);
-            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
-        }
+        //    await tableStorage.CreateTableAsync().ConfigureAwait(false);
+        //    await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+        //}
 
 
         public static void SetupRowKeyRecords(ITableStore<TestTableEntity> tableStorage)

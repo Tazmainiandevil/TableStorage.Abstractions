@@ -1,9 +1,8 @@
-﻿using FluentValidation;
-using Microsoft.Azure.Cosmos.Table;
+﻿using Azure.Data.Tables;
+using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Validators;
 
@@ -19,7 +18,7 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// The cloud table
         /// </summary>
-        protected readonly CloudTable CloudTable;
+        protected readonly TableClient CloudTable;
 
         /// <summary>
         /// Constructor
@@ -59,14 +58,14 @@ namespace TableStorage.Abstractions.Store
             OptimisePerformance(storageConnectionString, options);
             var cloudTableClient = CreateTableClient(storageConnectionString, options.Retries, options.RetryWaitTimeInSeconds);
 
-            CloudTable = cloudTableClient.GetTableReference(tableName);
+            CloudTable = cloudTableClient.GetTableClient(tableName);
 
             if (options.EnsureTableExists)
             {
-                if (!TableExists())
-                {
-                    CreateTable();
-                }
+                //if (!TableExists())
+                //{
+                CreateTable();
+                //}
             }
         }
 
@@ -75,11 +74,11 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         private static void OptimisePerformance(string storageConnectionString, TableStorageOptions options)
         {
-            var account = CloudStorageAccount.Parse(storageConnectionString);
-            var tableServicePoint = ServicePointManager.FindServicePoint(account.TableEndpoint);
-            tableServicePoint.UseNagleAlgorithm = options.UseNagleAlgorithm;
-            tableServicePoint.Expect100Continue = options.Expect100Continue;
-            tableServicePoint.ConnectionLimit = options.ConnectionLimit;
+            // var account = CloudStorageAccount.Parse(storageConnectionString);
+            //var tableServicePoint = ServicePointManager.FindServicePoint(account.TableEndpoint);
+            //tableServicePoint.UseNagleAlgorithm = options.UseNagleAlgorithm;
+            //tableServicePoint.Expect100Continue = options.Expect100Continue;
+            //tableServicePoint.ConnectionLimit = options.ConnectionLimit;
         }
 
         /// <summary>
@@ -89,17 +88,30 @@ namespace TableStorage.Abstractions.Store
         /// <param name="retries">Number of retries</param>
         /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
         /// <returns>The table client</returns>
-        private static CloudTableClient CreateTableClient(string connectionString, int retries, double retryWaitTimeInSeconds)
+        private static TableServiceClient CreateTableClient(string connectionString, int retries, double retryWaitTimeInSeconds)
         {
-            var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
-
-            var requestOptions = new TableRequestOptions
+            var options = new TableClientOptions
             {
-                RetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(retryWaitTimeInSeconds), retries)
+                Retry =
+                {
+                    MaxRetries = retries,
+                    Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
+                    Mode = Azure.Core.RetryMode.Exponential
+                }
             };
 
-            var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
-            cloudTableClient.DefaultRequestOptions = requestOptions;
+
+            var cloudTableClient = new TableServiceClient(connectionString, options);
+
+            //var cloudStorageAccount = CloudStorageAccount.Parse(connectionString);
+
+            //var requestOptions = new TableRequestOptions
+            //{
+            //    RetryPolicy = new ExponentialRetry(TimeSpan.FromSeconds(retryWaitTimeInSeconds), retries)
+            //};
+
+            //var cloudTableClient = cloudStorageAccount.CreateCloudTableClient();
+            //cloudTableClient.DefaultRequestOptions = requestOptions;
             return cloudTableClient;
         }
 
@@ -119,30 +131,32 @@ namespace TableStorage.Abstractions.Store
             await CloudTable.CreateIfNotExistsAsync().ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        public bool TableExists()
-        {
-            return CloudTable.Exists();
-        }
+        ///// <summary>
+        ///// Does the table exist
+        ///// </summary>
+        ///// <returns></returns>
+        //public bool TableExists(string tableName)
+        //{
+        //    var queryTableResults = CloudTable.Query(filter: $"TableName eq '{tableName}'");
 
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        public async Task<bool> TableExistsAsync()
-        {
-            return await CloudTable.ExistsAsync().ConfigureAwait(false);
-        }
+        //    return CloudTable.Exists();
+        //}
+
+        ///// <summary>
+        ///// Does the table exist
+        ///// </summary>
+        ///// <returns></returns>
+        //public async Task<bool> TableExistsAsync()
+        //{
+        //    return await CloudTable.ExistsAsync().ConfigureAwait(false);
+        //}
 
         /// <summary>
         /// Delete the table
         /// </summary>
         public void DeleteTable()
         {
-            CloudTable.DeleteIfExists();
+            CloudTable.Delete();
         }
 
         /// <summary>
@@ -150,7 +164,7 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         public async Task DeleteTableAsync()
         {
-            await CloudTable.DeleteIfExistsAsync().ConfigureAwait(false);
+            await CloudTable.DeleteAsync().ConfigureAwait(false);
         }
 
         /// <summary>
@@ -159,20 +173,25 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The record count</returns>
         public int GetRecordCount()
         {
-            TableContinuationToken continuationToken = null;
 
-            var query = new TableQuery().Select(new List<string> { "PartitionKey" });
+            var items = CloudTable.Query<TableEntity>(select: new List<string>() { "PartitionKey" });
+            return items.Count();
 
-            var recordCount = 0;
-            do
-            {
-                var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
-                continuationToken = items.ContinuationToken;
+            //TableContinuationToken continuationToken = null;
 
-                recordCount += items.Count();
-            } while (continuationToken != null);
+            //var query = new TableQuery().Select(new List<string> { "PartitionKey" });
 
-            return recordCount;
+
+            //var recordCount = 0;
+            //do
+            //{
+            //    var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
+            //    continuationToken = items.ContinuationToken;
+
+            //    recordCount += items.Count();
+            //} while (continuationToken != null);
+
+            //return recordCount;
         }
 
         /// <summary>
@@ -181,20 +200,31 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The record count</returns>
         public async Task<int> GetRecordCountAsync()
         {
-            TableContinuationToken continuationToken = null;
+            var items = CloudTable.QueryAsync<TableEntity>(select: new List<string>() { "PartitionKey" });
+            int count = 0;
 
-            var query = new TableQuery().Select(new List<string> { "PartitionKey" });
-
-            var recordCount = 0;
-            do
+            // Iterate the list in order to access individual queried entities.
+            await foreach (TableEntity qEntity in items)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
+                count++;
+            }
 
-                recordCount += items.Count();
-            } while (continuationToken != null);
+            return count;
 
-            return recordCount;
+            //TableContinuationToken continuationToken = null;
+
+            //var query = new TableQuery().Select(new List<string> { "PartitionKey" });
+
+            //var recordCount = 0;
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+
+            //    recordCount += items.Count();
+            //} while (continuationToken != null);
+
+            //return recordCount;
         }
 
         #region Helpers

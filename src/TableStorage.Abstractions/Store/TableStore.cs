@@ -1,12 +1,11 @@
-﻿using Microsoft.Azure.Cosmos.Table;
-using Newtonsoft.Json;
+﻿using Azure;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Parsers;
 using Useful.Extensions;
 
@@ -52,9 +51,9 @@ namespace TableStorage.Abstractions.Store
         public void Insert(T record)
         {
             EnsureRecord(record);
-
-            var operation = TableOperation.Insert(record);
-            CloudTable.Execute(operation);
+            CloudTable.AddEntity(record);
+            //var operation = TableOperation.Insert(record);
+            //CloudTable.Execute(operation);
         }
 
         /// <summary>
@@ -74,13 +73,14 @@ namespace TableStorage.Abstractions.Store
 
             foreach (var entry in partitionKeySeparation)
             {
-                var operation = new TableBatchOperation();
-                entry.ToList().ForEach(operation.Insert);
+                entry.ToList().ForEach(x => CloudTable.AddEntity(x));
+                //var operation = new TableBatchOperation();
+                //entry.ToList().ForEach(operation.Insert);
 
-                if (operation.Any())
-                {
-                    CloudTable.ExecuteBatch(operation);
-                }
+                //if (operation.Any())
+                //{
+                //    CloudTable.ExecuteBatch(operation);
+                //}
             }
         }
 
@@ -92,8 +92,10 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.InsertOrReplace(record);
-            CloudTable.Execute(operation);
+            CloudTable.UpsertEntity(record);
+
+            //var operation = TableOperation.InsertOrReplace(record);
+            //CloudTable.Execute(operation);
         }
 
         /// <summary>
@@ -104,8 +106,9 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Merge(record);
-            CloudTable.Execute(operation);
+            CloudTable.UpdateEntity(record, record.ETag, TableUpdateMode.Merge);
+            //var operation = TableOperation.Merge(record);
+            //CloudTable.Execute(operation);
         }
 
         /// <summary>
@@ -116,7 +119,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            record.ETag = "*";
+            record.ETag = Azure.ETag.All;
             Update(record);
         }
 
@@ -128,8 +131,10 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Delete(record);
-            CloudTable.Execute(operation);
+            CloudTable.DeleteEntity(record.PartitionKey, record.RowKey);
+
+            //var operation = TableOperation.Delete(record);
+            //CloudTable.Execute(operation);
         }
 
         /// <summary>
@@ -140,7 +145,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            record.ETag = "*";
+            record.ETag = Azure.ETag.All;
             Delete(record);
         }
 
@@ -156,12 +161,14 @@ namespace TableStorage.Abstractions.Store
 
             EnsureRowKey(rowKey);
 
-            // Create a retrieve operation that takes a customer record.
-            var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            return CloudTable.GetEntity<T>(partitionKey, rowKey);
 
-            // Execute the operation.
-            var retrievedResult = CloudTable.Execute(retrieveOperation);
-            return retrievedResult.Result as T;
+            // Create a retrieve operation that takes a customer record.
+            //var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+
+            //// Execute the operation.
+            //var retrievedResult = CloudTable.Execute(retrieveOperation);
+            //return retrievedResult.Result as T;
         }
 
         /// <summary>
@@ -173,19 +180,21 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
+            //TableContinuationToken continuationToken = null;
 
             var query = BuildGetByPartitionQuery(partitionKey);
+            return query;
 
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+            //var allItems = new List<T>();
 
-            return allItems;
+            //do
+            //{
+            //    var items = ExecuteQuerySegment(query, continuationToken);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
+
+            //return allItems;
         }
 
         /// <summary>
@@ -198,45 +207,46 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
+            //TableContinuationToken continuationToken = null;
 
             var query = BuildGetByPartitionAndTimeQuery(partitionKey, ago);
+            return query;
 
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = ExecuteQuerySegment(query, continuationToken);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
-            return allItems;
+            //return allItems;
         }
 
-        /// <summary>
-        /// Get the records by partition key, paged
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>The Paged Result</returns>
-        public PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100, string continuationTokenJson = null)
-        {
-            EnsurePartitionKey(partitionKey);
+        ///// <summary>
+        ///// Get the records by partition key, paged
+        ///// </summary>
+        ///// <param name="partitionKey">The partition key.</param>
+        ///// <param name="pageSize">Size of the page.</param>
+        ///// <param name="continuationTokenJson">The next page token.</param>
+        ///// <returns>The Paged Result</returns>
+        //public PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100, string continuationTokenJson = null)
+        //{
+        //    EnsurePartitionKey(partitionKey);
 
-            var continuationToken = DeserializeContinuationToken(continuationTokenJson);
+        //    var continuationToken = DeserializeContinuationToken(continuationTokenJson);
 
-            var query = BuildGetByPartitionQuery(partitionKey);
-            query.TakeCount = pageSize;
+        //    var query = BuildGetByPartitionQuery(partitionKey);
+        //    query.TakeCount = pageSize;
 
-            var allItems = new List<T>();
+        //    var allItems = new List<T>();
 
-            var items = ExecuteQuerySegment(query, continuationToken);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
+        //    var items = ExecuteQuerySegment(query, continuationToken);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, allItems);
-        }
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get the records by row key
@@ -247,19 +257,20 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = null;
+            //            TableContinuationToken continuationToken = null;
 
             var query = BuildGetByRowKeyQuery(rowKey);
+            return query;
 
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = ExecuteQuerySegment(query, continuationToken);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
-            return allItems;
+            //return allItems;
         }
 
         /// <summary>
@@ -272,45 +283,46 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = null;
+            //TableContinuationToken continuationToken = null;
 
             var query = BuildGetByRowKeyAndTimeQuery(rowKey, ago);
+            return query;
 
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = ExecuteQuerySegment(query, continuationToken);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
-            return allItems;
+            //return allItems;
         }
 
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>The Paged Result</returns>
-        public PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100, string continuationTokenJson = null)
-        {
-            EnsureRowKey(rowKey);
+        ///// <summary>
+        ///// Get the records by row key
+        ///// </summary>
+        ///// <param name="rowKey">The row key.</param>
+        ///// <param name="pageSize">Size of the page.</param>
+        ///// <param name="continuationTokenJson">The next page token.</param>
+        ///// <returns>The Paged Result</returns>
+        //public PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100, string continuationTokenJson = null)
+        //{
+        //    EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = DeserializeContinuationToken(continuationTokenJson);
+        //    TableContinuationToken continuationToken = DeserializeContinuationToken(continuationTokenJson);
 
-            var query = BuildGetByRowKeyQuery(rowKey);
-            query.TakeCount = pageSize;
+        //    var query = BuildGetByRowKeyQuery(rowKey);
+        //    query.TakeCount = pageSize;
 
-            var allItems = new List<T>();
+        //    var allItems = new List<T>();
 
-            var items = ExecuteQuerySegment(query, continuationToken);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
+        //    var items = ExecuteQuerySegment(query, continuationToken);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, allItems);
-        }
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get all the records in the table
@@ -318,39 +330,45 @@ namespace TableStorage.Abstractions.Store
         /// <returns>All records</returns>
         public IEnumerable<T> GetAllRecords()
         {
-            var query = new TableQuery<T>();
-
-            var token = new TableContinuationToken();
-            var segment = CloudTable.ExecuteQuerySegmented(query, token);
-            while (token != null)
+            var query = CloudTable.Query<T>();
+            foreach (var result in query)
             {
-                foreach (var result in segment)
-                {
-                    yield return result;
-                }
-                token = segment.ContinuationToken;
-                segment = CloudTable.ExecuteQuerySegmented(query, token);
+                yield return result;
             }
+
+            //var query = new TableQuery<T>();
+
+            //var token = new TableContinuationToken();
+            //var segment = CloudTable.ExecuteQuerySegmented(query, token);
+            //while (token != null)
+            //{
+            //    foreach (var result in segment)
+            //    {
+            //        yield return result;
+            //    }
+            //    token = segment.ContinuationToken;
+            //    segment = CloudTable.ExecuteQuerySegmented(query, token);
+            //}
         }
 
-        /// <summary>
-        /// Gets all records in the table, paged
-        /// </summary>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="pageToken">The page token</param>
-        /// <returns>The Paged Result</returns>
+        ///// <summary>
+        ///// Gets all records in the table, paged
+        ///// </summary>
+        ///// <param name="pageSize">Size of the page.</param>
+        ///// <param name="pageToken">The page token</param>
+        ///// <returns>The Paged Result</returns>
 
-        public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null)
-        {
-            var query = new TableQuery<T> { TakeCount = pageSize };
+        //public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null)
+        //{
+        //    var query = new TableQuery<T> { TakeCount = pageSize };
 
-            var allItems = new List<T>();
-            var continuationToken = DeserializeContinuationToken(pageToken);
-            var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
-            return CreatePagedResult(continuationToken, allItems);
-        }
+        //    var allItems = new List<T>();
+        //    var continuationToken = DeserializeContinuationToken(pageToken);
+        //    var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -471,9 +489,11 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Insert(record);
+            await CloudTable.AddEntityAsync(record);
 
-            await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
+            //var operation = TableOperation.Insert(record);
+
+            //await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -493,13 +513,18 @@ namespace TableStorage.Abstractions.Store
 
             foreach (var entry in partitionKeySeparation)
             {
-                var operation = new TableBatchOperation();
-                entry.ToList().ForEach(operation.Insert);
-
-                if (operation.Any())
+                await foreach (T qEntity in entry.ToAsyncEnumerable())
                 {
-                    await CloudTable.ExecuteBatchAsync(operation).ConfigureAwait(false);
+                    await CloudTable.AddEntityAsync(qEntity);
                 }
+
+                //var operation = new TableBatchOperation();
+                //entry.ToList().ForEach(operation.Insert);
+
+                //if (operation.Any())
+                //{
+                //    await CloudTable.ExecuteBatchAsync(operation).ConfigureAwait(false);
+                //}
             }
         }
 
@@ -512,9 +537,11 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.InsertOrReplace(record);
+            await CloudTable.UpsertEntityAsync(record);
 
-            await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
+            //var operation = TableOperation.InsertOrReplace(record);
+
+            //await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -525,9 +552,11 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Merge(record);
+            await CloudTable.UpdateEntityAsync(record, record.ETag);
 
-            await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
+            //var operation = TableOperation.Merge(record);
+
+            //await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -538,7 +567,8 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            record.ETag = "*";
+            //record.ETag = "*";
+            record.ETag = ETag.All;
             await UpdateAsync(record).ConfigureAwait(false);
         }
 
@@ -550,9 +580,10 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Delete(record);
+            await CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey);
+            //var operation = TableOperation.Delete(record);
 
-            await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
+            //await CloudTable.ExecuteAsync(operation).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -563,7 +594,8 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            record.ETag = "*";
+            //record.ETag = "*";
+            record.ETag = ETag.All;
 
             await DeleteAsync(record).ConfigureAwait(false);
         }
@@ -576,27 +608,32 @@ namespace TableStorage.Abstractions.Store
         {
             var deleteQuery = BuildGetByPartitionQuery(partitionKey);
 
-            TableContinuationToken continuationToken = null;
-            do
+            await foreach (var item in deleteQuery.ToAsyncEnumerable())
             {
-                var tableQueryResult = CloudTable.ExecuteQuerySegmentedAsync(deleteQuery, continuationToken);
-                continuationToken = tableQueryResult.Result.ContinuationToken;
-
-                // Split result into chunks of 100s
-                var rowsChunked = tableQueryResult.Result.ToList().Partition(100);
-
-                // Delete each chunk in a batch
-                foreach (var rows in rowsChunked)
-                {
-                    TableBatchOperation tableBatchOperation = new TableBatchOperation();
-                    foreach (var row in rows)
-                    {
-                        tableBatchOperation.Add(TableOperation.Delete(row));
-                    }
-                    await CloudTable.ExecuteBatchAsync(tableBatchOperation);
-                }
+                await CloudTable.DeleteEntityAsync(item.PartitionKey, item.RowKey);
             }
-            while (continuationToken != null);
+
+            //TableContinuationToken continuationToken = null;
+            //do
+            //{
+            //    var tableQueryResult = CloudTable.ExecuteQuerySegmentedAsync(deleteQuery, continuationToken);
+            //    continuationToken = tableQueryResult.Result.ContinuationToken;
+
+            //    // Split result into chunks of 100s
+            //    var rowsChunked = tableQueryResult.Result.ToList().Partition(100);
+
+            //    // Delete each chunk in a batch
+            //    foreach (var rows in rowsChunked)
+            //    {
+            //        TableBatchOperation tableBatchOperation = new TableBatchOperation();
+            //        foreach (var row in rows)
+            //        {
+            //            tableBatchOperation.Add(TableOperation.Delete(row));
+            //        }
+            //        await CloudTable.ExecuteBatchAsync(tableBatchOperation);
+            //    }
+            //}
+            //while (continuationToken != null);
         }
 
         /// <summary>
@@ -624,13 +661,15 @@ namespace TableStorage.Abstractions.Store
 
             EnsureRowKey(rowKey);
 
-            // Create a retrieve operation that takes a customer record.
-            var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
+            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
 
-            // Execute the operation.
-            var retrievedResult = await CloudTable.ExecuteAsync(retrieveOperation).ConfigureAwait(false);
+            //// Create a retrieve operation that takes a customer record.
+            //var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
 
-            return retrievedResult.Result as T;
+            //// Execute the operation.
+            //var retrievedResult = await CloudTable.ExecuteAsync(retrieveOperation).ConfigureAwait(false);
+
+            //return retrievedResult.Result as T;
         }
 
         /// <summary>
@@ -642,17 +681,23 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByPartitionQuery(partitionKey);
-
             var allItems = new List<T>();
-            do
+            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
+            await foreach (var queryResult in queryResults)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+                allItems.Add(queryResult);
+            }
+            //TableContinuationToken continuationToken = null;
+
+            //var query = BuildGetByPartitionQuery(partitionKey);
+
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
             return allItems;
         }
@@ -661,45 +706,54 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByPartitionAndTimeQuery(partitionKey, ago);
-
             var allItems = new List<T>();
-            do
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime);
+            await foreach (var queryResult in queryResults)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+                allItems.Add(queryResult);
+            }
+
+            //            TableContinuationToken continuationToken = null;
+
+            //            var query = BuildGetByPartitionAndTimeQuery(partitionKey, ago);
+
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
             return allItems;
         }
 
-        /// <summary>
-        ///  Get the records by partition key, paged
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        /// <returns>The Paged Result</returns>
-        public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null)
-        {
-            EnsurePartitionKey(partitionKey);
+        ///// <summary>
+        /////  Get the records by partition key, paged
+        ///// </summary>
+        ///// <param name="partitionKey">The partition key.</param>
+        ///// <param name="pageSize">Size of the page.</param>
+        ///// <param name="continuationTokenJson">The next page token.</param>
+        ///// <returns>The Paged Result</returns>
+        //public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null)
+        //{
+        //    EnsurePartitionKey(partitionKey);
 
-            var continuationToken = DeserializeContinuationToken(continuationTokenJson);
+        //    var continuationToken = DeserializeContinuationToken(continuationTokenJson);
 
-            var query = BuildGetByPartitionQuery(partitionKey);
-            query.TakeCount = pageSize;
+        //    var query = BuildGetByPartitionQuery(partitionKey);
+        //    query.TakeCount = pageSize;
 
-            var allItems = new List<T>();
+        //    var allItems = new List<T>();
 
-            var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
+        //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, allItems);
-        }
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get the records by row key
@@ -710,17 +764,22 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByRowKeyQuery(rowKey);
+            //TableContinuationToken continuationToken = null;
 
             var allItems = new List<T>();
-            do
+            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
+            await foreach (var queryResult in queryResults)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+                allItems.Add(queryResult);
+            }
+
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
             return allItems;
         }
@@ -729,44 +788,53 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByRowKeyAndTimeQuery(rowKey, ago);
-
             var allItems = new List<T>();
-            do
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime);
+            await foreach (var queryResult in queryResults)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+                allItems.Add(queryResult);
+            }
+
+            //TableContinuationToken continuationToken = null;
+
+            //var query = BuildGetByRowKeyAndTimeQuery(rowKey, ago);
+
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
             return allItems;
         }
 
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationTokenJson">The next page token.</param>
-        public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationTokenJson = null)
-        {
-            EnsureRowKey(rowKey);
+        ///// <summary>
+        ///// Get the records by row key
+        ///// </summary>
+        ///// <param name="rowKey">The row key.</param>
+        ///// <param name="pageSize">Size of the page.</param>
+        ///// <param name="continuationTokenJson">The next page token.</param>
+        //public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationTokenJson = null)
+        //{
+        //    EnsureRowKey(rowKey);
 
-            var continuationToken = DeserializeContinuationToken(continuationTokenJson);
+        //    var continuationToken = DeserializeContinuationToken(continuationTokenJson);
 
-            var query = BuildGetByRowKeyQuery(rowKey);
-            query.TakeCount = pageSize;
+        //    var query = BuildGetByRowKeyQuery(rowKey);
+        //    query.TakeCount = pageSize;
 
-            var allItems = new List<T>();
+        //    var allItems = new List<T>();
 
-            var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
+        //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
 
-            return CreatePagedResult(continuationToken, allItems);
-        }
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get all the records in the table
@@ -774,37 +842,44 @@ namespace TableStorage.Abstractions.Store
         /// <returns>All records</returns>
         public async Task<IEnumerable<T>> GetAllRecordsAsync()
         {
-            TableContinuationToken continuationToken = null;
-
-            var query = new TableQuery<T>();
-
             var allItems = new List<T>();
-            do
+
+            var queryResults = CloudTable.QueryAsync<T>();
+            await foreach (var queryResult in queryResults)
             {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
+                allItems.Add(queryResult);
+            }
+
+            //TableContinuationToken continuationToken = null;
+
+            //var query = new TableQuery<T>();
+
+            //var allItems = new List<T>();
+            //do
+            //{
+            //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+            //    continuationToken = items.ContinuationToken;
+            //    allItems.AddRange(items);
+            //} while (continuationToken != null);
 
             return allItems;
         }
 
-        /// <summary>
-        /// Gets all records in the table, paged
-        /// </summary>
-        /// <returns>The Paged Result</returns>
-        public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
-        {
-            var query = new TableQuery<T> { TakeCount = pageSize };
+        ///// <summary>
+        ///// Gets all records in the table, paged
+        ///// </summary>
+        ///// <returns>The Paged Result</returns>
+        //public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
+        //{
+        //    var query = new TableQuery<T> { TakeCount = pageSize };
 
-            var allItems = new List<T>();
-            var continuationToken = DeserializeContinuationToken(pageToken);
-            var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-            continuationToken = items.ContinuationToken;
-            allItems.AddRange(items);
-            return CreatePagedResult(continuationToken, allItems);
-
-        }
+        //    var allItems = new List<T>();
+        //    var continuationToken = DeserializeContinuationToken(pageToken);
+        //    var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
+        //    continuationToken = items.ContinuationToken;
+        //    allItems.AddRange(items);
+        //    return CreatePagedResult(continuationToken, allItems);
+        //}
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -847,11 +922,14 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="partitionKey">The partition key.</param>
         /// <returns>The table query</returns>
-        private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
+        //private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
+        private Pageable<T> BuildGetByPartitionQuery(string partitionKey)
         {
-            var query = new TableQuery<T>().Where(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
-            return query;
+            Pageable<T> queryResults = CloudTable.Query<T>(filter: $"PartitionKey eq '{partitionKey}'");
+            return queryResults;
+            //var query = new TableQuery<T>().Where(
+            //    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
+            //return query;
         }
 
         /// <summary>
@@ -860,14 +938,18 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey">The partition key.</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The table query</returns>
-        private static TableQuery<T> BuildGetByPartitionAndTimeQuery(string partitionKey, string ago)
+        //private static TableQuery<T> BuildGetByPartitionAndTimeQuery(string partitionKey, string ago)
+        private Pageable<T> BuildGetByPartitionAndTimeQuery(string partitionKey, string ago)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey),
-                                                                            TableOperators.And,
-                                                                            TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
-            return query;
+            Pageable<T> queryResults = CloudTable.Query<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime);
+            return queryResults;
+
+            //var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey),
+            //                                                                TableOperators.And,
+            //                                                                TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
+            //return query;
         }
 
         /// <summary>
@@ -875,10 +957,13 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="rowKey">The row key</param>
         /// <returns>The table query</returns>
-        private static TableQuery<T> BuildGetByRowKeyQuery(string rowKey)
+        //private static TableQuery<T> BuildGetByRowKeyQuery(string rowKey)
+        private Pageable<T> BuildGetByRowKeyQuery(string rowKey)
         {
-            var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
-            return query;
+            Pageable<T> queryResults = CloudTable.Query<T>(filter: $"RowKey eq '{rowKey}'");
+            return queryResults;
+            //var query = new TableQuery<T>().Where(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey));
+            //return query;
         }
 
         /// <summary>
@@ -887,48 +972,57 @@ namespace TableStorage.Abstractions.Store
         /// <param name="rowKey">The row key</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
         /// <returns>The table query</returns>
-        private static TableQuery<T> BuildGetByRowKeyAndTimeQuery(string rowKey, string ago)
+        //private static TableQuery<T> BuildGetByRowKeyAndTimeQuery(string rowKey, string ago)
+        private Pageable<T> BuildGetByRowKeyAndTimeQuery(string rowKey, string ago)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey),
-                                                                            TableOperators.And,
-                                                                            TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
-            return query;
+            Pageable<T> queryResults = CloudTable.Query<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime);
+            return queryResults;
+            //var query = new TableQuery<T>().Where(TableQuery.CombineFilters(TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey),
+            //                                                                TableOperators.And,
+            //                                                                TableQuery.GenerateFilterConditionForDate("Timestamp", QueryComparisons.GreaterThanOrEqual, utcTime)));
+            //return query;
         }
 
-        /// <summary>
-        /// Create a paged result
-        /// </summary>
-        /// <param name="continuationToken">The continuation token</param>
-        /// <param name="items">The items</param>
-        /// <returns>The paged result</returns>
-        private static PagedResult<T> CreatePagedResult(TableContinuationToken continuationToken, IList<T> items)
-        {
-            var continuationTokenJson = continuationToken != null ? JsonConvert.SerializeObject(continuationToken) : null;
-            return new PagedResult<T>(items, continuationTokenJson, continuationToken == null);
-        }
+        ///// <summary>
+        ///// Create a paged result
+        ///// </summary>
+        ///// <param name="continuationToken">The continuation token</param>
+        ///// <param name="items">The items</param>
+        ///// <returns>The paged result</returns>
+        //private static PagedResult<T> CreatePagedResult(TableContinuationToken continuationToken, IList<T> items)
+        //{
+        //    var continuationTokenJson = continuationToken != null ? JsonConvert.SerializeObject(continuationToken) : null;
+        //    return new PagedResult<T>(items, continuationTokenJson, continuationToken == null);
+        //}
 
-        /// <summary>
-        /// Deserialize the continuation token
-        /// </summary>
-        /// <param name="continuationTokenJson">The json string containing the continuation token</param>
-        /// <returns>The continuation token</returns>
-        private static TableContinuationToken DeserializeContinuationToken(string continuationTokenJson)
-        {
-            TableContinuationToken continuationToken = null;
-            if (!string.IsNullOrEmpty(continuationTokenJson))
-            {
-                continuationToken = JsonConvert.DeserializeObject<TableContinuationToken>(continuationTokenJson);
-            }
-            return continuationToken;
-        }
+        ///// <summary>
+        ///// Deserialize the continuation token
+        ///// </summary>
+        ///// <param name="continuationTokenJson">The json string containing the continuation token</param>
+        ///// <returns>The continuation token</returns>
+        //private static TableContinuationToken DeserializeContinuationToken(string continuationTokenJson)
+        //{
+        //    TableContinuationToken continuationToken = null;
+        //    if (!string.IsNullOrEmpty(continuationTokenJson))
+        //    {
+        //        continuationToken = JsonConvert.DeserializeObject<TableContinuationToken>(continuationTokenJson);
+        //    }
+        //    return continuationToken;
+        //}
 
-        private TableQuerySegment<T> ExecuteQuerySegment(TableQuery<T> query, TableContinuationToken continuationToken)
-        {
-            var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
-            return items;
-        }
+        //private TableQuerySegment<T> ExecuteQuerySegment(TableQuery<T> query, TableContinuationToken continuationToken)
+        //{
+        //    var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
+        //    return items;
+        //}
+
+        //private Pageable<T> ExecuteQuerySegment(TableQuery<T> query, TableContinuationToken continuationToken)
+        //{
+        //    var items = CloudTable.ExecuteQuerySegmented(query, continuationToken);
+        //    return items;
+        //}
 
         #endregion Helpers
     }

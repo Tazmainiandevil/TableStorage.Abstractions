@@ -19,16 +19,16 @@ namespace TableStorage.Abstractions.Tests.Store
             act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
-        [Fact]
-        public void update_dynamic_with_null_record_throws_exception()
-        {
-            // Arrange
-            // Act
-            Action act = () => _tableStorageDynamic.Update(null as TestTableEntity);
+        //[Fact]
+        //public void update_dynamic_with_null_record_throws_exception()
+        //{
+        //    // Arrange
+        //    // Act
+        //    Action act = () => _tableStorageDynamic.Update(null as TestTableEntity);
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
-        }
+        //    // Assert
+        //    act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+        //}
 
         [Fact]
         public async Task update_a_record_in_the_table_and_the_change_should_be_recorded()
@@ -49,24 +49,24 @@ namespace TableStorage.Abstractions.Tests.Store
             item2.Age.Should().Be(22);
         }
 
-        [Fact]
-        public async Task update_a_dynamic_record_in_the_table_and_the_change_should_be_recorded()
-        {
-            // Arrange
-            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+        //[Fact]
+        //public async Task update_a_dynamic_record_in_the_table_and_the_change_should_be_recorded()
+        //{
+        //    // Arrange
+        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
 
-            // Act
-            var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
+        //    // Act
+        //    var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
 
-            item.Age = 22;
+        //    item.Age = 22;
 
-            _tableStorageDynamic.Update(item);
+        //    _tableStorageDynamic.Update(item);
 
-            var item2 = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
+        //    var item2 = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
 
-            // Assert
-            item2.Age.Should().Be(22);
-        }
+        //    // Assert
+        //    item2.Age.Should().Be(22);
+        //}
 
         [Fact]
         public void update_using_wildcard_etag_with_null_record_throws_exception()

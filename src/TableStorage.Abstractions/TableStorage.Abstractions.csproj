@@ -9,10 +9,11 @@
     <PackageVersion>1.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
     <PackageReference Include="FluentValidation" Version="8.6.1" />
+    <PackageReference Include="System.Linq.Async" Version="5.0.0" />
     <PackageReference Include="System.Reactive" Version="4.3.2" />
     <PackageReference Include="Useful.Extensions" Version="3.0.1" />
-    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.8" />
   </ItemGroup>
 
 </Project>

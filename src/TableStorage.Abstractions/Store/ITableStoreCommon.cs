@@ -14,17 +14,17 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         Task CreateTableAsync();
 
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        bool TableExists();
+        ///// <summary>
+        ///// Does the table exist
+        ///// </summary>
+        ///// <returns></returns>
+        //bool TableExists();
 
-        /// <summary>
-        /// Does the table exist
-        /// </summary>
-        /// <returns></returns>
-        Task<bool> TableExistsAsync();
+        ///// <summary>
+        ///// Does the table exist
+        ///// </summary>
+        ///// <returns></returns>
+        //Task<bool> TableExistsAsync();
 
         /// <summary>
         /// Delete the table

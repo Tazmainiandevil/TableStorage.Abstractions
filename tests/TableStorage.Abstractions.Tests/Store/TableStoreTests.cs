@@ -133,30 +133,30 @@ namespace TableStorage.Abstractions.Tests.Store
                 .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.\r\n -- Retries: 'Retries' must be greater than '0'.\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
         }
 
-        [Fact]
-        public void table_does_exist_then_exist_check_returns_true()
-        {
-            // Arrange
-            _tableStorage.DeleteTable();
+        //[Fact]
+        //public void table_does_exist_then_exist_check_returns_true()
+        //{
+        //    // Arrange
+        //    _tableStorage.DeleteTable();
 
-            // Act
-            _tableStorage.CreateTable();
+        //    // Act
+        //    _tableStorage.CreateTable();
 
-            // Assert
-            _tableStorage.TableExists().Should().BeTrue();
-        }
+        //    // Assert
+        //    _tableStorage.TableExists().Should().BeTrue();
+        //}
 
-        [Fact]
-        public void table_does_not_exist_then_exist_check_returns_false()
-        {
-            // Arrange
-            _tableStorage.DeleteTable();
+        //[Fact]
+        //public void table_does_not_exist_then_exist_check_returns_false()
+        //{
+        //    // Arrange
+        //    _tableStorage.DeleteTable();
 
-            // Act
-            var result = _tableStorage.TableExists();
+        //    // Act
+        //    var result = _tableStorage.TableExists();
 
-            // Assert
-            result.Should().BeFalse();
-        }
+        //    // Assert
+        //    result.Should().BeFalse();
+        //}
     }
 }

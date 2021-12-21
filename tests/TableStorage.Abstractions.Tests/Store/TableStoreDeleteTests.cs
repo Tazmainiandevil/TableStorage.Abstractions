@@ -1,7 +1,7 @@
-﻿using System;
+﻿using FluentAssertions;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
 
@@ -20,16 +20,16 @@ namespace TableStorage.Abstractions.Tests.Store
             act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
-        [Fact]
-        public void delete_dynamic_with_null_record_throws_exception()
-        {
-            // Arrange
-            // Act
-            Action act = () => _tableStorageDynamic.Delete(null as TestTableEntity);
+        //[Fact]
+        //public void delete_dynamic_with_null_record_throws_exception()
+        //{
+        //    // Arrange
+        //    // Act
+        //    Action act = () => _tableStorageDynamic.Delete(null as TestTableEntity);
 
-            // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
-        }
+        //    // Assert
+        //    act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+        //}
 
         [Fact]
         public async Task delete_an_entry_and_the_record_count_should_decrease()
@@ -49,22 +49,22 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
 
-        [Fact]
-        public async Task delete_a_dynamic_entry_and_the_record_count_should_decrease()
-        {
-            // Arrange
-            await TestDataHelper.SetupRecords(_tableStorageDynamic);
-            var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
+        //[Fact]
+        //public async Task delete_a_dynamic_entry_and_the_record_count_should_decrease()
+        //{
+        //    // Arrange
+        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
+        //    var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
 
-            // Act
+        //    // Act
 
-            _tableStorageDynamic.Delete(item);
+        //    _tableStorageDynamic.Delete(item);
 
-            var result = _tableStorageDynamic.GetByPartitionKey<TestTableEntity>("Smith");
+        //    var result = _tableStorageDynamic.GetByPartitionKey<TestTableEntity>("Smith");
 
-            // Assert
-            result.Count().Should().Be(1);
-        }
+        //    // Assert
+        //    result.Count().Should().Be(1);
+        //}
 
         [Fact]
         public void delete_using_wild_card_etag_when_entity_is_null_then_throws_an_exception()
@@ -77,34 +77,34 @@ namespace TableStorage.Abstractions.Tests.Store
             act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
-        [Fact]
-        public async Task delete_all_records_and_the_record_count_should_be_zero()
-        {
-            // Arrange
-            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+        //[Fact]
+        //public async Task delete_all_records_and_the_record_count_should_be_zero()
+        //{
+        //    // Arrange
+        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
 
-            // Act
-            await _tableStorage.DeleteAllAsync();
-            var result = await _tableStorage.GetAllRecordsAsync();
+        //    // Act
+        //    await _tableStorage.DeleteAllAsync();
+        //    var result = await _tableStorage.GetAllRecordsAsync();
 
-            // Assert
-            result.Count().Should().Be(0);
-        }
+        //    // Assert
+        //    result.Count().Should().Be(0);
+        //}
 
-        [Fact]
-        public async Task delete_records_by_partitionkey_and_record_count_by_partition_should_be_zero()
-        {
-            // Arrange
-            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+        //[Fact]
+        //public async Task delete_records_by_partitionkey_and_record_count_by_partition_should_be_zero()
+        //{
+        //    // Arrange
+        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
 
-            // Act
-            await _tableStorage.DeleteByPartitionAsync("Smith");
-            var resultEmpty = await _tableStorage.GetByPartitionKeyAsync("Smith");
-            var resultNotEmpty = await _tableStorage.GetByPartitionKeyAsync("Jones");
+        //    // Act
+        //    await _tableStorage.DeleteByPartitionAsync("Smith");
+        //    var resultEmpty = await _tableStorage.GetByPartitionKeyAsync("Smith");
+        //    var resultNotEmpty = await _tableStorage.GetByPartitionKeyAsync("Jones");
 
-            // Assert
-            resultEmpty.Count().Should().Be(0);
-            resultNotEmpty.Count().Should().NotBe(0);
-        }
+        //    // Assert
+        //    resultEmpty.Count().Should().Be(0);
+        //    resultNotEmpty.Count().Should().NotBe(0);
+        //}
     }
 }
