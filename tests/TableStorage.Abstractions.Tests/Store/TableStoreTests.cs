@@ -81,7 +81,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.");
+                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error");
         }
 
         [Theory]
@@ -97,7 +97,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- Retries: 'Retries' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error");
         }
 
         [Theory]
@@ -113,7 +113,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         [Theory]
@@ -130,7 +130,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.\r\n -- Retries: 'Retries' must be greater than '0'.\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error\r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         //[Fact]
