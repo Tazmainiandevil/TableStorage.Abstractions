@@ -238,7 +238,7 @@ namespace TableStorage.Abstractions.Store
         {
             if (string.IsNullOrWhiteSpace(partitionKey))
             {
-                throw new ArgumentNullException(nameof(partitionKey));
+                throw new ArgumentNullException(nameof(partitionKey), "PartitionKey cannot be null or empty");
             }
         }
 
@@ -251,7 +251,7 @@ namespace TableStorage.Abstractions.Store
         {
             if (string.IsNullOrWhiteSpace(rowKey))
             {
-                throw new ArgumentNullException(nameof(rowKey));
+                throw new ArgumentNullException(nameof(rowKey), "RowKey cannot be null or empty");
             }
         }
 
@@ -259,7 +259,7 @@ namespace TableStorage.Abstractions.Store
         {
             if (record == null)
             {
-                throw new ArgumentNullException(nameof(record));
+                throw new ArgumentNullException(nameof(record), "Record cannot be null");
             }
         }
 

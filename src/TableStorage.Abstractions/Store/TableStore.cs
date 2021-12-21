@@ -64,7 +64,7 @@ namespace TableStorage.Abstractions.Store
         {
             if (records == null)
             {
-                throw new ArgumentNullException(nameof(records));
+                throw new ArgumentNullException(nameof(records), "Records cannot be null");
             }
 
             var partitionKeySeparation = records.GroupBy(x => x.PartitionKey)

@@ -37,7 +37,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => new TableStore<TestTableEntity>(tablename, "somestring", _tableStorageOptions);
 
             // Assert
-            act.Should().Throw<ArgumentException>().WithMessage("Table name cannot be null or empty\r\nParameter name: tableName");
+            act.Should().Throw<ArgumentException>().WithMessage("Table name cannot be null or empty*");
         }
 
         [Theory]
@@ -52,7 +52,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("Table connection string cannot be null or empty\r\nParameter name: storageConnectionString");
+                .WithMessage("Table connection string cannot be null or empty*");
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("Table storage options cannot be null\r\nParameter name: options");
+                .WithMessage("Table storage options cannot be null*");
         }
 
         [Theory]

@@ -66,7 +66,7 @@ namespace TableStorage.Abstractions.Tests.Parsers
             Action act = () => TimeStringParser.GetTimeAgo("1");
 
             // Assert
-            act.Should().Throw<ArgumentException>().WithMessage("Time ago value '1' is invalid. Values must be in the format of 1m, 1h, 1d.\r\nParameter Name: ago");
+            act.Should().Throw<ArgumentException>().WithMessage("Time ago value '1' is invalid. Values must be in the format of 1m, 1h, 1d.*");
         }
 
         [Fact]
@@ -77,7 +77,7 @@ namespace TableStorage.Abstractions.Tests.Parsers
             Action act = () => TimeStringParser.GetTimeAgo("1hdfyskdhfkds");
 
             // Assert
-            act.Should().Throw<ArgumentException>().WithMessage("Time ago value '1hdfyskdhfkds' is invalid. Values must be in the format of 1m, 1h, 1d.\r\nParameter Name: ago");
+            act.Should().Throw<ArgumentException>().WithMessage("Time ago value '1hdfyskdhfkds' is invalid. Values must be in the format of 1m, 1h, 1d.*");
         }
     }
 }

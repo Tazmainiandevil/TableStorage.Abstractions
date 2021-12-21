@@ -17,7 +17,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.Delete(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
         }
 
         //[Fact]
@@ -74,7 +74,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.DeleteUsingWildcardEtag(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
         }
 
         //[Fact]

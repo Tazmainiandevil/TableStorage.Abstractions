@@ -18,7 +18,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.Insert(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
         }
 
         //[Fact]
@@ -132,7 +132,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.Insert(null as IEnumerable<TestTableEntity>);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: records");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Records cannot be null*");
         }
 
         //[Fact]

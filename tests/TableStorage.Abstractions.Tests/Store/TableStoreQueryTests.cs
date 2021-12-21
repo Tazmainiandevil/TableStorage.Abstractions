@@ -22,7 +22,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.GetRecord(partitionKey, "someRowKey");
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("PartitionKey cannot be null or empty*");
         }
 
         [Theory]
@@ -36,7 +36,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.GetRecord("somePartitionKey", rowKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("RowKey cannot be null or empty*");
         }
 
         //[Fact]
@@ -90,7 +90,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.GetByPartitionKey(partitionKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("PartitionKey cannot be null or empty*");
         }
 
         //[Theory]
@@ -330,7 +330,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => _tableStorage.GetByRowKey(rowKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().Throw<ArgumentNullException>().WithMessage("RowKey cannot be null or empty*");
         }
 
         [Fact]
