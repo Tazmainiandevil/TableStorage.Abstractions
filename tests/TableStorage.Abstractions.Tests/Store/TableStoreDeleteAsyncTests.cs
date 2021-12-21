@@ -17,7 +17,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorage.DeleteAsync(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().ThrowAsync<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
         }
 
         //[Fact]

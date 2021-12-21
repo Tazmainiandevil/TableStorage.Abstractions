@@ -22,7 +22,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorage.GetRecordAsync(partitionKey, "someRowKey");
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
+            act.Should().ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
 
@@ -37,7 +37,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorage.GetRecordAsync("somePartitionKey", rowKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().ThrowAsync<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
         }
 
         [Theory]
@@ -51,7 +51,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorage.GetByPartitionKeyAsync(partitionKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>()
+            act.Should().ThrowAsync<ArgumentNullException>()
                 .WithMessage("Value cannot be null.\r\nParameter name: partitionKey");
         }
 
@@ -150,7 +150,7 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             results.Should().BeEquivalentTo(expected,
                 op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag)
-                    .Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+                    .Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
 
         //[Theory]
@@ -236,7 +236,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorage.GetByRowKeyAsync(rowKey);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
+            act.Should().ThrowAsync<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: rowKey");
         }
 
         public static IEnumerable<object[]> RowKeyExpectedData
@@ -319,7 +319,7 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             results.Should().BeEquivalentTo(expected,
                 op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag)
-                    .Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+                    .Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
 
         //[Theory]
@@ -470,7 +470,7 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().BeEquivalentTo(expected,
                 op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag)
-                    .Excluding(o => o.SelectedMemberPath == "CompiledRead"));
+                    .Excluding(o => o.Path == "CompiledRead"));
         }
 
         //[Fact]
@@ -496,7 +496,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> result = async () => await _tableStorage.GetRecordAsync("surname", "first");
 
             // Assert
-            result.Should().Throw<RequestFailedException>().WithMessage("*ResourceNotFound*");
+            await result.Should().ThrowAsync<RequestFailedException>().WithMessage("*ResourceNotFound*");
 
         }
 

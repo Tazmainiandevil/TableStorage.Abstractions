@@ -76,7 +76,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var result = _tableStorage.GetRecord("Jones", "Bill");
 
             // Assert
-            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath == "CompiledRead"));
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path == "CompiledRead"));
         }
 
         [Theory]
@@ -211,7 +211,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = _tableStorage.GetByPartitionKey(partitionKey);
 
             // Assert
-            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
 
         //[Theory]
@@ -438,7 +438,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var results = _tableStorage.GetByRowKey(rowKey);
 
             // Assert
-            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            results.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
 
         //[Theory]
@@ -587,7 +587,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 21 && x.Age < 29);
 
             // Assert
-            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
 
         public static IEnumerable<object[]> FilterExpectedData
@@ -622,7 +622,7 @@ namespace TableStorage.Abstractions.Tests.Store
             var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 21 && x.Age < 29, start, page);
 
             // Assert
-            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.SelectedMemberPath.EndsWith("CompiledRead")));
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
         }
     }
 }
