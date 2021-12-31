@@ -12,13 +12,11 @@ namespace TableStorage.Abstractions.Tests.Store
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
         private readonly ITableStore<TestTableEntity> _tableStorage;
-        private readonly ITableStoreDynamic _tableStorageDynamic;
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
         public TableStoreTests()
         {
             _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString, _tableStorageOptions);
-            _tableStorageDynamic = new TableStoreDynamic(TableName, ConnectionString);
         }
 
         public void Dispose()
@@ -71,7 +69,8 @@ namespace TableStorage.Abstractions.Tests.Store
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
-        public void create_table_storage_with_table_option_connection_limit_less_than_2_then_throws_an_exception(int connectionLimit)
+        public void create_table_storage_with_table_option_connection_limit_less_than_2_then_throws_an_exception(
+            int connectionLimit)
         {
             // Arrange
             var options = new TableStorageOptions { ConnectionLimit = connectionLimit };
@@ -81,7 +80,8 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error");
+                .WithMessage(
+                    "Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error");
         }
 
         [Theory]
@@ -103,7 +103,8 @@ namespace TableStorage.Abstractions.Tests.Store
         [Theory]
         [InlineData(-1)]
         [InlineData(0)]
-        public void create_table_storage_with_table_options_retry_wait_in_seconds_less_than_1_then_throws_an_exception(double retryTime)
+        public void create_table_storage_with_table_options_retry_wait_in_seconds_less_than_1_then_throws_an_exception(
+            double retryTime)
         {
             // Arrange
             var options = new TableStorageOptions { RetryWaitTimeInSeconds = retryTime };
@@ -113,24 +114,29 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
+                .WithMessage(
+                    "Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         [Theory]
         [InlineData(-1, -1, -1)]
         [InlineData(0, 0, 0)]
         [InlineData(1, 0, 0)]
-        public void create_table_storage_with_multiple_invalid_table_options_throws_an_exception_with_all_invalid_entries(int connectionLimit, int retries, double retryTime)
+        public void
+            create_table_storage_with_multiple_invalid_table_options_throws_an_exception_with_all_invalid_entries(
+                int connectionLimit, int retries, double retryTime)
         {
             // Arrange
-            var options = new TableStorageOptions { ConnectionLimit = connectionLimit, Retries = retries, RetryWaitTimeInSeconds = retryTime };
+            var options = new TableStorageOptions
+            { ConnectionLimit = connectionLimit, Retries = retries, RetryWaitTimeInSeconds = retryTime };
 
             // Act
             Action act = () => new TableStore<TestTableEntity>("sometable", ConnectionString, options);
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error\r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
+                .WithMessage(
+                    "Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error\r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         //[Fact]

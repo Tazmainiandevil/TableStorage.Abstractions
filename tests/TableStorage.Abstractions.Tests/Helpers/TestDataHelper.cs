@@ -29,25 +29,35 @@ namespace TableStorage.Abstractions.Tests.Helpers
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
-        //public static async Task SetupRecords(ITableStoreDynamic tableStorage)
-        //{
-        //    var entityList = new List<TestTableEntity>
-        //    {
-        //        new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
-        //        new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
-        //    };
+        public static void SetupLotsOfRecords(int count, ITableStore<TestTableEntity> tableStorage)
+        {
+            tableStorage.CreateTable();
+            for (var i = 0; i < count; i++)
+            {
+                var entry = new TestTableEntity($"name{i}", $"surname{count}") { Age = 32, Email = $"{count}@somewhere.com" };
+                tableStorage.Insert(entry);
+            }
+        }
 
-        //    var anotherEntityList = new List<TestTableEntity>
-        //    {
-        //        new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
-        //        new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
-        //    };
+        public static async Task SetupRecords(ITableStoreDynamic tableStorage)
+        {
+            var entityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
+                new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
+            };
 
-        //    entityList.Combine(anotherEntityList);
+            var anotherEntityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
+                new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
+            };
 
-        //    await tableStorage.CreateTableAsync().ConfigureAwait(false);
-        //    await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
-        //}
+            entityList.Combine(anotherEntityList);
+
+            await tableStorage.CreateTableAsync().ConfigureAwait(false);
+            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+        }
 
 
         public static void SetupRowKeyRecords(ITableStore<TestTableEntity> tableStorage)

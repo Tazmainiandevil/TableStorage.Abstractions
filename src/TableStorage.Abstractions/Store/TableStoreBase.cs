@@ -1,4 +1,5 @@
-﻿using Azure.Data.Tables;
+﻿using Azure;
+using Azure.Data.Tables;
 using FluentValidation;
 using System;
 using System.Collections.Generic;
@@ -261,6 +262,30 @@ namespace TableStorage.Abstractions.Store
             {
                 throw new ArgumentNullException(nameof(record), "Record cannot be null");
             }
+        }
+
+
+        /// <summary>
+        /// Builds the get by partition query.
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <returns>The table query</returns>
+        //private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
+        protected Pageable<T> BuildGetByPartitionQuery<T>(string partitionKey) where T : class, ITableEntity, new()
+        {
+            Pageable<T> queryResults = CloudTable.Query<T>(filter: $"PartitionKey eq '{partitionKey}'");
+            return queryResults;
+        }
+
+        /// <summary>
+        /// Build the row key table query
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <returns>The table query</returns>
+        protected Pageable<T> BuildGetByRowKeyQuery<T>(string rowKey) where T : class, ITableEntity, new()
+        {
+            Pageable<T> queryResults = CloudTable.Query<T>(filter: $"RowKey eq '{rowKey}'");
+            return queryResults;
         }
 
         #endregion Helpers
