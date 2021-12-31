@@ -6,7 +6,9 @@
 **/obj
 **/bin
 /.vs
+/.idea
 *.user
 *.nupkg
+*.DotSettings
 
 __azurite_db_table__.json
