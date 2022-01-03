@@ -1,5 +1,4 @@
-﻿using Azure;
-using Azure.Data.Tables;
+﻿using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -193,48 +192,6 @@ namespace TableStorage.Abstractions.Store
             return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
         }
 
-        ///// <summary>
-        ///// Get all the records in the table
-        ///// </summary>
-        ///// <returns>All records</returns>
-        //public IEnumerable<TableEntity> GetAllRecords()
-        //{
-        //    var query = new TableQuery<DynamicTableEntity>();
-
-        //    var token = new TableContinuationToken();
-        //    var segment = CloudTable.ExecuteQuerySegmented(query, token);
-        //    while (token != null)
-        //    {
-        //        foreach (var result in segment)
-        //        {
-        //            yield return result;
-        //        }
-        //        token = segment.ContinuationToken;
-        //        segment = CloudTable.ExecuteQuerySegmented(query, token);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// Get all the records in the table
-        ///// </summary>
-        ///// <returns>All records</returns>
-        //public async Task<IEnumerable<TableEntity>> GetAllRecordsAsync()
-        //{
-        //    TableContinuationToken continuationToken = null;
-
-        //    var query = new TableQuery<DynamicTableEntity>();
-
-        //    var allItems = new List<DynamicTableEntity>();
-        //    do
-        //    {
-        //        var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-        //        continuationToken = items.ContinuationToken;
-        //        allItems.AddRange(items);
-        //    } while (continuationToken != null);
-
-        //    return allItems;
-        //}
-
         /// <summary>
         /// Get the records by partition key
         /// </summary>
@@ -257,14 +214,9 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            var allItems = new List<T>();
-            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
-            await foreach (var queryResult in queryResults)
-            {
-                allItems.Add(queryResult);
-            }
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
 
-            return allItems;
+            return await queryResults.ToListAsync();
         }
 
         /// <summary>
@@ -287,79 +239,9 @@ namespace TableStorage.Abstractions.Store
         public async Task<IEnumerable<T>> GetByRowKeyAsync<T>(string rowKey) where T : class, ITableEntity, new()
         {
             EnsureRowKey(rowKey);
-            var allItems = new List<T>();
-            AsyncPageable<T> queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
-            await foreach (var queryResult in queryResults)
-            {
-                allItems.Add(queryResult);
-            }
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
 
-            return allItems;
+            return await queryResults.ToListAsync();
         }
-
-        //#region Helpers
-
-        ///// <summary>
-        ///// Create the entity resolver for type T
-        ///// </summary>
-        ///// <returns>The entity resolver</returns>
-        //private static EntityResolver<T> CreateEntityResolver<T>() where T : class, ITableEntity, new()
-        //{
-        //    return (pk, rk, ts, props, etag) =>
-        //    {
-        //        var resolvedEntity = new T { PartitionKey = pk, RowKey = rk, Timestamp = ts, ETag = etag };
-        //        resolvedEntity.ReadEntity(props, null);
-        //        return resolvedEntity;
-        //    };
-        //}
-
-        //private TableQuerySegment<T> ExecuteQuerySegment<T>(TableQuery<DynamicTableEntity> query, TableContinuationToken continuationToken) where T : class, ITableEntity, new()
-        //{
-        //    var items = CloudTable.ExecuteQuerySegmented(query, CreateEntityResolver<T>(), continuationToken);
-        //    return items;
-        //}
-
-        ///// <summary>
-        ///// Build the row key table query
-        ///// </summary>
-        ///// <param name="rowKey">The row key</param>
-        ///// <returns>The table query</returns>
-        //private static TableQuery<TableEntity> BuildGetByRowKeyQuery(string rowKey)
-        //{
-        //    var filter = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey);
-
-        //    var query = new TableQuery<DynamicTableEntity>().Where(filter);
-
-        //    return query;
-        //}
-
-        ///// <summary>
-        ///// Builds the get by partition query.
-        ///// </summary>
-        ///// <param name = "partitionKey" > The partition key.</param>
-        ///// <returns>The table query</returns>
-        ////private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
-        ////private Pageable<T> BuildGetByPartitionQuery<T>(string partitionKey) where T : class, ITableEntity, new()
-        ////{
-        ////    Pageable<T> queryResults = CloudTable.Query<T>(filter: $"PartitionKey eq '{partitionKey}'");
-        ////    return queryResults;
-        ////    var query = new TableQuery<T>().Where(
-        ////        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
-        ////    return query;
-        ////}
-
-        ///// <summary>
-        ///// Builds the get by partition query.
-        ///// </summary>
-        ///// <param name="partitionKey">The partition key.</param>
-        ///// <returns>The table query</returns>
-        //private static TableQuery<TableEntity> BuildGetByPartitionQuery(string partitionKey)
-        //{
-        //    var query = new TableQuery<DynamicTableEntity>().Where(
-        //        TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
-        //    return query;
-        //}
-
-        //#endregion Helpers
     }
 }

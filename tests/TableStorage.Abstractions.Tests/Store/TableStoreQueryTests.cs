@@ -523,6 +523,7 @@ namespace TableStorage.Abstractions.Tests.Store
         public void get_all_records_with_over_a_thousand_entries_returns_the_expected_count()
         {
             // Arrange
+
             const int recordCount = 1100;
             TestDataHelper.SetupLotsOfRecords(recordCount, _tableStorage);
 
@@ -571,6 +572,23 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().Be(4);
         }
+
+
+        [Fact]
+        public void get_record_count_with_over_a_thousand_entries_returns_the_expected_count()
+        {
+            // Arrange
+
+            const int recordCount = 1100;
+            TestDataHelper.SetupLotsOfRecords(recordCount, _tableStorage);
+
+            // Act
+            var result = _tableStorage.GetRecordCount();
+
+            // Assert
+            result.Should().Be(recordCount);
+        }
+
 
         [Fact]
         public async Task get_records_by_filter_with_a_given_filter_returns_the_expected_count()
@@ -1006,6 +1024,21 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             result.Should().Be(4);
+        }
+
+        [Fact]
+        public async Task get_record_count_async_with_over_a_thousand_entries_returns_the_expected_count()
+        {
+            // Arrange
+
+            const int recordCount = 1252;
+            TestDataHelper.SetupLotsOfRecords(recordCount, _tableStorage);
+
+            // Act
+            var result = await _tableStorage.GetRecordCountAsync();
+
+            // Assert
+            result.Should().Be(recordCount);
         }
 
         [Fact]
