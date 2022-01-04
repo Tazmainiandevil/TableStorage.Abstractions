@@ -126,7 +126,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            CloudTable.UpdateEntity(record, record.ETag, TableUpdateMode.Merge);
+            CloudTable.UpdateEntity(record, record.ETag);
         }
 
         /// <summary>

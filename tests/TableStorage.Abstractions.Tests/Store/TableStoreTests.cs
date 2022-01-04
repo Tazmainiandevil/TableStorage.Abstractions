@@ -1,6 +1,7 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using System;
+using System.Threading.Tasks;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
 using Xunit;
@@ -12,6 +13,7 @@ namespace TableStorage.Abstractions.Tests.Store
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
         private readonly ITableStore<TestTableEntity> _tableStorage;
+
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
         public TableStoreTests()
@@ -103,8 +105,7 @@ namespace TableStorage.Abstractions.Tests.Store
         [Theory]
         [InlineData(-1)]
         [InlineData(0)]
-        public void create_table_storage_with_table_options_retry_wait_in_seconds_less_than_1_then_throws_an_exception(
-            double retryTime)
+        public void create_table_storage_with_table_options_retry_wait_in_seconds_less_than_1_then_throws_an_exception(double retryTime)
         {
             // Arrange
             var options = new TableStorageOptions { RetryWaitTimeInSeconds = retryTime };
@@ -122,9 +123,7 @@ namespace TableStorage.Abstractions.Tests.Store
         [InlineData(-1, -1, -1)]
         [InlineData(0, 0, 0)]
         [InlineData(1, 0, 0)]
-        public void
-            create_table_storage_with_multiple_invalid_table_options_throws_an_exception_with_all_invalid_entries(
-                int connectionLimit, int retries, double retryTime)
+        public void create_table_storage_with_multiple_invalid_table_options_throws_an_exception_with_all_invalid_entries(int connectionLimit, int retries, double retryTime)
         {
             // Arrange
             var options = new TableStorageOptions
@@ -139,30 +138,57 @@ namespace TableStorage.Abstractions.Tests.Store
                     "Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error\r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
-        //[Fact]
-        //public void table_does_exist_then_exist_check_returns_true()
-        //{
-        //    // Arrange
-        //    _tableStorage.DeleteTable();
+        [Fact]
+        public void table_does_exist_then_exist_check_returns_true()
+        {
+            // Arrange
+            _tableStorage.DeleteTable();
 
-        //    // Act
-        //    _tableStorage.CreateTable();
+            // Act
+            _tableStorage.CreateTable();
 
-        //    // Assert
-        //    _tableStorage.TableExists().Should().BeTrue();
-        //}
+            // Assert
+            _tableStorage.TableExists().Should().BeTrue();
+        }
 
-        //[Fact]
-        //public void table_does_not_exist_then_exist_check_returns_false()
-        //{
-        //    // Arrange
-        //    _tableStorage.DeleteTable();
+        [Fact]
+        public void table_does_not_exist_then_exist_check_returns_false()
+        {
+            // Arrange
+            _tableStorage.DeleteTable();
 
-        //    // Act
-        //    var result = _tableStorage.TableExists();
+            // Act
+            var result = _tableStorage.TableExists();
 
-        //    // Assert
-        //    result.Should().BeFalse();
-        //}
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task table_does_exist_then_exist_async_check_returns_true()
+        {
+            // Arrange
+            await _tableStorage.DeleteTableAsync();
+            await _tableStorage.CreateTableAsync();
+
+            // Act
+            var result = await _tableStorage.TableExistsAsync();
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task table_does_not_exist_then_exist_async_check_returns_false()
+        {
+            // Arrange
+            await _tableStorage.DeleteTableAsync();
+
+            // Act
+            var result = await _tableStorage.TableExistsAsync();
+
+            // Assert
+            result.Should().BeFalse();
+        }
     }
 }

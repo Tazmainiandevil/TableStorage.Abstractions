@@ -22,6 +22,9 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         protected readonly TableClient CloudTable;
 
+        private readonly TableServiceClient CloudTableService;
+        private readonly string _tableName;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -58,9 +61,10 @@ namespace TableStorage.Abstractions.Store
             validator.ValidateAndThrow(options);
 
             OptimisePerformance(storageConnectionString, options);
-            var cloudTableClient = CreateTableClient(storageConnectionString, options.Retries, options.RetryWaitTimeInSeconds);
+            (CloudTableService, CloudTable) = CreateTableClient(storageConnectionString, tableName, options.Retries, options.RetryWaitTimeInSeconds);
 
-            CloudTable = cloudTableClient.GetTableClient(tableName);
+            _tableName = tableName;
+
             if (options.EnsureTableExists)
             {
                 //if (!TableExists())
@@ -89,7 +93,7 @@ namespace TableStorage.Abstractions.Store
         /// <param name="retries">Number of retries</param>
         /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
         /// <returns>The table client</returns>
-        private static TableServiceClient CreateTableClient(string connectionString, int retries, double retryWaitTimeInSeconds)
+        private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string connectionString, string tableName, int retries, double retryWaitTimeInSeconds)
         {
             var options = new TableClientOptions
             {
@@ -101,9 +105,9 @@ namespace TableStorage.Abstractions.Store
                 }
             };
 
-            var cloudTableClient = new TableServiceClient(connectionString, options);
-
-            return cloudTableClient;
+            var serviceClient = new TableServiceClient(connectionString, options);
+            var tableClient = serviceClient.GetTableClient(tableName);
+            return (serviceClient, tableClient);
         }
 
         /// <summary>
@@ -122,25 +126,26 @@ namespace TableStorage.Abstractions.Store
             return CloudTable.CreateIfNotExistsAsync();
         }
 
-        ///// <summary>
-        ///// Does the table exist
-        ///// </summary>
-        ///// <returns></returns>
-        //public bool TableExists(string tableName)
-        //{
-        //    var queryTableResults = CloudTable.Query(filter: $"TableName eq '{tableName}'");
+        /// <summary>
+        /// Does the table exist
+        /// </summary>
+        /// <returns></returns>
+        public bool TableExists()
+        {
+            var queryTableResults = CloudTableService.Query(e => e.Name == _tableName);
+            return queryTableResults.Any();
+        }
 
-        //    return CloudTable.Exists();
-        //}
-
-        ///// <summary>
-        ///// Does the table exist
-        ///// </summary>
-        ///// <returns></returns>
-        //public async Task<bool> TableExistsAsync()
-        //{
-        //    return await CloudTable.ExistsAsync().ConfigureAwait(false);
-        //}
+        /// <summary>
+        /// Does the table exist
+        /// </summary>
+        /// <returns></returns>
+        public async Task<bool> TableExistsAsync()
+        {
+            var queryResults = CloudTableService.QueryAsync(e => e.Name == _tableName);
+            var list = await queryResults.ToListAsync();
+            return list.Any();
+        }
 
         /// <summary>
         /// Delete the table

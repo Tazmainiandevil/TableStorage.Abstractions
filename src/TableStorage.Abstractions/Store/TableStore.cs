@@ -100,7 +100,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            record.ETag = Azure.ETag.All;
+            record.ETag = ETag.All;
             Delete(record);
         }
 
@@ -513,7 +513,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            CloudTable.UpdateEntity(record, record.ETag, TableUpdateMode.Merge);
+            CloudTable.UpdateEntity(record, record.ETag);
         }
 
         /// <summary>
