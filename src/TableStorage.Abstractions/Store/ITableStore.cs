@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TableStorage.Abstractions.Models;
 
 namespace TableStorage.Abstractions.Store
 {
@@ -105,6 +106,12 @@ namespace TableStorage.Abstractions.Store
         /// Delete all records in the table
         /// </summary>
         /// <returns></returns>
+        void DeleteAll();
+
+        /// <summary>
+        /// Delete all records in the table
+        /// </summary>
+        /// <returns></returns>
         Task DeleteAllAsync();
 
         /// <summary>
@@ -153,25 +160,23 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records found</returns>
         Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
 
-        ///// <summary>
-        /////  Get the records by partition key, paged
-        ///// </summary>
-        ///// <param name="partitionKey">The partition key.</param>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="continuationTokenJson">The next page token.</param>
-        ///// <returns>The Paged Result</returns>
-        //PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100,
-        //    string continuationTokenJson = null);
+        /// <summary>
+        ///  Get the records by partition key, paged
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        /// <returns>The Paged Result</returns>
+        PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100, string continuationTokenJson = null);
 
-        ///// <summary>
-        /////  Get the records by partition key, paged
-        ///// </summary>
-        ///// <param name="partitionKey">The partition key.</param>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="continuationTokenJson">The next page token.</param>
-        ///// <returns>The Paged Result</returns>
-        //Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100,
-        //    string continuationTokenJson = null);
+        /// <summary>
+        ///  Get the records by partition key, paged
+        /// </summary>
+        /// <param name="partitionKey">The partition key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationTokenJson">The next page token.</param>
+        /// <returns>The Paged Result</returns>
+        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null);
 
         /// <summary>
         /// Get the records by row key
@@ -203,23 +208,21 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records found</returns>
         Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago);
 
-        ///// <summary>
-        ///// Get the records by row key
-        ///// </summary>
-        ///// <param name="rowKey">The row key.</param>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="continuationTokenJson">The next page token.</param>
-        //PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100,
-        //    string continuationTokenJson = null);
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationToken">The next page token.</param>
+        PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100, string continuationToken = null);
 
-        ///// <summary>
-        ///// Get the records by row key
-        ///// </summary>
-        ///// <param name="rowKey">The row key.</param>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="continuationTokenJson">The next page token.</param>
-        //Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100,
-        //    string continuationTokenJson = null);
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key.</param>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationToken">The next page token.</param>
+        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null);
 
         /// <summary>
         /// Get all the records in the table
@@ -233,21 +236,21 @@ namespace TableStorage.Abstractions.Store
         /// <returns>All records</returns>
         Task<IEnumerable<T>> GetAllRecordsAsync();
 
-        ///// <summary>
-        ///// Gets all records paged.
-        ///// </summary>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="pageToken">The page token.</param>
-        ///// <returns>The Paged Result</returns>
-        //PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string pageToken = null);
+        /// <summary>
+        /// Gets all records paged.
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationToken">The page token.</param>
+        /// <returns>The Paged Result</returns>
+        PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string continuationToken = null);
 
-        ///// <summary>
-        ///// Gets all records in the table, paged
-        ///// </summary>
-        ///// <param name="pageSize">Size of the page.</param>
-        ///// <param name="pageToken">The page token</param>
-        ///// <returns>The Paged Result</returns>
-        //Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null);
+        /// <summary>
+        /// Gets all records in the table, paged
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="continuationToken">The page token</param>
+        /// <returns>The Paged Result</returns>
+        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string continuationToken = null);
 
         /// <summary>
         /// Get the records and filter by a given predicate

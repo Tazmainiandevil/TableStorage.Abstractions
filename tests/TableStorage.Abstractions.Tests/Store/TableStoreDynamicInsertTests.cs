@@ -233,5 +233,20 @@ namespace TableStorage.Abstractions.Tests.Store
         //    // Assert
         //    result.Count().Should().Be(entryList.Count);
         //}
+
+        [Fact]
+        public void insert_dynamic_record_into_the_table_and_record_count_should_be_greater_than_zero()
+        {
+            // Arrange
+            var testEntity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
+
+            // Act
+            _tableStorageDynamic.Insert(testEntity);
+
+            var result = _tableStorageDynamic.GetByRowKey<TestTableEntity>("John").ToList();
+
+            // Assert
+            result.Count.Should().BeGreaterThan(0);
+        }
     }
 }
