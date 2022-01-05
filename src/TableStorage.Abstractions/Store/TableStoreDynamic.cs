@@ -192,6 +192,19 @@ namespace TableStorage.Abstractions.Store
             return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
         }
 
+        public IEnumerable<TableEntity> GetAllRecords()
+        {
+            var query = CloudTable.Query<TableEntity>();
+            return query;
+        }
+
+        public async Task<IEnumerable<TableEntity>> GetAllRecordsAsync()
+        {
+            var queryResults = CloudTable.QueryAsync<TableEntity>();
+
+            return await queryResults.ToListAsync();
+        }
+
         /// <summary>
         /// Get the records by partition key
         /// </summary>

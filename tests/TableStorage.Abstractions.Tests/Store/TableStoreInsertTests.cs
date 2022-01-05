@@ -36,8 +36,6 @@ namespace TableStorage.Abstractions.Tests.Store
             result.Count.Should().BeGreaterThan(0);
         }
 
-
-
         [Fact]
         public void insert_or_replace_record_into_the_table_when_record_does_not_exist_and_record_count_should_be_greater_than_zero()
         {
@@ -52,8 +50,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Count.Should().BeGreaterThan(0);
         }
-
-
 
         [Fact]
         public void insert_or_replace_record_into_the_table_when_record_does_exist_and_record_should_have_updated_fields()
@@ -70,22 +66,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result[0].Age.Should().Be(45);
         }
-
-        //[Fact]
-        //public void insert_or_replace_dynamic_record_into_the_table_when_record_does_exist_and_record_should_have_updated_fields()
-        //{
-        //    // Arrange
-        //    var testEntity = new TestTableEntity("John", "Smith") { Age = 21, Email = "john.smith@something.com" };
-        //    _tableStorageDynamic.Insert(testEntity);
-        //    // Act
-        //    testEntity = new TestTableEntity("John", "Smith") { Age = 45, Email = "john.smith@something.com" };
-        //    _tableStorageDynamic.InsertOrReplace(testEntity);
-
-        //    var result = _tableStorageDynamic.GetByRowKey<TestTableEntity>("John").ToList();
-
-        //    // Assert
-        //    result[0].Age.Should().Be(45);
-        //}
 
         [Fact]
         public void insert_with_null_for_multiple_records_throws_exception()

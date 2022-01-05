@@ -13,7 +13,7 @@ namespace TableStorage.Abstractions.Tests.Store
         {
             // Arrange
             // Act
-            Action act = () => _tableStorage.Update(null as TestTableEntity);
+            Action act = () => _tableStorage.Update(null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
@@ -46,7 +46,7 @@ namespace TableStorage.Abstractions.Tests.Store
         {
             // Arrange
             // Act
-            Action act = () => _tableStorage.UpdateUsingWildcardEtag(null as TestTableEntity);
+            Action act = () => _tableStorage.UpdateUsingWildcardEtag(null);
 
             // Assert
             act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
@@ -106,7 +106,7 @@ namespace TableStorage.Abstractions.Tests.Store
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await _tableStorage.UpdateUsingWildcardEtagAsync(null as TestTableEntity);
+            Func<Task> act = async () => await _tableStorage.UpdateUsingWildcardEtagAsync(null);
 
             // Assert
             act.Should().ThrowAsync<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");

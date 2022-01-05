@@ -1002,18 +1002,18 @@ namespace TableStorage.Abstractions.Tests.Store
                     .Excluding(o => o.Path == "CompiledRead"));
         }
 
-        //[Fact]
-        //public async Task get_record_async_with_no_entry_returns_null()
-        //{
-        //    // Arrange
-        //    await TestDataHelper.SetupRecords(_tableStorage);
+        [Fact]
+        public async Task get_record_async_with_no_entry_returns_null()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecords(_tableStorage);
 
-        //    // Act
-        //    var result = await _tableStorage.GetRecordAsync("surname", "first");
+            // Act
+            Func<Task> act = async () => await _tableStorage.GetRecordAsync("surname", "first");
 
-        //    // Assert
-        //    result.Should().BeNull();
-        //}
+            // Assert
+            await act.Should().ThrowAsync<RequestFailedException>().WithMessage("The specified resource does not exist.*");
+        }
 
         [Fact]
         public async Task get_record_async_with_no_entry_returns_a_request_failed_exception_with_resource_not_found()

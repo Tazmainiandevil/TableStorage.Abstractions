@@ -83,17 +83,17 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The record found or null if not found</returns>
         Task<T> GetRecordAsync<T>(string partitionKey, string rowKey) where T : class, ITableEntity, new();
 
-        ///// <summary>
-        ///// Get all the records in the table
-        ///// </summary>
-        ///// <returns>All records</returns>
-        //IEnumerable<TableEntity> GetAllRecords();
+        /// <summary>
+        /// Get all the records in the table
+        /// </summary>
+        /// <returns>All records</returns>
+        IEnumerable<TableEntity> GetAllRecords();
 
-        ///// <summary>
-        ///// Get all the records in the table
-        ///// </summary>
-        ///// <returns>All records</returns>
-        //Task<IEnumerable<TableEntity>> GetAllRecordsAsync();
+        /// <summary>
+        /// Get all the records in the table
+        /// </summary>
+        /// <returns>All records</returns>
+        Task<IEnumerable<TableEntity>> GetAllRecordsAsync();
 
         /// <summary>
         /// Get the records by partition key

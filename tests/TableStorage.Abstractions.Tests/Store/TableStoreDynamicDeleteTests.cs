@@ -37,36 +37,6 @@ namespace TableStorage.Abstractions.Tests.Store
             result.Count().Should().Be(1);
         }
 
-        //[Fact]
-        //public async Task delete_all_records_and_the_record_count_should_be_zero()
-        //{
-        //    // Arrange
-        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
-
-        //    // Act
-        //    await _tableStorageDynamic.DeleteAllAsync();
-        //    var result = await _tableStorageDynamic.GetAllRecordsAsync();
-
-        //    // Assert
-        //    result.Count().Should().Be(0);
-        //}
-
-        //[Fact]
-        //public async Task delete_records_by_partitionkey_and_record_count_by_partition_should_be_zero()
-        //{
-        //    // Arrange
-        //    await TestDataHelper.SetupRecords(_tableStorageDynamic);
-
-        //    // Act
-        //    await _tableStorageDynamic.DeleteByPartitionAsync("Smith");
-        //    var resultEmpty = await _tableStorageDynamic.GetByPartitionKeyAsync("Smith");
-        //    var resultNotEmpty = await _tableStorageDynamic.GetByPartitionKeyAsync("Jones");
-
-        //    // Assert
-        //    resultEmpty.Count().Should().Be(0);
-        //    resultNotEmpty.Count().Should().NotBe(0);
-        //}
-
         [Fact]
         public void delete_async_dynamic_with_null_record_throws_exception()
         {
