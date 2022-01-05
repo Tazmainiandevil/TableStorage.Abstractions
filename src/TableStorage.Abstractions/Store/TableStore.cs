@@ -128,8 +128,6 @@ namespace TableStorage.Abstractions.Store
             return DeleteAsync(record);
         }
 
-
-
         /// <summary>
         /// Get all the records in the table
         /// </summary>
@@ -137,11 +135,10 @@ namespace TableStorage.Abstractions.Store
         public IEnumerable<T> GetAllRecords()
         {
             var query = CloudTable.Query<T>();
-            return query;
-            //foreach (var result in query)
-            //{
-            //    yield return result;
-            //}
+            foreach (var result in query)
+            {
+                yield return result;
+            }
         }
 
         /// <summary>
@@ -151,7 +148,6 @@ namespace TableStorage.Abstractions.Store
         public async Task<IEnumerable<T>> GetAllRecordsAsync()
         {
             var queryResults = CloudTable.QueryAsync<T>();
-
             return await queryResults.ToListAsync();
         }
 
