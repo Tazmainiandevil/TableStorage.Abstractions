@@ -34,7 +34,7 @@ namespace TableStorage.Abstractions.Tests.Helpers
             tableStorage.CreateTable();
             for (var i = 0; i < count; i++)
             {
-                var entry = new TestTableEntity($"name{i}", $"surname{count}") { Age = 32, Email = $"{count}@somewhere.com" };
+                var entry = new TestTableEntity($"name{i}", $"surname{count}") { Age = 32, Email = $"surname{count}@somewhere.com" };
                 tableStorage.Insert(entry);
             }
         }

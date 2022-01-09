@@ -12,6 +12,7 @@ namespace TableStorage.Abstractions.Tests.Store
     {
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
+
         private readonly ITableStore<TestTableEntity> _tableStorage;
 
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
