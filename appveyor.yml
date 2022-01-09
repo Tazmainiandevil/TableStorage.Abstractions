@@ -18,7 +18,7 @@ before_build:
   # Display minimal restore text
   - cmd: dotnet restore --verbosity m
   # Start the azure storage emulator  
-  - ps: 'start "%ProgramFiles%\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe"'
+  - ps: start azurite.exe
 
 build:
  verbosity: minimal
