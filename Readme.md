@@ -45,9 +45,16 @@ public class TableStorageOptions
 
 Example entity:
 
+__NOTE__: Azure.Data.Tables requires inheritance from the interface as the base class TableEntity is a sealed class.
+
 ```C#
-public class TestTableEntity : TableEntity
+public class TestTableEntity : ITableEntity
 {
+    public string PartitionKey { get; set; }
+    public string RowKey { get; set; }
+    public DateTimeOffset? Timestamp { get; set; }
+    public ETag ETag { get; set; }
+
     public int Age { get; set; }
     public string Email { get; set; }
 
