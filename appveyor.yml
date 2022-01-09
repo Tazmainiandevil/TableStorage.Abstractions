@@ -1,5 +1,5 @@
 version: 2.0.{build}
-os: Visual Studio 2022
+image: Visual Studio 2022
 configuration: Release
 
 # enable version patching with build version number 
@@ -18,7 +18,7 @@ before_build:
   # Display minimal restore text
   - cmd: dotnet restore --verbosity m
   # Start the azure storage emulator  
-  - '"%ProgramFiles%\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe"'
+  - ps: 'start "%ProgramFiles%\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe"'
 
 build:
  verbosity: minimal
