@@ -9,7 +9,7 @@
     <PackageVersion>1.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.3.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.4.0" />
     <PackageReference Include="Azure.Storage.Common" Version="12.9.0" />
     <PackageReference Include="FluentValidation" Version="10.3.6" />
     <PackageReference Include="System.Linq.Async" Version="5.1.0" />

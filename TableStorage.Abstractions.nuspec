@@ -13,7 +13,7 @@
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
      <group targetFramework="netstandard2.0">
-      <dependency id="Azure.Data.Tables" version="12.3.0" />
+      <dependency id="Azure.Data.Tables" version="12.4.0" />
       <dependency id="Azure.Storage.Common" Version="12.9.0" />
       <dependency id="FluentValidation" version="10.3.6" />
       <dependency id="System.Linq.Async" version="5.1.0" />      
