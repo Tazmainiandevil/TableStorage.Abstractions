@@ -14,6 +14,21 @@ namespace TableStorage.Abstractions.Tests.Parsers
         }
 
         [Theory]
+        [InlineData("30s")]
+        [InlineData("30S")]
+        public void given_time_string_parser_get_time_ago_when_30s_then_the_result_is_30_seconds_in_the_past(string ago)
+        {
+            // Arrange
+            var expected = new DateTime(2018, 01, 01, 08, 9, 30);
+
+            // Act
+            var result = TimeStringParser.GetTimeAgo(ago);
+
+            // Assert
+            result.Should().Be(expected);
+        }
+
+        [Theory]
         [InlineData("10m")]
         [InlineData("10M")]
         public void given_time_string_parser_get_time_ago_when_10m_then_the_result_is_10_minutes_in_the_past(string ago)
@@ -73,11 +88,12 @@ namespace TableStorage.Abstractions.Tests.Parsers
         public void given_time_string_parser_get_time_ago_when_value_contains_additional_characters_after_the_valid_time_then_an_exception_is_thrown()
         {
             // Arrange
+            var invalidAgo = "1hiudadlj";
             // Act
-            Action act = () => TimeStringParser.GetTimeAgo("1hdfyskdhfkds");
+            Action act = () => TimeStringParser.GetTimeAgo(invalidAgo);
 
             // Assert
-            act.Should().Throw<ArgumentException>().WithMessage("Time ago value '1hdfyskdhfkds' is invalid. Values must be in the format of 1m, 1h, 1d.*");
+            act.Should().Throw<ArgumentException>().WithMessage($"Time ago value '{invalidAgo}' is invalid. Values must be in the format of 1m, 1h, 1d.*");
         }
     }
 }

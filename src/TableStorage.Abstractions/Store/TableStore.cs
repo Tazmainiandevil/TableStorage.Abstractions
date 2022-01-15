@@ -57,10 +57,13 @@ namespace TableStorage.Abstractions.Store
         public void DeleteAll()
         {
             var queryResults = CloudTable.Query<T>();
-            var deleteEntitiesBatch = new List<TableTransactionAction>();
 
-            deleteEntitiesBatch.AddRange(queryResults.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-            CloudTable.SubmitTransaction(deleteEntitiesBatch);
+            if (queryResults.Any())
+            {
+                var deleteEntitiesBatch = new List<TableTransactionAction>();
+                deleteEntitiesBatch.AddRange(queryResults.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+                CloudTable.SubmitTransaction(deleteEntitiesBatch);
+            }
         }
 
         /// <summary>
@@ -70,11 +73,12 @@ namespace TableStorage.Abstractions.Store
         {
             var records = await GetAllRecordsAsync().ConfigureAwait(false);
 
-            var deleteEntitiesBatch = new List<TableTransactionAction>();
-
-            deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-
-            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+            if (records.Any())
+            {
+                var deleteEntitiesBatch = new List<TableTransactionAction>();
+                deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -383,7 +387,9 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filtered</returns>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago)
         {
-            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
             return GetAllRecords().Where(CombineFilter);
         }
 
@@ -410,7 +416,10 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filtered</returns>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize, string ago)
         {
-            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
+
             var items = GetRecordsByFilter(CombineFilter);
             return items.Page(start, pageSize);
         }
@@ -440,7 +449,10 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The records filtered</returns>
         public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago)
         {
-            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
+
             var allRecords = await GetAllRecordsAsync();
             var data = allRecords.Where(CombineFilter).Page(start, pageSize);
 
@@ -476,7 +488,8 @@ namespace TableStorage.Abstractions.Store
         /// <returns>The observable for the results</returns>
         public IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago)
         {
-            bool CombineFilter(T x) => filter(x) && x.Timestamp >= TimeStringParser.GetTimeAgo(ago);
+            var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
+            bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
 
             return Observable.Create<T>(o =>
             {

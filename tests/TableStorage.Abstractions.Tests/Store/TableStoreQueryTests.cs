@@ -67,6 +67,45 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
+        public async Task get_records_by_filter_of_with_a_time_in_the_past_returns_the_expected_results()
+        {
+            // Arrange
+            const string ago = "10s";
+            const string queryAgo = "5s";
+            await TestDataHelper.SetupRecordsAgo(_tableStorage, ago);
+            var expected = new List<TestTableEntity>
+            {
+                new TestTableEntity("Liam", "Matthews") {Age = 28, Email = "liam.matthews@something.com"}
+            };
+
+            // Act
+            var result = _tableStorage.GetRecordsByFilter(x => x.Age is >= 21 and < 29, queryAgo);
+
+            // Assert
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
+        }
+
+        [Fact]
+        public async Task get_records_by_all_age_filter_with_a_time_in_the_past_returns_the_expected_results()
+        {
+            // Arrange
+            const string ago = "10s";
+            const string queryAgo = "5s";
+            await TestDataHelper.SetupRecordsAgo(_tableStorage, ago);
+            var expected = new List<TestTableEntity>
+            {
+                new TestTableEntity("Liam", "Matthews") {Age = 28, Email = "liam.matthews@something.com"},
+                new TestTableEntity("Mary", "Gates") {Age = 45, Email = "mary.gates@somewhere.com"}
+            };
+
+            // Act
+            var result = _tableStorage.GetRecordsByFilter(x => x.Age >= 1 && x.Age < 150, queryAgo);
+
+            // Assert
+            result.Should().BeEquivalentTo(expected, op => op.Excluding(o => o.Timestamp).Excluding(o => o.ETag).Excluding(o => o.Path.EndsWith("CompiledRead")));
+        }
+
+        [Fact]
         public async Task get_record_with_an_entry_returns_the_expected_entry()
         {
             // Arrange
@@ -588,7 +627,6 @@ namespace TableStorage.Abstractions.Tests.Store
             result.Should().Be(4);
         }
 
-
         [Fact]
         public void get_record_count_with_over_a_thousand_entries_returns_the_expected_count()
         {
@@ -603,7 +641,6 @@ namespace TableStorage.Abstractions.Tests.Store
             // Assert
             result.Should().Be(recordCount);
         }
-
 
         [Fact]
         public async Task get_records_by_filter_with_a_given_filter_returns_the_expected_count()

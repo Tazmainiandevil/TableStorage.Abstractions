@@ -4,12 +4,15 @@ using System;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
+using Useful.Extensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests : IDisposable
     {
+        private readonly ITestOutputHelper _testOutputHelper;
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
 
@@ -17,9 +20,11 @@ namespace TableStorage.Abstractions.Tests.Store
 
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
-        public TableStoreTests()
+        public TableStoreTests(ITestOutputHelper testOutputHelper)
         {
+            _testOutputHelper = testOutputHelper;
             _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString, _tableStorageOptions);
+            SystemTime.UtcNow = () => DateTime.UtcNow;
         }
 
         public void Dispose()

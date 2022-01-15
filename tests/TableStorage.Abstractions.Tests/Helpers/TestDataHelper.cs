@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using TableStorage.Abstractions.Parsers;
 using TableStorage.Abstractions.Store;
 using Useful.Extensions;
 
@@ -27,6 +28,30 @@ namespace TableStorage.Abstractions.Tests.Helpers
 
             await tableStorage.CreateTableAsync().ConfigureAwait(false);
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+        }
+
+        public static async Task SetupRecordsAgo(ITableStore<TestTableEntity> tableStorage, string ago)
+        {
+            await tableStorage.DeleteAllAsync();
+
+            var entityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("Kevin", "Bacon") {Age = 21, Email = "kevin.bacon@something.com"},
+                new TestTableEntity("Steven", "Jones") {Age = 32, Email = "steven.jones@somewhere.com"}
+            };
+
+            await tableStorage.CreateTableAsync().ConfigureAwait(false);
+            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+
+            await Task.Delay(TimeStringParser.GetTimeAgoTimeSpan(ago));
+
+            var anotherEntityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("Liam", "Matthews") {Age = 28, Email = "liam.matthews@something.com"},
+                new TestTableEntity("Mary", "Gates") {Age = 45, Email = "mary.gates@somewhere.com"}
+            };
+
+            await tableStorage.InsertAsync(anotherEntityList).ConfigureAwait(false);
         }
 
         public static void SetupLotsOfRecords(int count, ITableStore<TestTableEntity> tableStorage)
@@ -58,7 +83,6 @@ namespace TableStorage.Abstractions.Tests.Helpers
             await tableStorage.CreateTableAsync().ConfigureAwait(false);
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
-
 
         public static void SetupRowKeyRecords(ITableStore<TestTableEntity> tableStorage)
         {
