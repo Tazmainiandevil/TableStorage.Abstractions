@@ -1,5 +1,5 @@
 version: 2.0.{build}
-os: Visual Studio 2019
+image: Visual Studio 2022
 configuration: Release
 
 # enable version patching with build version number 
@@ -11,26 +11,14 @@ dotnet_csproj:
   assembly_version: '{version}'
   file_version: '{version}'
 
-# temporary workaround for getting Azure Storage Emulator 5.2 installed
-install: 
-  - ps: | 
-       $msiPath = "$env:TEMP\MicrosoftAzureStorageEmulator.msi"        
-       (New-Object Net.WebClient).DownloadFile('https://go.microsoft.com/fwlink/?linkid=717179&clcid=0x409', $msiPath)       
-       cmd /c start /wait msiexec /i $msiPath /quiet 
-       del $msiPath
-
 # restore NuGet packages before running
 before_build:
   # Display .NET Core version
   - cmd: dotnet --version
   # Display minimal restore text
   - cmd: dotnet restore --verbosity m
-  # Prepare localdb
-  - cmd: SqlLocalDB.exe create MSSQLLocalDB
-  - cmd: SqlLocalDB.exe start MSSQLLocalDB
-  - cmd: SqlLocalDB.exe info MSSQLLocalDB
-  # Start the azure storage emulator
-  - '"%ProgramFiles(x86)%\Microsoft SDKs\Azure\Storage Emulator\AzureStorageEmulator.exe" start'
+  # Start the azure storage emulator  
+  - ps: start "${Env:ProgramFiles}\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Azure Storage Emulator\azurite.exe"
 
 build:
  verbosity: minimal

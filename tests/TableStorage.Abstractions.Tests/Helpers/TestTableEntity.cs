@@ -1,8 +1,10 @@
-using Microsoft.Azure.Cosmos.Table;
+using Azure;
+using Azure.Data.Tables;
+using System;
 
 namespace TableStorage.Abstractions.Tests.Helpers
 {
-    public class TestTableEntity : TableEntity
+    public class TestTableEntity : ITableEntity
     {
         public int Age { get; set; }
         public string Email { get; set; }
@@ -16,5 +18,10 @@ namespace TableStorage.Abstractions.Tests.Helpers
             PartitionKey = surname;
             RowKey = name;
         }
+
+        public string PartitionKey { get; set; }
+        public string RowKey { get; set; }
+        public DateTimeOffset? Timestamp { get; set; }
+        public ETag ETag { get; set; }
     }
 }

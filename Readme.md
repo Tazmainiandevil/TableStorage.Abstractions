@@ -1,6 +1,6 @@
 # TableStorage.Abstractions
 
-Repository wrapper for Azure Table Storage in C# using the Microsoft.Azure.Cosmos.Table libraries and supporting .NET Standard 2.0.
+Repository wrapper for Azure Table Storage in C# using the Azure.Data.Tables libraries and supporting .NET Standard 2.0 and tested in .NET Framework 4.8 and .NET 6.0
 
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
 <a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
@@ -45,9 +45,16 @@ public class TableStorageOptions
 
 Example entity:
 
+__NOTE__: Azure.Data.Tables requires inheritance from the interface as the base class TableEntity is a sealed class.
+
 ```C#
-public class TestTableEntity : TableEntity
+public class TestTableEntity : ITableEntity
 {
+    public string PartitionKey { get; set; }
+    public string RowKey { get; set; }
+    public DateTimeOffset? Timestamp { get; set; }
+    public ETag ETag { get; set; }
+
     public int Age { get; set; }
     public string Email { get; set; }
 
@@ -281,4 +288,4 @@ __NOTE__: Currently only the basic methods are supported for this type of table,
 
 Most methods have a synchronous and asynchronous version.
 
-The unit tests rely on using Azure Storage Emulator (which can be found here <https://azure.microsoft.com/en-gb/downloads/>).
+The unit tests rely on using Azurite Emulator which is now bundled with Visual Studio 2022 details can be found on [Microsoft Docs](https://docs.microsoft.com/en-us/azure/storage/common/storage-use-azurite?tabs=visual-studio) for other installations including Visual Studio Code and Docker.

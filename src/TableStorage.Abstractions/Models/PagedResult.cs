@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 namespace TableStorage.Abstractions.Models
 {
@@ -9,10 +8,10 @@ namespace TableStorage.Abstractions.Models
         public IReadOnlyCollection<T> Items { get; }
         public bool IsFinalPage { get; }
 
-        internal PagedResult(IList<T> results, string continuationToken, bool isFinalPage)
+        internal PagedResult(IReadOnlyCollection<T> results, string continuationToken, bool isFinalPage)
         {
             ContinuationToken = continuationToken;
-            Items = new ReadOnlyCollection<T>(results);
+            Items = results;
             IsFinalPage = isFinalPage;
         }
     }

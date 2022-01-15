@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using Azure.Data.Tables;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,53 +6,54 @@ namespace TableStorage.Abstractions.Store
 {
     public interface ITableStoreDynamic : ITableStoreCommon
     {
-        /// <summary>
-        /// Insert an record
-        /// </summary>
-        /// <param name="record">The record to insert</param>
-        void Insert<T>(T record) where T : class, ITableEntity;
 
         /// <summary>
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
-        Task InsertAsync<T>(T record) where T : class, ITableEntity;
+        void Insert<T>(T record) where T : class, ITableEntity, new();
+
+        /// <summary>
+        /// Insert an record
+        /// </summary>
+        /// <param name="record">The record to insert</param>
+        Task InsertAsync<T>(T record) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Insert multiple records
         /// </summary>
         /// <param name="records">The records to insert</param>
-        void Insert<T>(IEnumerable<T> records) where T : class, ITableEntity;
+        void Insert<T>(IEnumerable<T> records) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Insert multiple records
         /// </summary>
         /// <param name="records">The records to insert</param>
-        Task InsertAsync<T>(IEnumerable<T> records) where T : class, ITableEntity;
+        Task InsertAsync<T>(IEnumerable<T> records) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
-        void InsertOrReplace<T>(T record) where T : class, ITableEntity;
+        void InsertOrReplace<T>(T record) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
-        Task InsertOrReplaceAsync<T>(T record) where T : class, ITableEntity;
+        Task InsertOrReplaceAsync<T>(T record) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        void Update<T>(T record) where T : class, ITableEntity;
+        void Update<T>(T record) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        Task UpdateAsync<T>(T record) where T : class, ITableEntity;
+        Task UpdateAsync<T>(T record) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Delete a record
@@ -72,7 +73,7 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
         /// <returns>The record found or null if not found</returns>
-        T GetRecord<T>(string partitionKey, string rowKey) where T : class, ITableEntity;
+        T GetRecord<T>(string partitionKey, string rowKey) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Get an record by partition and row key
@@ -80,19 +81,19 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
         /// <returns>The record found or null if not found</returns>
-        Task<T> GetRecordAsync<T>(string partitionKey, string rowKey) where T : class, ITableEntity;
+        Task<T> GetRecordAsync<T>(string partitionKey, string rowKey) where T : class, ITableEntity, new();
 
         /// <summary>
         /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
-        IEnumerable<DynamicTableEntity> GetAllRecords();
+        IEnumerable<TableEntity> GetAllRecords();
 
         /// <summary>
         /// Get all the records in the table
         /// </summary>
         /// <returns>All records</returns>
-        Task<IEnumerable<DynamicTableEntity>> GetAllRecordsAsync();
+        Task<IEnumerable<TableEntity>> GetAllRecordsAsync();
 
         /// <summary>
         /// Get the records by partition key

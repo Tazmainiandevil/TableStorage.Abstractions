@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,32 +34,49 @@ namespace TableStorage.Abstractions.Store
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
-        public void Insert<T>(T record) where T : class, ITableEntity
+        public void Insert<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Insert(record);
-            CloudTable.Execute(operation);
+            CloudTable.AddEntity(record);
         }
 
         /// <summary>
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
-        public Task InsertAsync<T>(T record) where T : class, ITableEntity
+        public Task InsertAsync<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
-
-            var operation = TableOperation.Insert(record);
-
-            return CloudTable.ExecuteAsync(operation);
+            return CloudTable.AddEntityAsync(record);
         }
 
         /// <summary>
         /// Insert multiple records
         /// </summary>
         /// <param name="records">The records to insert</param>
-        public void Insert<T>(IEnumerable<T> records) where T : class, ITableEntity
+        public void Insert<T>(IEnumerable<T> records) where T : class, ITableEntity, new()
+        {
+            if (records == null)
+            {
+                throw new ArgumentNullException(nameof(records), "Records cannot be null");
+            }
+
+            var partitionKeySeparation = records.GroupBy(x => x.PartitionKey)
+                .OrderBy(g => g.Key)
+                .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
+
+            foreach (var entry in partitionKeySeparation)
+            {
+                entry.ToList().ForEach(x => CloudTable.AddEntity(x));
+            }
+        }
+
+        /// <summary>
+        /// Insert multiple records
+        /// </summary>
+        /// <param name="records">The records to insert</param>
+        public async Task InsertAsync<T>(IEnumerable<T> records) where T : class, ITableEntity, new()
         {
             if (records == null)
             {
@@ -72,39 +89,9 @@ namespace TableStorage.Abstractions.Store
 
             foreach (var entry in partitionKeySeparation)
             {
-                var operation = new TableBatchOperation();
-                entry.ToList().ForEach(operation.Insert);
-
-                if (operation.Any())
+                await foreach (T qEntity in entry.ToAsyncEnumerable())
                 {
-                    CloudTable.ExecuteBatch(operation);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Insert multiple records
-        /// </summary>
-        /// <param name="records">The records to insert</param>
-        public async Task InsertAsync<T>(IEnumerable<T> records) where T : class, ITableEntity
-        {
-            if (records == null)
-            {
-                throw new ArgumentNullException(nameof(records));
-            }
-
-            var partitionKeySeparation = records.GroupBy(x => x.PartitionKey)
-                .OrderBy(g => g.Key)
-                .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
-
-            foreach (var entry in partitionKeySeparation)
-            {
-                var operation = new TableBatchOperation();
-                entry.ToList().ForEach(operation.Insert);
-
-                if (operation.Any())
-                {
-                    await CloudTable.ExecuteBatchAsync(operation).ConfigureAwait(false);
+                    await CloudTable.AddEntityAsync(qEntity);
                 }
             }
         }
@@ -113,50 +100,44 @@ namespace TableStorage.Abstractions.Store
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
-        public void InsertOrReplace<T>(T record) where T : class, ITableEntity
+        public void InsertOrReplace<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.InsertOrReplace(record);
-            CloudTable.Execute(operation);
+            CloudTable.UpsertEntity(record);
         }
 
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
-        public Task InsertOrReplaceAsync<T>(T record) where T : class, ITableEntity
+        public Task InsertOrReplaceAsync<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.InsertOrReplace(record);
-
-            return CloudTable.ExecuteAsync(operation);
+            return CloudTable.UpsertEntityAsync(record);
         }
 
         /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        public void Update<T>(T record) where T : class, ITableEntity
+        public void Update<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Merge(record);
-            CloudTable.Execute(operation);
+            CloudTable.UpdateEntity(record, record.ETag);
         }
 
         /// <summary>
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        public Task UpdateAsync<T>(T record) where T : class, ITableEntity
+        public Task UpdateAsync<T>(T record) where T : class, ITableEntity, new()
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Merge(record);
-
-            return CloudTable.ExecuteAsync(operation);
+            return CloudTable.UpdateEntityAsync(record, record.ETag);
         }
 
         /// <summary>
@@ -167,8 +148,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Delete(record);
-            CloudTable.Execute(operation);
+            CloudTable.DeleteEntity(record.PartitionKey, record.RowKey);
         }
 
         /// <summary>
@@ -179,9 +159,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRecord(record);
 
-            var operation = TableOperation.Delete(record);
-
-            return CloudTable.ExecuteAsync(operation);
+            return CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey);
         }
 
         /// <summary>
@@ -190,18 +168,13 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
         /// <returns>The record found or null if not found</returns>
-        public T GetRecord<T>(string partitionKey, string rowKey) where T : class, ITableEntity
+        public T GetRecord<T>(string partitionKey, string rowKey) where T : class, ITableEntity, new()
         {
             EnsurePartitionKey(partitionKey);
 
             EnsureRowKey(rowKey);
 
-            // Create a retrieve operation that takes a customer record.
-            var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
-
-            // Execute the operation.
-            var retrievedResult = CloudTable.Execute(retrieveOperation);
-            return retrievedResult.Result as T;
+            return CloudTable.GetEntity<T>(partitionKey, rowKey);
         }
 
         /// <summary>
@@ -210,61 +183,26 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
         /// <returns>The record found or null if not found</returns>
-        public async Task<T> GetRecordAsync<T>(string partitionKey, string rowKey) where T : class, ITableEntity
+        public async Task<T> GetRecordAsync<T>(string partitionKey, string rowKey) where T : class, ITableEntity, new()
         {
             EnsurePartitionKey(partitionKey);
 
             EnsureRowKey(rowKey);
 
-            // Create a retrieve operation that takes a customer record.
-            var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
-
-            // Execute the operation.
-            var retrievedResult = await CloudTable.ExecuteAsync(retrieveOperation).ConfigureAwait(false);
-
-            return retrievedResult.Result as T;
+            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
         }
 
-        /// <summary>
-        /// Get all the records in the table
-        /// </summary>
-        /// <returns>All records</returns>
-        public IEnumerable<DynamicTableEntity> GetAllRecords()
+        public IEnumerable<TableEntity> GetAllRecords()
         {
-            var query = new TableQuery<DynamicTableEntity>();
-
-            var token = new TableContinuationToken();
-            var segment = CloudTable.ExecuteQuerySegmented(query, token);
-            while (token != null)
-            {
-                foreach (var result in segment)
-                {
-                    yield return result;
-                }
-                token = segment.ContinuationToken;
-                segment = CloudTable.ExecuteQuerySegmented(query, token);
-            }
+            var query = CloudTable.Query<TableEntity>();
+            return query;
         }
 
-        /// <summary>
-        /// Get all the records in the table
-        /// </summary>
-        /// <returns>All records</returns>
-        public async Task<IEnumerable<DynamicTableEntity>> GetAllRecordsAsync()
+        public async Task<IEnumerable<TableEntity>> GetAllRecordsAsync()
         {
-            TableContinuationToken continuationToken = null;
+            var queryResults = CloudTable.QueryAsync<TableEntity>();
 
-            var query = new TableQuery<DynamicTableEntity>();
-
-            var allItems = new List<DynamicTableEntity>();
-            do
-            {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+            return await queryResults.ToListAsync();
         }
 
         /// <summary>
@@ -276,19 +214,8 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByPartitionQuery(partitionKey);
-
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment<T>(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+            var query = BuildGetByPartitionQuery<T>(partitionKey);
+            return query;
         }
 
         /// <summary>
@@ -300,19 +227,9 @@ namespace TableStorage.Abstractions.Store
         {
             EnsurePartitionKey(partitionKey);
 
-            TableContinuationToken continuationToken = null;
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
 
-            var query = BuildGetByPartitionQuery(partitionKey);
-
-            var allItems = new List<T>();
-            do
-            {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, CreateEntityResolver<T>(), continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+            return await queryResults.ToListAsync();
         }
 
         /// <summary>
@@ -324,19 +241,7 @@ namespace TableStorage.Abstractions.Store
         {
             EnsureRowKey(rowKey);
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByRowKeyQuery(rowKey);
-
-            var allItems = new List<T>();
-            do
-            {
-                var items = ExecuteQuerySegment<T>(query, continuationToken);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+            return BuildGetByRowKeyQuery<T>(rowKey);
         }
 
         /// <summary>
@@ -347,70 +252,9 @@ namespace TableStorage.Abstractions.Store
         public async Task<IEnumerable<T>> GetByRowKeyAsync<T>(string rowKey) where T : class, ITableEntity, new()
         {
             EnsureRowKey(rowKey);
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
 
-            TableContinuationToken continuationToken = null;
-
-            var query = BuildGetByRowKeyQuery(rowKey);
-
-            var allItems = new List<T>();
-            do
-            {
-                var items = await CloudTable.ExecuteQuerySegmentedAsync(query, CreateEntityResolver<T>(), continuationToken).ConfigureAwait(false);
-                continuationToken = items.ContinuationToken;
-                allItems.AddRange(items);
-            } while (continuationToken != null);
-
-            return allItems;
+            return await queryResults.ToListAsync();
         }
-
-        #region Helpers
-
-        /// <summary>
-        /// Create the entity resolver for type T
-        /// </summary>
-        /// <returns>The entity resolver</returns>
-        private static EntityResolver<T> CreateEntityResolver<T>() where T : class, ITableEntity, new()
-        {
-            return (pk, rk, ts, props, etag) =>
-            {
-                var resolvedEntity = new T { PartitionKey = pk, RowKey = rk, Timestamp = ts, ETag = etag };
-                resolvedEntity.ReadEntity(props, null);
-                return resolvedEntity;
-            };
-        }
-
-        private TableQuerySegment<T> ExecuteQuerySegment<T>(TableQuery<DynamicTableEntity> query, TableContinuationToken continuationToken) where T : class, ITableEntity, new()
-        {
-            var items = CloudTable.ExecuteQuerySegmented(query, CreateEntityResolver<T>(), continuationToken);
-            return items;
-        }
-
-        /// <summary>
-        /// Build the row key table query
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <returns>The table query</returns>
-        private static TableQuery<DynamicTableEntity> BuildGetByRowKeyQuery(string rowKey)
-        {
-            var filter = TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey);
-
-            var query = new TableQuery<DynamicTableEntity>().Where(filter);
-
-            return query;
-        }
-
-        /// <summary>
-        /// Builds the get by partition query.
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <returns>The table query</returns>
-        private static TableQuery<DynamicTableEntity> BuildGetByPartitionQuery(string partitionKey)
-        {
-            var query = new TableQuery<DynamicTableEntity>().Where(
-                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, partitionKey));
-            return query;
-        }
-
-        #endregion Helpers
     }
 }

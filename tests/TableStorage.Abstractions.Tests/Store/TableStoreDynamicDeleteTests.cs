@@ -7,17 +7,34 @@ using Xunit;
 
 namespace TableStorage.Abstractions.Tests.Store
 {
-    public partial class TableStoreAsyncTests
+    public partial class TableStoreDynamicTests
     {
         [Fact]
-        public void delete_async_with_null_record_throws_exception()
+        public void delete_dynamic_with_null_record_throws_exception()
         {
             // Arrange
             // Act
-            Func<Task> act = async () => await _tableStorage.DeleteAsync(null as TestTableEntity);
+            Action act = () => _tableStorageDynamic.Delete(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
+            act.Should().Throw<ArgumentNullException>().WithMessage("Record cannot be null*");
+        }
+
+        [Fact]
+        public async Task delete_a_dynamic_entry_and_the_record_count_should_decrease()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecords(_tableStorageDynamic);
+            var item = _tableStorageDynamic.GetRecord<TestTableEntity>("Smith", "John");
+
+            // Act
+
+            _tableStorageDynamic.Delete(item);
+
+            var result = _tableStorageDynamic.GetByPartitionKey<TestTableEntity>("Smith");
+
+            // Assert
+            result.Count().Should().Be(1);
         }
 
         [Fact]
@@ -28,23 +45,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Func<Task> act = async () => await _tableStorageDynamic.DeleteAsync(null as TestTableEntity);
 
             // Assert
-            act.Should().Throw<ArgumentNullException>().WithMessage("Value cannot be null.\r\nParameter name: record");
-        }
-
-        [Fact]
-        public async Task delete_async_an_entry_and_the_record_count_should_decrease()
-        {
-            // Arrange
-            await TestDataHelper.SetupRecords(_tableStorage);
-            var item = await _tableStorage.GetRecordAsync("Smith", "John");
-
-            // Act
-            await _tableStorage.DeleteAsync(item);
-
-            var result = await _tableStorage.GetByPartitionKeyAsync("Smith");
-
-            // Assert
-            result.Count().Should().Be(1);
+            act.Should().ThrowAsync<ArgumentNullException>().WithMessage("Record cannot be null*");
         }
 
         [Fact]

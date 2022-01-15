@@ -1,24 +1,30 @@
 ﻿using FluentAssertions;
 using FluentValidation;
 using System;
+using System.Threading.Tasks;
 using TableStorage.Abstractions.Store;
 using TableStorage.Abstractions.Tests.Helpers;
+using Useful.Extensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace TableStorage.Abstractions.Tests.Store
 {
     public partial class TableStoreTests : IDisposable
     {
+        private readonly ITestOutputHelper _testOutputHelper;
         private const string TableName = "TestTable";
         private const string ConnectionString = "UseDevelopmentStorage=true";
+
         private readonly ITableStore<TestTableEntity> _tableStorage;
-        private readonly ITableStoreDynamic _tableStorageDynamic;
+
         private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
 
-        public TableStoreTests()
+        public TableStoreTests(ITestOutputHelper testOutputHelper)
         {
+            _testOutputHelper = testOutputHelper;
             _tableStorage = new TableStore<TestTableEntity>(TableName, ConnectionString, _tableStorageOptions);
-            _tableStorageDynamic = new TableStoreDynamic(TableName, ConnectionString);
+            SystemTime.UtcNow = () => DateTime.UtcNow;
         }
 
         public void Dispose()
@@ -37,7 +43,7 @@ namespace TableStorage.Abstractions.Tests.Store
             Action act = () => new TableStore<TestTableEntity>(tablename, "somestring", _tableStorageOptions);
 
             // Assert
-            act.Should().Throw<ArgumentException>().WithMessage("Table name cannot be null or empty\r\nParameter name: tableName");
+            act.Should().Throw<ArgumentException>().WithMessage("Table name cannot be null or empty*");
         }
 
         [Theory]
@@ -52,7 +58,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ArgumentException>()
-                .WithMessage("Table connection string cannot be null or empty\r\nParameter name: storageConnectionString");
+                .WithMessage("Table connection string cannot be null or empty*");
         }
 
         [Fact]
@@ -64,14 +70,15 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ArgumentNullException>()
-                .WithMessage("Table storage options cannot be null\r\nParameter name: options");
+                .WithMessage("Table storage options cannot be null*");
         }
 
         [Theory]
         [InlineData(-1)]
         [InlineData(0)]
         [InlineData(1)]
-        public void create_table_storage_with_table_option_connection_limit_less_than_2_then_throws_an_exception(int connectionLimit)
+        public void create_table_storage_with_table_option_connection_limit_less_than_2_then_throws_an_exception(
+            int connectionLimit)
         {
             // Arrange
             var options = new TableStorageOptions { ConnectionLimit = connectionLimit };
@@ -81,7 +88,8 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.");
+                .WithMessage(
+                    "Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error");
         }
 
         [Theory]
@@ -97,7 +105,7 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- Retries: 'Retries' must be greater than '0'.");
+                .WithMessage("Validation failed: \r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error");
         }
 
         [Theory]
@@ -113,7 +121,8 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage(
+                    "Validation failed: \r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         [Theory]
@@ -123,14 +132,16 @@ namespace TableStorage.Abstractions.Tests.Store
         public void create_table_storage_with_multiple_invalid_table_options_throws_an_exception_with_all_invalid_entries(int connectionLimit, int retries, double retryTime)
         {
             // Arrange
-            var options = new TableStorageOptions { ConnectionLimit = connectionLimit, Retries = retries, RetryWaitTimeInSeconds = retryTime };
+            var options = new TableStorageOptions
+            { ConnectionLimit = connectionLimit, Retries = retries, RetryWaitTimeInSeconds = retryTime };
 
             // Act
             Action act = () => new TableStore<TestTableEntity>("sometable", ConnectionString, options);
 
             // Assert
             act.Should().Throw<ValidationException>()
-                .WithMessage("Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'.\r\n -- Retries: 'Retries' must be greater than '0'.\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'.");
+                .WithMessage(
+                    "Validation failed: \r\n -- ConnectionLimit: 'Connection Limit' must be greater than or equal to '2'. Severity: Error\r\n -- Retries: 'Retries' must be greater than '0'. Severity: Error\r\n -- RetryWaitTimeInSeconds: 'Retry Wait Time In Seconds' must be greater than '0'. Severity: Error");
         }
 
         [Fact]
@@ -154,6 +165,33 @@ namespace TableStorage.Abstractions.Tests.Store
 
             // Act
             var result = _tableStorage.TableExists();
+
+            // Assert
+            result.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task table_does_exist_then_exist_async_check_returns_true()
+        {
+            // Arrange
+            await _tableStorage.DeleteTableAsync();
+            await _tableStorage.CreateTableAsync();
+
+            // Act
+            var result = await _tableStorage.TableExistsAsync();
+
+            // Assert
+            result.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task table_does_not_exist_then_exist_async_check_returns_false()
+        {
+            // Arrange
+            await _tableStorage.DeleteTableAsync();
+
+            // Act
+            var result = await _tableStorage.TableExistsAsync();
 
             // Assert
             result.Should().BeFalse();

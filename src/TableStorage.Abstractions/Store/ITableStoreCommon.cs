@@ -17,13 +17,13 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Does the table exist
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A boolean denoting if the table exists</returns>
         bool TableExists();
 
         /// <summary>
         /// Does the table exist
         /// </summary>
-        /// <returns></returns>
+        /// <returns>A boolean denoting if the table exists</returns>
         Task<bool> TableExistsAsync();
 
         /// <summary>

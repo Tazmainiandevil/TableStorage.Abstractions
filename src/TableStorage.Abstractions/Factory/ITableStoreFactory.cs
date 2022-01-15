@@ -1,4 +1,4 @@
-﻿using Microsoft.Azure.Cosmos.Table;
+﻿using Azure.Data.Tables;
 using TableStorage.Abstractions.Store;
 
 namespace TableStorage.Abstractions.Factory
