@@ -7,7 +7,7 @@ using TableStorage.Abstractions.Models;
 namespace TableStorage.Abstractions.Store
 {
     /// <summary>
-    /// Table store interface
+    /// Table store repository
     /// </summary>
     /// <typeparam name="T">The type of storage entity</typeparam>
     public interface ITableStore<T> : ITableStoreCommon

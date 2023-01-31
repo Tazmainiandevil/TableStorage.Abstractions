@@ -86,8 +86,8 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
-        /// <returns>The record found or null if not found</returns>
         /// <param name="cancellationToken">Used to cancel the operation</param>
+        /// <returns>The record found or null if not found</returns>
         Task<T> GetRecordAsync<T>(string partitionKey, string rowKey, CancellationToken cancellationToken = default) where T : class, ITableEntity, new();
 
         /// <summary>

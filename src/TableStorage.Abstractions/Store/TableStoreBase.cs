@@ -68,10 +68,7 @@ public class TableStoreBase
 
         if (options.EnsureTableExists)
         {
-            //if (!TableExists())
-            //{
             CreateTable();
-            //}
         }
     }
 
@@ -212,6 +209,11 @@ public class TableStoreBase
         }
     }
 
+    /// <summary>
+    /// Ensures the record is not null.
+    /// </summary>
+    /// <param name="rowKey">The row key.</param>
+    /// <exception cref="ArgumentNullException">rowKey</exception>
     protected void EnsureRecord<T>(T record)
     {
         if (record == null)
@@ -225,13 +227,18 @@ public class TableStoreBase
     /// </summary>
     /// <param name="partitionKey">The partition key.</param>
     /// <returns>The table query</returns>
-    //private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
     protected Pageable<T> BuildGetByPartitionQuery<T>(string partitionKey) where T : class, ITableEntity, new()
     {
         var queryResults = CloudTable.Query<T>(filter: $"PartitionKey eq '{partitionKey}'");
         return queryResults;
     }
 
+    /// <summary>
+    /// Builds the get by partition query.
+    /// </summary>
+    /// <param name="partitionKey">The partition key.</param>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    /// <returns>The table query</returns>
     protected AsyncPageable<T> BuildGetByPartitionQueryAsync<T>(string partitionKey, CancellationToken cancellationToken) where T : class, ITableEntity, new()
     {
         var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'", cancellationToken: cancellationToken);
@@ -249,6 +256,12 @@ public class TableStoreBase
         return queryResults;
     }
 
+    /// <summary>
+    /// Build the row key table query
+    /// </summary>
+    /// <param name="rowKey">The row key</param>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    /// <returns>The table query</returns>
     protected AsyncPageable<T> BuildGetByRowKeyQueryAsync<T>(string rowKey, CancellationToken cancellationToken) where T : class, ITableEntity, new()
     {
         var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'", cancellationToken: cancellationToken);
