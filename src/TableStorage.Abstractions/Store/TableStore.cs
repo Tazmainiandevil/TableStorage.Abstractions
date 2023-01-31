@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Parsers;
@@ -69,7 +70,8 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Delete all records in the table
         /// </summary>
-        public async Task DeleteAllAsync()
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public async Task DeleteAllAsync(CancellationToken cancellationToken = default)
         {
             var records = await GetAllRecordsAsync().ConfigureAwait(false);
 
@@ -77,7 +79,7 @@ namespace TableStorage.Abstractions.Store
             {
                 var deleteEntitiesBatch = new List<TableTransactionAction>();
                 deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -85,18 +87,20 @@ namespace TableStorage.Abstractions.Store
         /// Delete an entry
         /// </summary>
         /// <param name="record">The record to delete</param>
-        public Task DeleteAsync(T record)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public Task DeleteAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey);
+            return CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey, cancellationToken: cancellationToken);
         }
 
         /// <summary>
         /// Delete records by partition key
         /// </summary>
         /// <param name="partitionKey"></param>
-        public async Task DeleteByPartitionAsync(string partitionKey)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public async Task DeleteByPartitionAsync(string partitionKey, CancellationToken cancellationToken = default)
         {
             var deleteQuery = BuildGetByPartitionQuery<T>(partitionKey);
 
@@ -104,7 +108,7 @@ namespace TableStorage.Abstractions.Store
 
             deleteEntitiesBatch.AddRange(deleteQuery.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
 
-            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -123,13 +127,14 @@ namespace TableStorage.Abstractions.Store
         /// Delete a record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to delete</param>
-        public Task DeleteUsingWildcardEtagAsync(T record)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public Task DeleteUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
             record.ETag = ETag.All;
 
-            return DeleteAsync(record);
+            return DeleteAsync(record, cancellationToken);
         }
 
         /// <summary>
@@ -148,11 +153,12 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Get all the records in the table
         /// </summary>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>All records</returns>
-        public async Task<IEnumerable<T>> GetAllRecordsAsync()
+        public async Task<IEnumerable<T>> GetAllRecordsAsync(CancellationToken cancellationToken = default)
         {
-            var queryResults = CloudTable.QueryAsync<T>();
-            return await queryResults.ToListAsync();
+            var queryResults = CloudTable.QueryAsync<T>(cancellationToken: cancellationToken);
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -166,10 +172,16 @@ namespace TableStorage.Abstractions.Store
             var query = CloudTable.Query<T>().AsPages(continuationToken, pageSize).FirstOrDefault();
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
-
-        public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="pageSize">Size of the page.</param>
+        /// <param name="pageToken">The continuation token</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        /// <returns></returns>
+        public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null, CancellationToken cancellationToken = default)
         {
-            var query = await CloudTable.QueryAsync<T>().AsPages(pageToken, pageSize).FirstOrDefaultAsync();
+            var query = await CloudTable.QueryAsync<T>(cancellationToken: cancellationToken).AsPages(pageToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
@@ -220,25 +232,33 @@ namespace TableStorage.Abstractions.Store
         /// Get the records by partition key
         /// </summary>
         /// <param name="partitionKey">The partition key</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey)
+        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
-            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'", cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago)
+        /// <summary>
+        /// Get the records by partition key
+        /// </summary>
+        /// <param name="partitionKey">The partition key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var queryResults = CloudTable.QueryAsync<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime);
+            var queryResults = CloudTable.QueryAsync<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime, cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
         /// <summary>
@@ -262,12 +282,13 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey">The partition key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationToken">The next page token.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The Paged Result</returns>
-        public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationToken = null)
+        public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
-            var query = await BuildGetByPartitionQueryAsync<T>(partitionKey).AsPages(continuationToken, pageSize).FirstOrDefaultAsync();
+            var query = await BuildGetByPartitionQueryAsync<T>(partitionKey, cancellationToken).AsPages(continuationToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
@@ -302,27 +323,42 @@ namespace TableStorage.Abstractions.Store
         /// Get the records by row key
         /// </summary>
         /// <param name="rowKey">The row key</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey)
+        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
-            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'", cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago)
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        /// <returns></returns>
+        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var queryResults = CloudTable.QueryAsync<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime);
+            var queryResults = CloudTable.QueryAsync<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime, cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="pageSize"></param>
+        /// <param name="continuationToken"></param>
+        /// <returns></returns>
         public PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100, string continuationToken = null)
         {
             EnsureRowKey(rowKey);
@@ -331,11 +367,19 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null)
+        /// <summary>
+        /// Get the records by row key
+        /// </summary>
+        /// <param name="rowKey">The row key</param>
+        /// <param name="pageSize">The page size</param>
+        /// <param name="continuationToken">The continuation token</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        /// <returns></returns>
+        public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
-            var query = await BuildGetByRowKeyQueryAsync<T>(rowKey).AsPages(continuationToken, pageSize).FirstOrDefaultAsync();
+            var query = await BuildGetByRowKeyQueryAsync<T>(rowKey, cancellationToken).AsPages(continuationToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
@@ -359,14 +403,15 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The record found or null if not found</returns>
-        public async Task<T> GetRecordAsync(string partitionKey, string rowKey)
+        public async Task<T> GetRecordAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
             EnsureRowKey(rowKey);
 
-            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
+            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -430,10 +475,11 @@ namespace TableStorage.Abstractions.Store
         /// <param name="filter">The filter to apply</param>
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records filtered</returns>
-        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize)
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, CancellationToken cancellationToken = default)
         {
-            var allRecords = await GetAllRecordsAsync();
+            var allRecords = await GetAllRecordsAsync(cancellationToken);
             var data = allRecords.Where(filter).Page(start, pageSize);
 
             return data;
@@ -446,14 +492,15 @@ namespace TableStorage.Abstractions.Store
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records filtered</returns>
-        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago)
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago, CancellationToken cancellationToken = default)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
             bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
 
-            var allRecords = await GetAllRecordsAsync();
+            var allRecords = await GetAllRecordsAsync(cancellationToken);
             var data = allRecords.Where(CombineFilter).Page(start, pageSize);
 
             return data;
@@ -539,18 +586,20 @@ namespace TableStorage.Abstractions.Store
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
-        public Task InsertAsync(T record)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public Task InsertAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.AddEntityAsync(record);
+            return CloudTable.AddEntityAsync(record, cancellationToken);
         }
 
         /// <summary>
         /// Insert multiple records
         /// </summary>
         /// <param name="records">The records to insert</param>
-        public async Task InsertAsync(IEnumerable<T> records)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public async Task InsertAsync(IEnumerable<T> records, CancellationToken cancellationToken = default)
         {
             if (records == null)
             {
@@ -565,7 +614,7 @@ namespace TableStorage.Abstractions.Store
             {
                 var addEntitiesBatch = new List<TableTransactionAction>();
                 addEntitiesBatch.AddRange(entry.Select(e => new TableTransactionAction(TableTransactionActionType.Add, e)));
-                await CloudTable.SubmitTransactionAsync(addEntitiesBatch).ConfigureAwait(false);
+                await CloudTable.SubmitTransactionAsync(addEntitiesBatch, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -583,13 +632,15 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Inserts or replaces the record
         /// </summary>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <param name="record"></param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns></returns>
-        public Task InsertOrReplaceAsync(T record)
+        public Task InsertOrReplaceAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.UpsertEntityAsync(record);
+            return CloudTable.UpsertEntityAsync(record, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -607,11 +658,12 @@ namespace TableStorage.Abstractions.Store
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        public Task UpdateAsync(T record)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public Task UpdateAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.UpdateEntityAsync(record, record.ETag);
+            return CloudTable.UpdateEntityAsync(record, record.ETag, cancellationToken: cancellationToken);
         }
 
         /// <summary>
@@ -630,12 +682,13 @@ namespace TableStorage.Abstractions.Store
         /// Update an record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to update</param>
-        public Task UpdateUsingWildcardEtagAsync(T record)
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        public Task UpdateUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
             record.ETag = ETag.All;
-            return UpdateAsync(record);
+            return UpdateAsync(record, cancellationToken);
         }
 
         #region Helpers
