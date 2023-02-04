@@ -5,6 +5,8 @@ Repository wrapper for Azure Table Storage in C# using the Azure.Data.Tables lib
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
 <a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
 
+[![Known Vulnerabilities](https://snyk.io/test/github/tazmainiandevil/tablestorage.abstractions/badge.svg)]
+
 ## Introduction
 
 Working with Azure Table Storage has been interesting and very different from working with SQL Server which I have done for many years. After reading a number of articles about it and using it I realised a generic wrapper would be useful to aid unit testing and so this is the result of that realisation.
