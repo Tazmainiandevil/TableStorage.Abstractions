@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Validators;
 
@@ -67,10 +68,7 @@ public class TableStoreBase
 
         if (options.EnsureTableExists)
         {
-            //if (!TableExists())
-            //{
             CreateTable();
-            //}
         }
     }
 
@@ -122,9 +120,10 @@ public class TableStoreBase
     /// <summary>
     /// Create the table
     /// </summary>
-    public Task CreateTableAsync()
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    public Task CreateTableAsync(CancellationToken cancellationToken = default)
     {
-        return CloudTable.CreateIfNotExistsAsync();
+        return CloudTable.CreateIfNotExistsAsync(cancellationToken);
     }
 
     /// <summary>
@@ -139,10 +138,11 @@ public class TableStoreBase
     /// <summary>
     /// Does the table exist
     /// </summary>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
     /// <returns></returns>
-    public async Task<bool> TableExistsAsync()
+    public async Task<bool> TableExistsAsync(CancellationToken cancellationToken = default)
     {
-        return (await _cloudTableService.QueryAsync(e => e.Name == _tableName).ToListAsync()).Any();
+        return (await _cloudTableService.QueryAsync(e => e.Name == _tableName, cancellationToken: cancellationToken).ToListAsync(cancellationToken)).Any();
     }
 
     /// <summary>
@@ -156,9 +156,10 @@ public class TableStoreBase
     /// <summary>
     /// Delete the table
     /// </summary>
-    public Task DeleteTableAsync()
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    public Task DeleteTableAsync(CancellationToken cancellationToken = default)
     {
-        return CloudTable.DeleteAsync();
+        return CloudTable.DeleteAsync(cancellationToken);
     }
 
     /// <summary>
@@ -173,10 +174,11 @@ public class TableStoreBase
     /// <summary>
     /// Get the number of the records in the table
     /// </summary>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
     /// <returns>The record count</returns>
-    public async Task<int> GetRecordCountAsync()
+    public async Task<int> GetRecordCountAsync(CancellationToken cancellationToken = default)
     {
-        return await (CloudTable.QueryAsync<TableEntity>(select: new List<string> { "PartitionKey" })).CountAsync();
+        return await (CloudTable.QueryAsync<TableEntity>(select: new List<string> { "PartitionKey" }, cancellationToken: cancellationToken)).CountAsync(cancellationToken);
     }
 
     #region Helpers
@@ -207,6 +209,11 @@ public class TableStoreBase
         }
     }
 
+    /// <summary>
+    /// Ensures the record is not null.
+    /// </summary>
+    /// <param name="rowKey">The row key.</param>
+    /// <exception cref="ArgumentNullException">rowKey</exception>
     protected void EnsureRecord<T>(T record)
     {
         if (record == null)
@@ -220,16 +227,21 @@ public class TableStoreBase
     /// </summary>
     /// <param name="partitionKey">The partition key.</param>
     /// <returns>The table query</returns>
-    //private static TableQuery<T> BuildGetByPartitionQuery(string partitionKey)
     protected Pageable<T> BuildGetByPartitionQuery<T>(string partitionKey) where T : class, ITableEntity, new()
     {
         var queryResults = CloudTable.Query<T>(filter: $"PartitionKey eq '{partitionKey}'");
         return queryResults;
     }
 
-    protected AsyncPageable<T> BuildGetByPartitionQueryAsync<T>(string partitionKey) where T : class, ITableEntity, new()
+    /// <summary>
+    /// Builds the get by partition query.
+    /// </summary>
+    /// <param name="partitionKey">The partition key.</param>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    /// <returns>The table query</returns>
+    protected AsyncPageable<T> BuildGetByPartitionQueryAsync<T>(string partitionKey, CancellationToken cancellationToken) where T : class, ITableEntity, new()
     {
-        var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
+        var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'", cancellationToken: cancellationToken);
         return queryResults;
     }
 
@@ -244,9 +256,15 @@ public class TableStoreBase
         return queryResults;
     }
 
-    protected AsyncPageable<T> BuildGetByRowKeyQueryAsync<T>(string rowKey) where T : class, ITableEntity, new()
+    /// <summary>
+    /// Build the row key table query
+    /// </summary>
+    /// <param name="rowKey">The row key</param>
+    /// <param name="cancellationToken">Used to cancel the operation</param>
+    /// <returns>The table query</returns>
+    protected AsyncPageable<T> BuildGetByRowKeyQueryAsync<T>(string rowKey, CancellationToken cancellationToken) where T : class, ITableEntity, new()
     {
-        var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
+        var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'", cancellationToken: cancellationToken);
         return queryResults;
     }
 
