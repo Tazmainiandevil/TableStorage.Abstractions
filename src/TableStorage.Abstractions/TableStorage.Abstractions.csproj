@@ -9,12 +9,12 @@
     <PackageVersion>1.0.0</PackageVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Azure.Data.Tables" Version="12.4.0" />
-    <PackageReference Include="Azure.Storage.Common" Version="12.9.0" />
-    <PackageReference Include="FluentValidation" Version="10.3.6" />
-    <PackageReference Include="System.Linq.Async" Version="5.1.0" />
+    <PackageReference Include="Azure.Data.Tables" Version="12.7.1" />
+    <PackageReference Include="Azure.Storage.Common" Version="12.13.0" />
+    <PackageReference Include="FluentValidation" Version="11.4.0" />
+    <PackageReference Include="System.Linq.Async" Version="6.0.1" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
-    <PackageReference Include="Useful.Extensions" Version="3.0.1" />
+    <PackageReference Include="Useful.Extensions" Version="3.0.2" />
   </ItemGroup>
 
 </Project>
