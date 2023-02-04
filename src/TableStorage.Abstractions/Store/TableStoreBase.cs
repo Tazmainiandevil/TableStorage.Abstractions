@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using Azure.Data.Tables;
 using FluentValidation;
 using System;
@@ -60,26 +61,69 @@ public class TableStoreBase
         var validator = new TableStorageOptionsValidator();
         validator.ValidateAndThrow(options);
 
-        OptimisePerformance(storageConnectionString, options);
+        var endpoint = ParseConnectionString.GetTableEndpoint(storageConnectionString);
+        OptimisePerformance(endpoint, options);
         (_cloudTableService, CloudTable) = CreateTableClient(storageConnectionString, tableName, options.Retries, options.RetryWaitTimeInSeconds);
 
         _tableName = tableName;
 
         if (options.EnsureTableExists)
         {
-            //if (!TableExists())
-            //{
             CreateTable();
-            //}
+        }
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="accountName">The table account name</param>
+    /// <param name="tableName">The table name</param>
+    /// <param name="tokenCredential">The connection using token credentials</param>
+    /// <param name="options">Table storage options</param>
+    protected TableStoreBase(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(accountName))
+        {
+            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
+        }
+
+        if (string.IsNullOrWhiteSpace(tableName))
+        {
+            throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
+        }
+
+
+        if (tokenCredential == null)
+        {
+            throw new ArgumentNullException(nameof(tokenCredential), "TokenCredential cannot be null");
+        }
+
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options), "Table storage options cannot be null");
+        }
+
+        var validator = new TableStorageOptionsValidator();
+        validator.ValidateAndThrow(options);
+
+        var tableEndpoint = $"https://{accountName}.table.core.windows.net/";
+
+        OptimisePerformance(new Uri(tableEndpoint), options);
+        (_cloudTableService, CloudTable) = CreateTableClient(tableEndpoint, tokenCredential, accountName, tableName, options.Retries, options.RetryWaitTimeInSeconds);
+
+        _tableName = tableName;
+
+        if (options.EnsureTableExists)
+        {
+            CreateTable();
         }
     }
 
     /// <summary>
     /// Settings to improve performance
     /// </summary>
-    private static void OptimisePerformance(string storageConnectionString, TableStorageOptions options)
+    private static void OptimisePerformance(Uri endpoint, TableStorageOptions options)
     {
-        var endpoint = ParseConnectionString.GetTableEndpoint(storageConnectionString);
         var tableServicePoint = ServicePointManager.FindServicePoint(endpoint);
         tableServicePoint.UseNagleAlgorithm = options.UseNagleAlgorithm;
         tableServicePoint.Expect100Continue = options.Expect100Continue;
@@ -110,6 +154,35 @@ public class TableStoreBase
         var tableClient = serviceClient.GetTableClient(tableName);
         return (serviceClient, tableClient);
     }
+
+    /// <summary>
+    /// Create the table client
+    /// </summary>
+    /// <param name="tokenCredential">The connection using token credentials</param>
+    /// <param name="accountName">The table account name</param>
+    /// <param name="tableName">The name of the table</param>
+    /// <param name="retries">Number of retries</param>
+    /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
+    /// <returns>The table client</returns>
+    private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string tableEndpoint, TokenCredential tokenCredential, string accountName, string tableName, int retries, double retryWaitTimeInSeconds)
+    {
+        var options = new TableClientOptions
+        {
+            Retry =
+            {
+                MaxRetries = retries,
+                Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
+                Mode = Azure.Core.RetryMode.Exponential
+            }
+        };
+
+
+
+        var serviceClient = new TableServiceClient(new Uri(tableEndpoint), tokenCredential, options);
+        var tableClient = serviceClient.GetTableClient(tableName);
+        return (serviceClient, tableClient);
+    }
+
 
     /// <summary>
     /// Create the table

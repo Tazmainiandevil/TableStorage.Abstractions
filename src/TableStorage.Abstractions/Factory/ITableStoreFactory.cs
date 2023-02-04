@@ -1,4 +1,5 @@
-﻿using Azure.Data.Tables;
+﻿using Azure.Core;
+using Azure.Data.Tables;
 using TableStorage.Abstractions.Store;
 
 namespace TableStorage.Abstractions.Factory
@@ -12,5 +13,10 @@ namespace TableStorage.Abstractions.Factory
         ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString);
 
         ITableStoreDynamic CreateTableStore(string tableName, string storageConnectionString, TableStorageOptions options);
+
+        ITableStore<T> CreateTableStore<T>(string accountName, string tableName, TokenCredential tokenCredential) where T : class, ITableEntity, new();
+
+        ITableStore<T> CreateTableStore<T>(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options) where T : class, ITableEntity, new();
+
     }
 }

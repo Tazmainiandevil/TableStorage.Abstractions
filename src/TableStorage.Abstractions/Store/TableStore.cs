@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,18 @@ namespace TableStorage.Abstractions.Store
         /// <param name="storageConnectionString">The connection string</param>
         public TableStore(string tableName, string storageConnectionString)
             : base(tableName, storageConnectionString, new TableStorageOptions())
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="accountName">The table account name</param>
+        /// <param name="tableName">The table name</param>
+        /// <param name="tokenCredential">The connection using token credentials</param>
+        /// <param name="options">Table storage options</param>
+        public TableStore(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
+            : base(accountName, tableName, tokenCredential, options)
         {
         }
 

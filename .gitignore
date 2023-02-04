@@ -11,4 +11,6 @@
 *.nupkg
 *.DotSettings
 
-__azurite_db_table__.json
+__azurite_db_*.json
+
+.dccache

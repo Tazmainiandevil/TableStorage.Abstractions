@@ -13,12 +13,12 @@
     <releaseNotes>$releaseNotes$</releaseNotes>
     <dependencies>
      <group targetFramework="netstandard2.0">
-      <dependency id="Azure.Data.Tables" version="12.4.0" />
-      <dependency id="Azure.Storage.Common" version="12.9.0" />
-      <dependency id="FluentValidation" version="10.3.6" />
-      <dependency id="System.Linq.Async" version="5.1.0" />      
-      <dependency id="System.Reactive" version="5.0.0" />      
-      <dependency id="Useful.Extensions" version="3.0.1" />
+      <dependency id="Azure.Data.Tables" version="12.7.1" />
+      <dependency id="Azure.Storage.Common" version="12.13.0" />
+      <dependency id="FluentValidation" version="11.4.0" />
+      <dependency id="System.Linq.Async" version="6.0.1" />
+      <dependency id="System.Reactive" version="5.0.0" />
+      <dependency id="Useful.Extensions" version="3.0.2" />
      </group> 
     </dependencies>
   </metadata>

@@ -1,4 +1,5 @@
-﻿using Azure.Data.Tables;
+﻿using Azure.Core;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,6 +28,16 @@ namespace TableStorage.Abstractions.Store
         /// <param name="options">Table storage options</param>
         public TableStoreDynamic(string tableName, string storageConnectionString, TableStorageOptions options)
             : base(tableName, storageConnectionString, options)
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, TokenCredential tokenCredential)
+            : base(accountName, tableName, tokenCredential, new TableStorageOptions())
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
+            : base(accountName, tableName, tokenCredential, options)
         {
         }
 
