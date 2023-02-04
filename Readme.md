@@ -5,7 +5,7 @@ Repository wrapper for Azure Table Storage in C# using the Azure.Data.Tables lib
 <image src="https://ci.appveyor.com/api/projects/status/github/Tazmainiandevil/TableStorage.Abstractions?branch=master&svg=true">
 <a href="https://badge.fury.io/nu/TableStorage.Abstractions"><img src="https://badge.fury.io/nu/TableStorage.Abstractions.svg" alt="NuGet version" height="18"></a>
 
-[![Known Vulnerabilities](https://snyk.io/test/github/tazmainiandevil/tablestorage.abstractions/badge.svg)]
+![Known Vulnerabilities](https://snyk.io/test/github/tazmainiandevil/tablestorage.abstractions/badge.svg)
 
 ## Introduction
 
