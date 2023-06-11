@@ -26,6 +26,8 @@ public class TableStoreBase
     private readonly TableServiceClient _cloudTableService;
     private readonly string _tableName;
 
+    #region Connection String Construction
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -73,6 +75,14 @@ public class TableStoreBase
         }
     }
 
+    #endregion Connection String Construction
+
+    #region Token Credential Construction
+
+    protected TableStoreBase(string accountName, string tableName, TokenCredential tokenCredential) : this(accountName, tableName, tokenCredential, new TableStorageOptions())
+    {
+    }
+
     /// <summary>
     /// Constructor
     /// </summary>
@@ -92,7 +102,6 @@ public class TableStoreBase
             throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
         }
 
-
         if (tokenCredential == null)
         {
             throw new ArgumentNullException(nameof(tokenCredential), "TokenCredential cannot be null");
@@ -109,7 +118,7 @@ public class TableStoreBase
         var tableEndpoint = $"https://{accountName}.table.core.windows.net/";
 
         OptimisePerformance(new Uri(tableEndpoint), options);
-        (_cloudTableService, CloudTable) = CreateTableClient(tableEndpoint, tokenCredential, accountName, tableName, options.Retries, options.RetryWaitTimeInSeconds);
+        (_cloudTableService, CloudTable) = CreateTableClient(tableEndpoint, tokenCredential, tableName, options.Retries, options.RetryWaitTimeInSeconds);
 
         _tableName = tableName;
 
@@ -118,6 +127,111 @@ public class TableStoreBase
             CreateTable();
         }
     }
+
+    #endregion Token Credential Construction
+
+    #region Sas Credential Construction
+    protected TableStoreBase(string accountName, string tableName, AzureSasCredential sasCredential) : this(accountName, tableName, sasCredential, new TableStorageOptions())
+    {
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="accountName">The table account name</param>
+    /// <param name="tableName">The table name</param>
+    /// <param name="sasCredential">The connection using sas credentials</param>
+    /// <param name="options">Table storage options</param>
+    protected TableStoreBase(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(accountName))
+        {
+            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
+        }
+
+        if (string.IsNullOrWhiteSpace(tableName))
+        {
+            throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
+        }
+
+        if (sasCredential == null)
+        {
+            throw new ArgumentNullException(nameof(sasCredential), "AzureSasCredential cannot be null");
+        }
+
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options), "Table storage options cannot be null");
+        }
+
+        var validator = new TableStorageOptionsValidator();
+        validator.ValidateAndThrow(options);
+
+        var tableEndpoint = $"https://{accountName}.table.core.windows.net/";
+
+        OptimisePerformance(new Uri(tableEndpoint), options);
+        (_cloudTableService, CloudTable) = CreateTableClient(tableEndpoint, sasCredential, tableName, options.Retries, options.RetryWaitTimeInSeconds);
+
+        _tableName = tableName;
+
+        if (options.EnsureTableExists)
+        {
+            CreateTable();
+        }
+    }
+
+    #endregion
+
+    #region Table SharedKey Credential Construction
+    protected TableStoreBase(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential) : this(accountName, tableName, sharedKeyCredential, new TableStorageOptions())
+    {
+    }
+
+    /// <summary>
+    /// Constructor
+    /// </summary>
+    /// <param name="accountName">The table account name</param>
+    /// <param name="tableName">The table name</param>
+    /// <param name="sharedKeyCredential">The connection using shared key credentials</param>
+    /// <param name="options">Table storage options</param>
+    protected TableStoreBase(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
+    {
+        if (string.IsNullOrWhiteSpace(accountName))
+        {
+            throw new ArgumentException("Account name cannot be null or empty", nameof(accountName));
+        }
+
+        if (string.IsNullOrWhiteSpace(tableName))
+        {
+            throw new ArgumentException("Table name cannot be null or empty", nameof(tableName));
+        }
+
+        if (sharedKeyCredential == null)
+        {
+            throw new ArgumentNullException(nameof(sharedKeyCredential), "SharedKeyCredential cannot be null");
+        }
+
+        if (options == null)
+        {
+            throw new ArgumentNullException(nameof(options), "Table storage options cannot be null");
+        }
+
+        var validator = new TableStorageOptionsValidator();
+        validator.ValidateAndThrow(options);
+
+        var tableEndpoint = $"https://{accountName}.table.core.windows.net/";
+
+        OptimisePerformance(new Uri(tableEndpoint), options);
+        (_cloudTableService, CloudTable) = CreateTableClient(tableEndpoint, sharedKeyCredential, tableName, options.Retries, options.RetryWaitTimeInSeconds);
+
+        _tableName = tableName;
+
+        if (options.EnsureTableExists)
+        {
+            CreateTable();
+        }
+    }
+    #endregion
 
     /// <summary>
     /// Settings to improve performance
@@ -146,7 +260,7 @@ public class TableStoreBase
             {
                 MaxRetries = retries,
                 Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
-                Mode = Azure.Core.RetryMode.Exponential
+                Mode = RetryMode.Exponential
             }
         };
 
@@ -158,13 +272,13 @@ public class TableStoreBase
     /// <summary>
     /// Create the table client
     /// </summary>
+    /// <param name="tableEndpoint">The table endpoint</param>
     /// <param name="tokenCredential">The connection using token credentials</param>
-    /// <param name="accountName">The table account name</param>
     /// <param name="tableName">The name of the table</param>
     /// <param name="retries">Number of retries</param>
     /// <param name="retryWaitTimeInSeconds">Wait time between retries in seconds</param>
     /// <returns>The table client</returns>
-    private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string tableEndpoint, TokenCredential tokenCredential, string accountName, string tableName, int retries, double retryWaitTimeInSeconds)
+    private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string tableEndpoint, TokenCredential tokenCredential, string tableName, int retries, double retryWaitTimeInSeconds)
     {
         var options = new TableClientOptions
         {
@@ -172,13 +286,47 @@ public class TableStoreBase
             {
                 MaxRetries = retries,
                 Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
-                Mode = Azure.Core.RetryMode.Exponential
+                Mode = RetryMode.Exponential
             }
         };
 
-
-
         var serviceClient = new TableServiceClient(new Uri(tableEndpoint), tokenCredential, options);
+        var tableClient = serviceClient.GetTableClient(tableName);
+        return (serviceClient, tableClient);
+    }
+
+
+    private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string tableEndpoint, AzureSasCredential sasCredential, string tableName, int retries, double retryWaitTimeInSeconds)
+    {
+        var options = new TableClientOptions
+        {
+            Retry =
+            {
+                MaxRetries = retries,
+                Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
+                Mode = RetryMode.Exponential
+            }
+        };
+
+        var serviceClient = new TableServiceClient(new Uri(tableEndpoint), sasCredential, options);
+        var tableClient = serviceClient.GetTableClient(tableName);
+        return (serviceClient, tableClient);
+    }
+
+
+    private static (TableServiceClient serviceClient, TableClient tableClient) CreateTableClient(string tableEndpoint, TableSharedKeyCredential sharedKeyCredential, string tableName, int retries, double retryWaitTimeInSeconds)
+    {
+        var options = new TableClientOptions
+        {
+            Retry =
+            {
+                MaxRetries = retries,
+                Delay = TimeSpan.FromSeconds(retryWaitTimeInSeconds),
+                Mode = RetryMode.Exponential
+            }
+        };
+
+        var serviceClient = new TableServiceClient(new Uri(tableEndpoint), sharedKeyCredential, options);
         var tableClient = serviceClient.GetTableClient(tableName);
         return (serviceClient, tableClient);
     }

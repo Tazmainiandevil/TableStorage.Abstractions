@@ -34,6 +34,28 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="tableName">The table name</param>
+        /// <param name="storageConnectionString">The connection string</param>
+        /// <param name="options">Table storage options</param>
+        public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
+            : base(tableName, storageConnectionString, options)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="accountName">The table account name</param>
+        /// <param name="tableName">The table name</param>
+        /// <param name="tokenCredential">The connection using token credentials</param>
+        public TableStore(string accountName, string tableName, TokenCredential tokenCredential)
+            : base(accountName, tableName, tokenCredential)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="accountName">The table account name</param>
         /// <param name="tableName">The table name</param>
         /// <param name="tokenCredential">The connection using token credentials</param>
@@ -46,11 +68,46 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="accountName">The table account name</param>
         /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
+        /// <param name="sasCredential">The connection using sas credentials</param>
+        public TableStore(string accountName, string tableName, AzureSasCredential sasCredential)
+            : base(accountName, tableName, sasCredential)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="accountName">The table account name</param>
+        /// <param name="tableName">The table name</param>
+        /// <param name="sasCredential">The connection using sas credentials</param>
         /// <param name="options">Table storage options</param>
-        public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
-            : base(tableName, storageConnectionString, options)
+        public TableStore(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
+            : base(accountName, tableName, sasCredential, options)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="accountName">The table account name</param>
+        /// <param name="tableName">The table name</param>
+        /// <param name="sharedKeyCredential">The connection using shared key credentials</param>
+        public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential)
+            : base(accountName, tableName, sharedKeyCredential)
+        {
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="accountName">The table account name</param>
+        /// <param name="tableName">The table name</param>
+        /// <param name="sharedKeyCredential">The connection using shared key credentials</param>
+        /// <param name="options">Table storage options</param>
+        public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
+            : base(accountName, tableName, sharedKeyCredential, options)
         {
         }
 
@@ -75,7 +132,11 @@ namespace TableStorage.Abstractions.Store
             {
                 var deleteEntitiesBatch = new List<TableTransactionAction>();
                 deleteEntitiesBatch.AddRange(queryResults.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                CloudTable.SubmitTransaction(deleteEntitiesBatch);
+
+                foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize))
+                {
+                    CloudTable.SubmitTransaction(batch);
+                }
             }
         }
 
@@ -90,7 +151,10 @@ namespace TableStorage.Abstractions.Store
             {
                 var deleteEntitiesBatch = new List<TableTransactionAction>();
                 deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+                await foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize).ToAsyncEnumerable())
+                {
+                    await CloudTable.SubmitTransactionAsync(batch).ConfigureAwait(false);
+                }
             }
         }
 

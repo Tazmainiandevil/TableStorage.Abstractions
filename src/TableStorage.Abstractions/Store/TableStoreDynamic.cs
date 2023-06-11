@@ -1,4 +1,5 @@
-﻿using Azure.Core;
+﻿using Azure;
+using Azure.Core;
 using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,26 @@ namespace TableStorage.Abstractions.Store
 
         public TableStoreDynamic(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
             : base(accountName, tableName, tokenCredential, options)
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, AzureSasCredential sasCredential)
+            : base(accountName, tableName, sasCredential, new TableStorageOptions())
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
+            : base(accountName, tableName, sasCredential, options)
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential)
+            : base(accountName, tableName, sharedKeyCredential, new TableStorageOptions())
+        {
+        }
+
+        public TableStoreDynamic(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
+            : base(accountName, tableName, sharedKeyCredential, options)
         {
         }
 
