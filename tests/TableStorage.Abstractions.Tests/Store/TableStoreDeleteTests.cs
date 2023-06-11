@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using FluentAssertions.Execution;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -155,8 +156,30 @@ namespace TableStorage.Abstractions.Tests.Store
             var resultNotEmpty = await _tableStorage.GetByPartitionKeyAsync("Jones");
 
             // Assert
-            resultEmpty.Count().Should().Be(0);
-            resultNotEmpty.Count().Should().NotBe(0);
+            using (new AssertionScope())
+            {
+                resultEmpty.Count().Should().Be(0);
+                resultNotEmpty.Count().Should().NotBe(0);
+            }
+        }
+
+        [Fact]
+        public async Task delete_records_by_partitionkey_and_record_count_is_over_100_and_then_partition_should_be_zero()
+        {
+            // Arrange
+            await TestDataHelper.SetupRecordsWithMoreThanMaxPartitionSize(_tableStorage);
+
+            // Act
+            await _tableStorage.DeleteByPartitionAsync("Smith");
+            var resultEmpty = await _tableStorage.GetByPartitionKeyAsync("Smith");
+            var resultNotEmpty = await _tableStorage.GetByPartitionKeyAsync("Jones");
+
+            // Assert
+            using (new AssertionScope())
+            {
+                resultEmpty.Count().Should().Be(0);
+                resultNotEmpty.Count().Should().NotBe(0);
+            }
         }
     }
 }

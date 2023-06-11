@@ -84,12 +84,16 @@ namespace TableStorage.Abstractions.Store
 
             if (queryResults.Any())
             {
-                var deleteEntitiesBatch = new List<TableTransactionAction>();
-                deleteEntitiesBatch.AddRange(queryResults.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+                var partitionKeySeparation = queryResults.GroupBy(x => x.PartitionKey)
+                    .OrderBy(g => g.Key)
+                    .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
 
-                foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize))
+                foreach (var entry in partitionKeySeparation)
                 {
-                    CloudTable.SubmitTransaction(batch);
+                    var deleteEntitiesBatch = new List<TableTransactionAction>();
+                    deleteEntitiesBatch.AddRange(entry.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+
+                    CloudTable.SubmitTransaction(deleteEntitiesBatch);
                 }
             }
         }
@@ -101,11 +105,15 @@ namespace TableStorage.Abstractions.Store
 
             if (records.Any())
             {
-                var deleteEntitiesBatch = new List<TableTransactionAction>();
-                deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                await foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize).ToAsyncEnumerable())
+                var partitionKeySeparation = records.GroupBy(x => x.PartitionKey)
+                    .OrderBy(g => g.Key)
+                    .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
+
+                await foreach (var entry in partitionKeySeparation.ToAsyncEnumerable().WithCancellation(cancellationToken))
                 {
-                    await CloudTable.SubmitTransactionAsync(batch).ConfigureAwait(false);
+                    var deleteEntitiesBatch = new List<TableTransactionAction>();
+                    deleteEntitiesBatch.AddRange(entry.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+                    await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -123,11 +131,16 @@ namespace TableStorage.Abstractions.Store
         {
             var deleteQuery = BuildGetByPartitionQuery<T>(partitionKey);
 
-            var deleteEntitiesBatch = new List<TableTransactionAction>();
+            var partitionKeySeparation = deleteQuery.GroupBy(x => x.PartitionKey)
+                .OrderBy(g => g.Key)
+                .Select(g => g.AsEnumerable()).SelectMany(entry => entry.Partition(MaxPartitionSize)).ToList();
 
-            deleteEntitiesBatch.AddRange(deleteQuery.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-
-            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken: cancellationToken).ConfigureAwait(false);
+            await foreach (var entry in partitionKeySeparation.ToAsyncEnumerable().WithCancellation(cancellationToken))
+            {
+                var deleteEntitiesBatch = new List<TableTransactionAction>();
+                deleteEntitiesBatch.AddRange(entry.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
+                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         /// <inheritdoc/>
