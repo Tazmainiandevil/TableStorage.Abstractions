@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Models;
 
 namespace TableStorage.Abstractions.Store
 {
     /// <summary>
-    /// Table store interface
+    /// Table store repository
     /// </summary>
     /// <typeparam name="T">The type of storage entity</typeparam>
     public interface ITableStore<T> : ITableStoreCommon
@@ -21,7 +22,8 @@ namespace TableStorage.Abstractions.Store
         /// Insert an record
         /// </summary>
         /// <param name="record">The record to insert</param>
-        Task InsertAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task InsertAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Insert multiple records
@@ -33,7 +35,8 @@ namespace TableStorage.Abstractions.Store
         /// Insert multiple records
         /// </summary>
         /// <param name="records">The records to insert</param>
-        Task InsertAsync(IEnumerable<T> records);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task InsertAsync(IEnumerable<T> records, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Inserts or replaces the record
@@ -45,7 +48,8 @@ namespace TableStorage.Abstractions.Store
         /// Inserts or replaces the record
         /// </summary>
         /// <param name="record"></param>
-        Task InsertOrReplaceAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task InsertOrReplaceAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update an record
@@ -57,7 +61,8 @@ namespace TableStorage.Abstractions.Store
         /// Update an record
         /// </summary>
         /// <param name="record">The record to update</param>
-        Task UpdateAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task UpdateAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Update a record using the wildcard etag
@@ -69,7 +74,8 @@ namespace TableStorage.Abstractions.Store
         /// Update an record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to update</param>
-        Task UpdateUsingWildcardEtagAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task UpdateUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a record
@@ -81,7 +87,8 @@ namespace TableStorage.Abstractions.Store
         /// Delete a record
         /// </summary>
         /// <param name="record">The record to delete</param>
-        Task DeleteAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task DeleteAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete a record using the wildcard etag
@@ -93,14 +100,16 @@ namespace TableStorage.Abstractions.Store
         /// Delete a record using the wildcard etag
         /// </summary>
         /// <param name="record">The record to delete</param>
-        Task DeleteUsingWildcardEtagAsync(T record);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task DeleteUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete records by partition key
         /// </summary>
         /// <param name="partitionKey"></param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns></returns>
-        Task DeleteByPartitionAsync(string partitionKey);
+        Task DeleteByPartitionAsync(string partitionKey, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Delete all records in the table
@@ -111,8 +120,9 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Delete all records in the table
         /// </summary>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns></returns>
-        Task DeleteAllAsync();
+        Task DeleteAllAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get an record by partition and row key
@@ -127,8 +137,9 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="partitionKey"></param>
         /// <param name="rowKey"></param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The record found or null if not found</returns>
-        Task<T> GetRecordAsync(string partitionKey, string rowKey);
+        Task<T> GetRecordAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records by partition key
@@ -150,15 +161,17 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="partitionKey">The partition key</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago);
+        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records by partition key
         /// </summary>
         /// <param name="partitionKey">The partition key</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey);
+        Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, CancellationToken cancellationToken = default);
 
         /// <summary>
         ///  Get the records by partition key, paged
@@ -175,8 +188,9 @@ namespace TableStorage.Abstractions.Store
         /// <param name="partitionKey">The partition key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationTokenJson">The next page token.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The Paged Result</returns>
-        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null);
+        Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationTokenJson = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records by row key
@@ -189,8 +203,9 @@ namespace TableStorage.Abstractions.Store
         /// Get the records by row key
         /// </summary>
         /// <param name="rowKey">The row key</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey);
+        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records by row key
@@ -205,8 +220,9 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="rowKey">The row key</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records found</returns>
-        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago);
+        Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records by row key
@@ -222,7 +238,8 @@ namespace TableStorage.Abstractions.Store
         /// <param name="rowKey">The row key.</param>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationToken">The next page token.</param>
-        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null);
+        /// <param name="cancellationToken">Used to cancel the operation</param>
+        Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get all the records in the table
@@ -233,8 +250,9 @@ namespace TableStorage.Abstractions.Store
         /// <summary>
         /// Get all the records in the table
         /// </summary>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>All records</returns>
-        Task<IEnumerable<T>> GetAllRecordsAsync();
+        Task<IEnumerable<T>> GetAllRecordsAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets all records paged.
@@ -249,8 +267,9 @@ namespace TableStorage.Abstractions.Store
         /// </summary>
         /// <param name="pageSize">Size of the page.</param>
         /// <param name="continuationToken">The page token</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The Paged Result</returns>
-        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string continuationToken = null);
+        Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -282,8 +301,9 @@ namespace TableStorage.Abstractions.Store
         /// <param name="filter">The filter to apply</param>
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records filtered</returns>
-        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize);
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records and filter by a given predicate
@@ -302,8 +322,9 @@ namespace TableStorage.Abstractions.Store
         /// <param name="start">The start record</param>
         /// <param name="pageSize">The page size</param>
         /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
+        /// <param name="cancellationToken">Used to cancel the operation</param>
         /// <returns>The records filtered</returns>
-        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago);
+        Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Get the records via observable

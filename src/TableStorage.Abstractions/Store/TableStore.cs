@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using TableStorage.Abstractions.Models;
 using TableStorage.Abstractions.Parsers;
@@ -13,99 +14,54 @@ using Useful.Extensions;
 
 namespace TableStorage.Abstractions.Store
 {
-    /// <summary>
-    /// Table store repository
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
+    /// <inheritdoc/>
     public class TableStore<T> : TableStoreBase, ITableStore<T> where T : class, ITableEntity, new()
     {
         #region Construction
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
+        //// <inheritdoc/>
         public TableStore(string tableName, string storageConnectionString)
             : base(tableName, storageConnectionString, new TableStorageOptions())
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
-        /// <param name="options">Table storage options</param>
+        //// <inheritdoc/>
         public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
             : base(tableName, storageConnectionString, options)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="tokenCredential">The connection using token credentials</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, TokenCredential tokenCredential)
             : base(accountName, tableName, tokenCredential)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="tokenCredential">The connection using token credentials</param>
-        /// <param name="options">Table storage options</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
             : base(accountName, tableName, tokenCredential, options)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="sasCredential">The connection using sas credentials</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, AzureSasCredential sasCredential)
             : base(accountName, tableName, sasCredential)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="sasCredential">The connection using sas credentials</param>
-        /// <param name="options">Table storage options</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
             : base(accountName, tableName, sasCredential, options)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="sharedKeyCredential">The connection using shared key credentials</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential)
             : base(accountName, tableName, sharedKeyCredential)
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="accountName">The table account name</param>
-        /// <param name="tableName">The table name</param>
-        /// <param name="sharedKeyCredential">The connection using shared key credentials</param>
-        /// <param name="options">Table storage options</param>
+        //// <inheritdoc/>
         public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
             : base(accountName, tableName, sharedKeyCredential, options)
         {
@@ -113,10 +69,7 @@ namespace TableStorage.Abstractions.Store
 
         #endregion Construction
 
-        /// <summary>
-        /// Delete a record
-        /// </summary>
-        /// <param name="record">The record to delete</param>
+        /// <inheritdoc/>
         public void Delete(T record)
         {
             EnsureRecord(record);
@@ -124,6 +77,7 @@ namespace TableStorage.Abstractions.Store
             CloudTable.DeleteEntity(record.PartitionKey, record.RowKey);
         }
 
+        /// <inheritdoc/>
         public void DeleteAll()
         {
             var queryResults = CloudTable.Query<T>();
@@ -140,10 +94,8 @@ namespace TableStorage.Abstractions.Store
             }
         }
 
-        /// <summary>
-        /// Delete all records in the table
-        /// </summary>
-        public async Task DeleteAllAsync()
+        /// <inheritdoc/>
+        public async Task DeleteAllAsync(CancellationToken cancellationToken = default)
         {
             var records = await GetAllRecordsAsync().ConfigureAwait(false);
 
@@ -158,22 +110,16 @@ namespace TableStorage.Abstractions.Store
             }
         }
 
-        /// <summary>
-        /// Delete an entry
-        /// </summary>
-        /// <param name="record">The record to delete</param>
-        public Task DeleteAsync(T record)
+        /// <inheritdoc/>
+        public Task DeleteAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey);
+            return CloudTable.DeleteEntityAsync(record.PartitionKey, record.RowKey, cancellationToken: cancellationToken);
         }
 
-        /// <summary>
-        /// Delete records by partition key
-        /// </summary>
-        /// <param name="partitionKey"></param>
-        public async Task DeleteByPartitionAsync(string partitionKey)
+        /// <inheritdoc/>
+        public async Task DeleteByPartitionAsync(string partitionKey, CancellationToken cancellationToken = default)
         {
             var deleteQuery = BuildGetByPartitionQuery<T>(partitionKey);
 
@@ -181,13 +127,10 @@ namespace TableStorage.Abstractions.Store
 
             deleteEntitiesBatch.AddRange(deleteQuery.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
 
-            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch).ConfigureAwait(false);
+            await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        /// <summary>
-        /// Delete a record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to delete</param>
+        /// <inheritdoc/>
         public void DeleteUsingWildcardEtag(T record)
         {
             EnsureRecord(record);
@@ -196,23 +139,17 @@ namespace TableStorage.Abstractions.Store
             Delete(record);
         }
 
-        /// <summary>
-        /// Delete a record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to delete</param>
-        public Task DeleteUsingWildcardEtagAsync(T record)
+        /// <inheritdoc/>
+        public Task DeleteUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
             record.ETag = ETag.All;
 
-            return DeleteAsync(record);
+            return DeleteAsync(record, cancellationToken);
         }
 
-        /// <summary>
-        /// Get all the records in the table
-        /// </summary>
-        /// <returns>All records</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetAllRecords()
         {
             var query = CloudTable.Query<T>();
@@ -222,38 +159,28 @@ namespace TableStorage.Abstractions.Store
             }
         }
 
-        /// <summary>
-        /// Get all the records in the table
-        /// </summary>
-        /// <returns>All records</returns>
-        public async Task<IEnumerable<T>> GetAllRecordsAsync()
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetAllRecordsAsync(CancellationToken cancellationToken = default)
         {
-            var queryResults = CloudTable.QueryAsync<T>();
-            return await queryResults.ToListAsync();
+            var queryResults = CloudTable.QueryAsync<T>(cancellationToken: cancellationToken);
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        /// <summary>
-        /// Gets all records in the table, paged
-        /// </summary>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationToken">The continuation token</param>
-        /// <returns>The Paged Result</returns>
+        /// <inheritdoc/>
         public PagedResult<T> GetAllRecordsPaged(int pageSize = 100, string continuationToken = null)
         {
             var query = CloudTable.Query<T>().AsPages(continuationToken, pageSize).FirstOrDefault();
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null)
+        /// <inheritdoc/>
+        public async Task<PagedResult<T>> GetAllRecordsPagedAsync(int pageSize = 100, string pageToken = null, CancellationToken cancellationToken = default)
         {
-            var query = await CloudTable.QueryAsync<T>().AsPages(pageToken, pageSize).FirstOrDefaultAsync();
+            var query = await CloudTable.QueryAsync<T>(cancellationToken: cancellationToken).AsPages(pageToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        /// <summary>
-        /// Get the records via observable
-        /// </summary>
-        /// <returns>The observable for the results</returns>
+        /// <inheritdoc/>
         public IObservable<T> GetAllRecordsObservable()
         {
             return Observable.Create<T>(o =>
@@ -266,11 +193,7 @@ namespace TableStorage.Abstractions.Store
             });
         }
 
-        /// <summary>
-        /// Get the records by partition key
-        /// </summary>
-        /// <param name="partitionKey">The partition key</param>
-        /// <returns>The records found</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetByPartitionKey(string partitionKey)
         {
             EnsurePartitionKey(partitionKey);
@@ -279,12 +202,7 @@ namespace TableStorage.Abstractions.Store
             return query;
         }
 
-        /// <summary>
-        /// Get the records by partition key
-        /// </summary>
-        /// <param name="partitionKey">The partition key</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records found</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetByPartitionKey(string partitionKey, string ago)
         {
             EnsurePartitionKey(partitionKey);
@@ -293,38 +211,29 @@ namespace TableStorage.Abstractions.Store
             return query;
         }
 
-        /// <summary>
-        /// Get the records by partition key
-        /// </summary>
-        /// <param name="partitionKey">The partition key</param>
-        /// <returns>The records found</returns>
-        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
-            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'");
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"PartitionKey eq '{partitionKey}'", cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetByPartitionKeyAsync(string partitionKey, string ago, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var queryResults = CloudTable.QueryAsync<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime);
+            var queryResults = CloudTable.QueryAsync<T>(x => x.PartitionKey == partitionKey && x.Timestamp >= utcTime, cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        /// <summary>
-        /// Get the records by partition key, paged
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationToken">The next page token.</param>
-        /// <returns>The Paged Result</returns>
+        /// <inheritdoc/>
         public PagedResult<T> GetByPartitionKeyPaged(string partitionKey, int pageSize = 100, string continuationToken = null)
         {
             EnsurePartitionKey(partitionKey);
@@ -333,26 +242,16 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        /// <summary>
-        ///  Get the records by partition key, paged
-        /// </summary>
-        /// <param name="partitionKey">The partition key.</param>
-        /// <param name="pageSize">Size of the page.</param>
-        /// <param name="continuationToken">The next page token.</param>
-        /// <returns>The Paged Result</returns>
-        public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationToken = null)
+        /// <inheritdoc/>
+        public async Task<PagedResult<T>> GetByPartitionKeyPagedAsync(string partitionKey, int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
-            var query = await BuildGetByPartitionQueryAsync<T>(partitionKey).AsPages(continuationToken, pageSize).FirstOrDefaultAsync();
+            var query = await BuildGetByPartitionQueryAsync<T>(partitionKey, cancellationToken).AsPages(continuationToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <returns>The records found</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetByRowKey(string rowKey)
         {
             EnsureRowKey(rowKey);
@@ -361,12 +260,7 @@ namespace TableStorage.Abstractions.Store
             return query;
         }
 
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records found</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetByRowKey(string rowKey, string ago)
         {
             EnsureRowKey(rowKey);
@@ -375,31 +269,29 @@ namespace TableStorage.Abstractions.Store
             return query;
         }
 
-        /// <summary>
-        /// Get the records by row key
-        /// </summary>
-        /// <param name="rowKey">The row key</param>
-        /// <returns>The records found</returns>
-        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
-            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'");
+            var queryResults = CloudTable.QueryAsync<T>(filter: $"RowKey eq '{rowKey}'", cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
-        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetByRowKeyAsync(string rowKey, string ago, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
-            var queryResults = CloudTable.QueryAsync<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime);
+            var queryResults = CloudTable.QueryAsync<T>(x => x.RowKey == rowKey && x.Timestamp >= utcTime, cancellationToken: cancellationToken);
 
-            return await queryResults.ToListAsync();
+            return await queryResults.ToListAsync(cancellationToken);
         }
 
+        /// <inheritdoc/>
         public PagedResult<T> GetByRowKeyPaged(string rowKey, int pageSize = 100, string continuationToken = null)
         {
             EnsureRowKey(rowKey);
@@ -408,20 +300,16 @@ namespace TableStorage.Abstractions.Store
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null)
+        /// <inheritdoc/>
+        public async Task<PagedResult<T>> GetByRowKeyPagedAsync(string rowKey, int pageSize = 100, string continuationToken = null, CancellationToken cancellationToken = default)
         {
             EnsureRowKey(rowKey);
 
-            var query = await BuildGetByRowKeyQueryAsync<T>(rowKey).AsPages(continuationToken, pageSize).FirstOrDefaultAsync();
+            var query = await BuildGetByRowKeyQueryAsync<T>(rowKey, cancellationToken).AsPages(continuationToken, pageSize).FirstOrDefaultAsync(cancellationToken);
             return CreatePagedResult(query?.Values ?? new List<T>(), query?.ContinuationToken);
         }
 
-        /// <summary>
-        /// Get an record by partition and row key
-        /// </summary>
-        /// <param name="partitionKey"></param>
-        /// <param name="rowKey"></param>
-        /// <returns>The record found or null if not found</returns>
+        /// <inheritdoc/>
         public T GetRecord(string partitionKey, string rowKey)
         {
             EnsurePartitionKey(partitionKey);
@@ -431,37 +319,23 @@ namespace TableStorage.Abstractions.Store
             return CloudTable.GetEntity<T>(partitionKey, rowKey);
         }
 
-        /// <summary>
-        /// Get an record by partition and row key
-        /// </summary>
-        /// <param name="partitionKey"></param>
-        /// <param name="rowKey"></param>
-        /// <returns>The record found or null if not found</returns>
-        public async Task<T> GetRecordAsync(string partitionKey, string rowKey)
+        /// <inheritdoc/>
+        public async Task<T> GetRecordAsync(string partitionKey, string rowKey, CancellationToken cancellationToken = default)
         {
             EnsurePartitionKey(partitionKey);
 
             EnsureRowKey(rowKey);
 
-            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey);
+            return await CloudTable.GetEntityAsync<T>(partitionKey, rowKey, cancellationToken: cancellationToken);
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <returns>The records filtered</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter)
         {
             return GetAllRecords().Where(filter);
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate and time in the past
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records filtered</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, string ago)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
@@ -470,27 +344,14 @@ namespace TableStorage.Abstractions.Store
             return GetAllRecords().Where(CombineFilter);
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <returns>The records filtered</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize)
         {
             var items = GetRecordsByFilter(filter);
             return items.Page(start, pageSize);
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records filtered</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetRecordsByFilter(Func<T, bool> filter, int start, int pageSize, string ago)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
@@ -501,48 +362,29 @@ namespace TableStorage.Abstractions.Store
             return items.Page(start, pageSize);
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <returns>The records filtered</returns>
-        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, CancellationToken cancellationToken = default)
         {
-            var allRecords = await GetAllRecordsAsync();
+            var allRecords = await GetAllRecordsAsync(cancellationToken);
             var data = allRecords.Where(filter).Page(start, pageSize);
 
             return data;
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate and time in the past
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The records filtered</returns>
-        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago)
+        /// <inheritdoc/>
+        public async Task<IEnumerable<T>> GetRecordsByFilterAsync(Func<T, bool> filter, int start, int pageSize, string ago, CancellationToken cancellationToken = default)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
 
             bool CombineFilter(T x) => filter(x) && x.Timestamp >= utcTime;
 
-            var allRecords = await GetAllRecordsAsync();
+            var allRecords = await GetAllRecordsAsync(cancellationToken);
             var data = allRecords.Where(CombineFilter).Page(start, pageSize);
 
             return data;
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate via observable
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <returns>The observable for the results</returns>
+        /// <inheritdoc/>
         public IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize)
         {
             return Observable.Create<T>(o =>
@@ -555,14 +397,7 @@ namespace TableStorage.Abstractions.Store
             });
         }
 
-        /// <summary>
-        /// Get the records and filter by a given predicate via observable
-        /// </summary>
-        /// <param name="filter">The filter to apply</param>
-        /// <param name="start">The start record</param>
-        /// <param name="pageSize">The page size</param>
-        /// <param name="ago">The time in the past to search e.g. 10m, 1h, etc.</param>
-        /// <returns>The observable for the results</returns>
+        /// <inheritdoc/>
         public IObservable<T> GetRecordsByFilterObservable(Func<T, bool> filter, int start, int pageSize, string ago)
         {
             var utcTime = new DateTimeOffset(TimeStringParser.GetTimeAgo(ago), TimeSpan.Zero);
@@ -578,20 +413,14 @@ namespace TableStorage.Abstractions.Store
             });
         }
 
-        /// <summary>
-        /// Insert an record
-        /// </summary>
-        /// <param name="record">The record to insert</param>
+        /// <inheritdoc/>
         public void Insert(T record)
         {
             EnsureRecord(record);
             CloudTable.AddEntity(record);
         }
 
-        /// <summary>
-        /// Insert multiple records
-        /// </summary>
-        /// <param name="records">The records to insert</param>
+        /// <inheritdoc/>
         public void Insert(IEnumerable<T> records)
         {
             if (records == null)
@@ -612,22 +441,16 @@ namespace TableStorage.Abstractions.Store
             }
         }
 
-        /// <summary>
-        /// Insert an record
-        /// </summary>
-        /// <param name="record">The record to insert</param>
-        public Task InsertAsync(T record)
+        /// <inheritdoc/>
+        public Task InsertAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.AddEntityAsync(record);
+            return CloudTable.AddEntityAsync(record, cancellationToken);
         }
 
-        /// <summary>
-        /// Insert multiple records
-        /// </summary>
-        /// <param name="records">The records to insert</param>
-        public async Task InsertAsync(IEnumerable<T> records)
+        /// <inheritdoc/>
+        public async Task InsertAsync(IEnumerable<T> records, CancellationToken cancellationToken = default)
         {
             if (records == null)
             {
@@ -642,14 +465,11 @@ namespace TableStorage.Abstractions.Store
             {
                 var addEntitiesBatch = new List<TableTransactionAction>();
                 addEntitiesBatch.AddRange(entry.Select(e => new TableTransactionAction(TableTransactionActionType.Add, e)));
-                await CloudTable.SubmitTransactionAsync(addEntitiesBatch).ConfigureAwait(false);
+                await CloudTable.SubmitTransactionAsync(addEntitiesBatch, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        /// <summary>
-        /// Inserts or replaces the record
-        /// </summary>
-        /// <param name="record"></param>
+        /// <inheritdoc/>
         public void InsertOrReplace(T record)
         {
             EnsureRecord(record);
@@ -657,22 +477,15 @@ namespace TableStorage.Abstractions.Store
             CloudTable.UpsertEntity(record);
         }
 
-        /// <summary>
-        /// Inserts or replaces the record
-        /// </summary>
-        /// <param name="record"></param>
-        /// <returns></returns>
-        public Task InsertOrReplaceAsync(T record)
+        /// <inheritdoc/>
+        public Task InsertOrReplaceAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.UpsertEntityAsync(record);
+            return CloudTable.UpsertEntityAsync(record, cancellationToken: cancellationToken);
         }
 
-        /// <summary>
-        /// Update an record
-        /// </summary>
-        /// <param name="record">The record to update</param>
+        /// <inheritdoc/>
         public void Update(T record)
         {
             EnsureRecord(record);
@@ -680,21 +493,15 @@ namespace TableStorage.Abstractions.Store
             CloudTable.UpdateEntity(record, record.ETag);
         }
 
-        /// <summary>
-        /// Update an record
-        /// </summary>
-        /// <param name="record">The record to update</param>
-        public Task UpdateAsync(T record)
+        /// <inheritdoc/>
+        public Task UpdateAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
-            return CloudTable.UpdateEntityAsync(record, record.ETag);
+            return CloudTable.UpdateEntityAsync(record, record.ETag, cancellationToken: cancellationToken);
         }
 
-        /// <summary>
-        /// Update an record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to update</param>
+        /// <inheritdoc/>
         public void UpdateUsingWildcardEtag(T record)
         {
             EnsureRecord(record);
@@ -703,16 +510,13 @@ namespace TableStorage.Abstractions.Store
             Update(record);
         }
 
-        /// <summary>
-        /// Update an record using the wildcard etag
-        /// </summary>
-        /// <param name="record">The record to update</param>
-        public Task UpdateUsingWildcardEtagAsync(T record)
+        /// <inheritdoc/>
+        public Task UpdateUsingWildcardEtagAsync(T record, CancellationToken cancellationToken = default)
         {
             EnsureRecord(record);
 
             record.ETag = ETag.All;
-            return UpdateAsync(record);
+            return UpdateAsync(record, cancellationToken);
         }
 
         #region Helpers
