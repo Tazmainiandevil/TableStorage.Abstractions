@@ -85,6 +85,9 @@ public class TestTableStorageClient
 }
 ```
 
+Support for other credentials other than connection string are also included i.e. TokenCredential, AzureSasCredential and TableSharedKeyCredential
+
+
 Override TableStorageOptions when using the factory creation
 
 ```C#

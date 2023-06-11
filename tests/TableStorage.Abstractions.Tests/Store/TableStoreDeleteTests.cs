@@ -89,10 +89,37 @@ namespace TableStorage.Abstractions.Tests.Store
         }
 
         [Fact]
+        public async Task delete_all_when_over_100_leaves_no_records_in_the_table()
+        {
+            // Arrange
+            await TestDataHelper.SetupDummyRecords(_tableStorage, 105);
+
+            // Act
+            _tableStorage.DeleteAll();
+
+            //
+            _tableStorage.GetRecordCount().Should().Be(0);
+        }
+
+
+        [Fact]
         public async Task delete_all_async_leaves_no_records_in_the_table()
         {
             // Arrange
             await TestDataHelper.SetupRecords(_tableStorage);
+
+            // Act
+            await _tableStorage.DeleteAllAsync();
+
+            //
+            (await _tableStorage.GetRecordCountAsync()).Should().Be(0);
+        }
+
+        [Fact]
+        public async Task delete_all_async_when_over_100_leaves_no_records_in_the_table()
+        {
+            // Arrange
+            await TestDataHelper.SetupDummyRecords(_tableStorage, 105);
 
             // Act
             await _tableStorage.DeleteAllAsync();

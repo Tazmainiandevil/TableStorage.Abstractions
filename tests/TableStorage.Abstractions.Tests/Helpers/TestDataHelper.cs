@@ -30,6 +30,19 @@ namespace TableStorage.Abstractions.Tests.Helpers
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
+        public static async Task SetupDummyRecords(ITableStore<TestTableEntity> tableStorage, int max)
+        {
+            var entityList = new List<TestTableEntity>();
+            for (var i = 0; i < max; i++)
+            {
+                entityList.Add(new TestTableEntity(i.ToString(), "x"));
+            }
+
+            await tableStorage.CreateTableAsync().ConfigureAwait(false);
+            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+        }
+
+
         public static async Task SetupRecordsAgo(ITableStore<TestTableEntity> tableStorage, string ago)
         {
             await tableStorage.DeleteAllAsync();

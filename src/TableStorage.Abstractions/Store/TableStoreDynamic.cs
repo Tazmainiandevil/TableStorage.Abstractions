@@ -1,4 +1,6 @@
-﻿using Azure.Data.Tables;
+﻿using Azure;
+using Azure.Core;
+using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +21,42 @@ namespace TableStorage.Abstractions.Store
         /// <inheritdoc/>
         public TableStoreDynamic(string tableName, string storageConnectionString, TableStorageOptions options)
             : base(tableName, storageConnectionString, options)
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, TokenCredential tokenCredential)
+            : base(accountName, tableName, tokenCredential, new TableStorageOptions())
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
+            : base(accountName, tableName, tokenCredential, options)
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, AzureSasCredential sasCredential)
+            : base(accountName, tableName, sasCredential, new TableStorageOptions())
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
+            : base(accountName, tableName, sasCredential, options)
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential)
+            : base(accountName, tableName, sharedKeyCredential, new TableStorageOptions())
+        {
+        }
+
+        /// <inheritdoc/>
+        public TableStoreDynamic(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
+            : base(accountName, tableName, sharedKeyCredential, options)
         {
         }
 

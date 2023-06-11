@@ -14,11 +14,13 @@ namespace TableStorage.Abstractions.Tests.Store
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private const string TableName = "TestTable";
+
         private const string ConnectionString = "UseDevelopmentStorage=true";
 
         private readonly ITableStore<TestTableEntity> _tableStorage;
 
-        private readonly TableStorageOptions _tableStorageOptions = new TableStorageOptions();
+        private readonly TableStorageOptions _tableStorageOptions = new();
+
 
         public TableStoreTests(ITestOutputHelper testOutputHelper)
         {
@@ -66,7 +68,7 @@ namespace TableStorage.Abstractions.Tests.Store
         {
             // Arrange
             // Act
-            Action act = () => new TableStore<TestTableEntity>("sometable", ConnectionString, null);
+            Action act = () => new TableStore<TestTableEntity>("sometable", ConnectionString, null as TableStorageOptions);
 
             // Assert
             act.Should().Throw<ArgumentNullException>()

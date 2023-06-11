@@ -1,4 +1,5 @@
 ﻿using Azure;
+using Azure.Core;
 using Azure.Data.Tables;
 using System;
 using System.Collections.Generic;
@@ -18,24 +19,51 @@ namespace TableStorage.Abstractions.Store
     {
         #region Construction
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
+        //// <inheritdoc/>
         public TableStore(string tableName, string storageConnectionString)
             : base(tableName, storageConnectionString, new TableStorageOptions())
         {
         }
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="tableName">The table name</param>
-        /// <param name="storageConnectionString">The connection string</param>
-        /// <param name="options">Table storage options</param>
+        //// <inheritdoc/>
         public TableStore(string tableName, string storageConnectionString, TableStorageOptions options)
             : base(tableName, storageConnectionString, options)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, TokenCredential tokenCredential)
+            : base(accountName, tableName, tokenCredential)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, TokenCredential tokenCredential, TableStorageOptions options)
+            : base(accountName, tableName, tokenCredential, options)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, AzureSasCredential sasCredential)
+            : base(accountName, tableName, sasCredential)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, AzureSasCredential sasCredential, TableStorageOptions options)
+            : base(accountName, tableName, sasCredential, options)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential)
+            : base(accountName, tableName, sharedKeyCredential)
+        {
+        }
+
+        //// <inheritdoc/>
+        public TableStore(string accountName, string tableName, TableSharedKeyCredential sharedKeyCredential, TableStorageOptions options)
+            : base(accountName, tableName, sharedKeyCredential, options)
         {
         }
 
@@ -58,7 +86,11 @@ namespace TableStorage.Abstractions.Store
             {
                 var deleteEntitiesBatch = new List<TableTransactionAction>();
                 deleteEntitiesBatch.AddRange(queryResults.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                CloudTable.SubmitTransaction(deleteEntitiesBatch);
+
+                foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize))
+                {
+                    CloudTable.SubmitTransaction(batch);
+                }
             }
         }
 
@@ -71,7 +103,10 @@ namespace TableStorage.Abstractions.Store
             {
                 var deleteEntitiesBatch = new List<TableTransactionAction>();
                 deleteEntitiesBatch.AddRange(records.Select(e => new TableTransactionAction(TableTransactionActionType.Delete, e)));
-                await CloudTable.SubmitTransactionAsync(deleteEntitiesBatch, cancellationToken).ConfigureAwait(false);
+                await foreach (var batch in deleteEntitiesBatch.Partition(MaxPartitionSize).ToAsyncEnumerable())
+                {
+                    await CloudTable.SubmitTransactionAsync(batch).ConfigureAwait(false);
+                }
             }
         }
 
