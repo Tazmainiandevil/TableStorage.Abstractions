@@ -42,6 +42,31 @@ namespace TableStorage.Abstractions.Tests.Helpers
             await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
         }
 
+        public static async Task SetupRecordsWithMoreThanMaxPartitionSize(ITableStore<TestTableEntity> tableStorage)
+        {
+            var entityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("John", "Smith") {Age = 21, Email = "john.smith@something.com"},
+                new TestTableEntity("Jane", "Smith") {Age = 28, Email = "jane.smith@something.com"}
+            };
+
+            var anotherEntityList = new List<TestTableEntity>
+            {
+                new TestTableEntity("Fred", "Jones") {Age = 32, Email = "fred.jones@somewhere.com"},
+                new TestTableEntity("Bill", "Jones") {Age = 45, Email = "bill.jones@somewhere.com"}
+            };
+
+            var bigList = new List<TestTableEntity>();
+            for (var i = 0; i < 105; i++)
+            {
+                bigList.Add(new TestTableEntity(i.ToString(), "Smith"));
+            }
+
+            entityList.Combine(anotherEntityList, bigList);
+
+            await tableStorage.CreateTableAsync().ConfigureAwait(false);
+            await tableStorage.InsertAsync(entityList).ConfigureAwait(false);
+        }
 
         public static async Task SetupRecordsAgo(ITableStore<TestTableEntity> tableStorage, string ago)
         {
